@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "quick-messages",
+  "version": "${version}",
+  "name": "Quick Messages",
+  "description": "A simple client-side Minecraft Fabric mod for sending pre-written messages and commands using hotkeys.",
+  "authors": [
+    "NotRyken"
+  ],
+  "contact": {
+    "homepage": "https://github.com/NotRyken/QuickMessages",
+    "sources": "https://github.com/NotRyken/QuickMessages",
+    "issues": "https://github.com/NotRyken/QuickMessages/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "notryken.quickmessages.client.QuickMessagesClient"
+    ],
+    "modmenu": [
+      "notryken.quickmessages.gui.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "quickmessages.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
