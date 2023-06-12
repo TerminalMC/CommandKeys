@@ -32,7 +32,7 @@ public class QuickMessagesClient implements ClientModInitializer
     public void onInitializeClient()
     {
         keyBinding = new KeyBinding("Open Menu",
-                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_T, "Quick Messages");
+                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "Quick Messages");
         KeyBindingHelper.registerKeyBinding(keyBinding);
 
         ClientTickEvents.END_CLIENT_TICK.register(this::onEndTick);
