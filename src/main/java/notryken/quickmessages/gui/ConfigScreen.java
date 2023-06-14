@@ -21,14 +21,14 @@ public class ConfigScreen extends GameOptionsScreen
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
     {
-        boolean retVal = super.keyPressed(keyCode, scanCode, modifiers);
+        // Using keyReleased to avoid key press overlap with next screen.
 
-        listWidget.pressedKey(InputUtil.fromKeyCode(keyCode,
-                scanCode).getTranslationKey());
+        listWidget.pressedKey(InputUtil.fromKeyCode(keyCode, scanCode)
+                .getTranslationKey());
 
-        return retVal;
+        return true;
     }
 
     @Override
@@ -65,6 +65,7 @@ public class ConfigScreen extends GameOptionsScreen
     @Override
     public void close()
     {
+        QuickMessagesClient.config.purge();
         QuickMessagesClient.saveConfig();
         super.close();
     }

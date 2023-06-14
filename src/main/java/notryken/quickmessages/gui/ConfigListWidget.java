@@ -55,12 +55,12 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
 
     public int getRowWidth()
     {
-        return 1200;
+        return 400;
     }
 
     protected int getScrollbarPositionX()
     {
-        return super.getScrollbarPositionX() + 32;
+        return super.getScrollbarPositionX() + 82;
     }
 
     public void pressedKey(String key)
@@ -79,7 +79,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                     }
                     client.setScreen(null);
                     client.inGameHud.setOverlayMessage(Text.literal(
-                            "Sent Quick Message for Hotkey '" + key + "'."),
+                            "Sent Quick Message for Hotkey '" + key + "'"),
                             false);
                 }
             }
@@ -140,9 +140,9 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                           MinecraftClient client)
             {
                 super(listWidget);
-                this.options.add(new TextWidget(width / 2 - 300, 0, 100, 20,
+                this.options.add(new TextWidget(width / 2 - 200, 0, 100, 20,
                         Text.of("Hotkey"), client.textRenderer));
-                this.options.add(new TextWidget(width / 2 - 190, 0, 460, 20,
+                this.options.add(new TextWidget(width / 2 - 90, 0, 260, 20,
                         Text.of("Message/Command"), client.textRenderer));
             }
         }
@@ -164,11 +164,11 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                             button.setMessage(Text.of("Press Key"));
                         })
                                 .size(100, 20)
-                                .position(width / 2 - 300, 0)
+                                .position(width / 2 - 200, 0)
                                 .build());
 
                 TextFieldWidget messageField = new TextFieldWidget(
-                        client.textRenderer, width / 2 - 190, 0, 460, 20,
+                        client.textRenderer, width / 2 - 90, 0, 260, 20,
                         Text.literal("Message"));
                 messageField.setMaxLength(256);
                 messageField.setText(message);
@@ -180,9 +180,9 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                                 (button) -> {
                                     config.removeMessage(index);
                                     listWidget.refreshScreen();
-                                })
+                })
                         .size(20, 20)
-                        .position(width / 2 + 280, 0)
+                        .position(width / 2 + 180, 0)
                         .build());
             }
 
@@ -204,8 +204,8 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                                     config.addMessage();
                                     listWidget.refreshScreen();
                                 })
-                        .size(600, 20)
-                        .position(width / 2 - 300, 0)
+                        .size(400, 20)
+                        .position(width / 2 - 200, 0)
                         .build());
             }
         }
