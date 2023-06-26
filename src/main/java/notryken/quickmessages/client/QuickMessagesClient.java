@@ -11,7 +11,6 @@ import net.minecraft.client.util.InputUtil;
 import notryken.quickmessages.config.Config;
 import notryken.quickmessages.config.ConfigDeserializer;
 import notryken.quickmessages.gui.ConfigScreen;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +30,9 @@ public class QuickMessagesClient implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
-        keyBinding = new KeyBinding("Open Menu",
-                InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "Quick Messages");
-        KeyBindingHelper.registerKeyBinding(keyBinding);
+        keyBinding = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding("Message Menu", InputUtil.Type.KEYSYM,
+                        InputUtil.GLFW_KEY_K, "Quick Messages"));
 
         ClientTickEvents.END_CLIENT_TICK.register(this::onEndTick);
 
