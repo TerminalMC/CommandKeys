@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import notryken.quickmessages.client.QuickMessagesClient;
 
@@ -79,7 +80,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                     }
                     client.setScreen(null);
                     client.inGameHud.setOverlayMessage(Text.literal(
-                            "Sent Quick Message for Hotkey '" + key + "'"),
+                            message).setStyle(Style.EMPTY.withColor(12369084)),
                             false);
                 }
             }
