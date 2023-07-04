@@ -13,7 +13,7 @@
     "issues": "https://github.com/NotRyken/QuickMessages/issues"
   },
   "license": "MIT",
-  "icon": "assets/icon.png",
+  "icon": "assets/quickmessages/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
