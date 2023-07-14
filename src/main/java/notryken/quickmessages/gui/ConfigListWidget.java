@@ -7,11 +7,12 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import notryken.quickmessages.client.QuickMessagesClient;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static notryken.quickmessages.client.QuickMessagesClient.config;
@@ -22,7 +23,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
     public final Screen parent;
     public final Text title;
 
-    public String selectedKey;
+    public int selectedKey = -1;
 
     public ConfigListWidget(MinecraftClient client, int width, int height,
                             int top, int bottom, int itemHeight,
@@ -39,12 +40,12 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                 "the Hotkey of the Message you want to Send, or Edit below.")));
         this.addEntry(new Entry.ListHeader(width, this, client));
 
-        int index = 0;
-        for (String[] keyMessage : config.getKeyMessages()) {
+        Iterator<Integer> keyIter = config.getKeyIter();
+        Iterator<String> valueIter = config.getValueIter();
 
+        while (keyIter.hasNext()) {
             this.addEntry(new Entry.KeyMessageField(width, this, client,
-                    keyMessage[0], keyMessage[1], index));
-            index++;
+                    keyIter.next(), valueIter.next()));
         }
         this.addEntry(new Entry.AddMessageButton(width, this));
     }
@@ -64,14 +65,14 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
         return super.getScrollbarPositionX() + 82;
     }
 
-    public void pressedKey(String key)
+    public void pressedKey(int keyCode)
     {
-        if (selectedKey == null) {
+        if (selectedKey == -1) {
             if (this.getSelectedOrNull() == null &&
                     client.getNetworkHandler() != null &&
                     client.getNetworkHandler().isConnectionOpen())
             {
-                String message = QuickMessagesClient.config.getMessage(key);
+                String message = config.getMessage(keyCode);
                 if (message != null) {
                     MinecraftClient client = MinecraftClient.getInstance();
                     client.setScreen(new ChatScreen(message));
@@ -86,7 +87,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
             }
         }
         else {
-            config.setKey(selectedKey, key);
+            config.setKey(selectedKey, keyCode);
             refreshScreen();
         }
     }
@@ -141,35 +142,38 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                           MinecraftClient client)
             {
                 super(listWidget);
-                this.options.add(new TextWidget(width / 2 - 200, 0, 100, 20,
+                this.options.add(new TextWidget(width / 2 - 200, 0, 80, 20,
                         Text.of("Hotkey"), client.textRenderer));
-                this.options.add(new TextWidget(width / 2 - 90, 0, 260, 20,
+                this.options.add(new TextWidget(width / 2 - 110, 0, 280, 20,
                         Text.of("Message/Command"), client.textRenderer));
             }
         }
 
         private static class KeyMessageField extends Entry {
-            private final String key;
+            private final int key;
 
             KeyMessageField(int width, ConfigListWidget listWidget,
-                            MinecraftClient client, String key, String message,
-                            int index)
+                            MinecraftClient client, int key, String message)
             {
                 super(listWidget);
                 this.key = key;
 
+                String label = (key == Integer.MAX_VALUE ? "[Click to Bind]" :
+                        InputUtil.fromKeyCode(key, key).getLocalizedText()
+                                .getString());
+
                 options.add(
-                        ButtonWidget.builder(Text.translatable(key),
-                                        (button) -> {
+                        ButtonWidget.builder(Text.of(label), (button) -> {
                             listWidget.selectedKey = key;
-                            button.setMessage(Text.of("Press Key"));
+                            button.setMessage(Text.literal("[Press Key]")
+                                    .setStyle(Style.EMPTY.withColor(16267834)));
                         })
-                                .size(100, 20)
+                                .size(80, 20)
                                 .position(width / 2 - 200, 0)
                                 .build());
 
                 TextFieldWidget messageField = new TextFieldWidget(
-                        client.textRenderer, width / 2 - 90, 0, 260, 20,
+                        client.textRenderer, width / 2 - 110, 0, 280, 20,
                         Text.literal("Message"));
                 messageField.setMaxLength(256);
                 messageField.setText(message);
@@ -179,7 +183,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
 
                 options.add(ButtonWidget.builder(Text.literal("X"),
                                 (button) -> {
-                                    config.removeMessage(index);
+                                    config.removeMessage(key);
                                     listWidget.refreshScreen();
                 })
                         .size(20, 20)
@@ -189,7 +193,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
 
             private void setMessage(String message)
             {
-                config.setMessage(this.key, message);
+                config.setMessage(this.key, message.strip());
             }
         }
 

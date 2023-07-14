@@ -9,7 +9,7 @@ In-game, pressing the menu key (default: K) will open the screen shown below.
 You can then press another hotkey of your choice to send one of the listed 
 messages, or add/edit hotkey/message combinations using the interactive GUI.
 
-![Menu](https://i.postimg.cc/bJpKZjb8/2023-06-14-08-07-09.png)
+![Menu](https://i.postimg.cc/MpPN5CyW/2023-07-14-10-28-16.png)
 
 ## Contact
 

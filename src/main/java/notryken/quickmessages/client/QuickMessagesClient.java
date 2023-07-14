@@ -9,7 +9,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import notryken.quickmessages.config.Config;
-import notryken.quickmessages.config.ConfigDeserializer;
 import notryken.quickmessages.gui.ConfigScreen;
 
 import java.io.File;
@@ -22,9 +21,8 @@ public class QuickMessagesClient implements ClientModInitializer
 
     private static final File settingsFile =
             new File("config", "quickmessages.json");
-    private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Config.class, new ConfigDeserializer())
-            .setPrettyPrinting().create();
+    private static final Gson gson =
+            new GsonBuilder().setPrettyPrinting().create();
     private static KeyBinding keyBinding;
 
     @Override
@@ -46,6 +44,11 @@ public class QuickMessagesClient implements ClientModInitializer
             MinecraftClient.getInstance().setScreen(new ConfigScreen(
                     client.currentScreen));
         }
+    }
+
+    public static KeyBinding getKeyBinding()
+    {
+        return keyBinding;
     }
 
     /**

@@ -1,76 +1,50 @@
 package notryken.quickmessages.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Config
 {
-    private final ArrayList<String[]> keyMessages;
+    private final Map<Integer,String> messageMap;
 
     public Config()
     {
-        keyMessages = new ArrayList<>();
-    }
-
-    public Config(ArrayList<String[]> keyMessages)
-    {
-        this.keyMessages = keyMessages;
+        messageMap = new LinkedHashMap<>();
     }
 
     /**
-     * Returns the message paired with the specified key, or null if not found.
-     * @param key The message key.
-     * @return The corresponding message, or null if not found.
+     * @param key The input keycode associated with the message.
+     * @return The message, or null if not found.
      */
-    public String getMessage(String key)
+    public String getMessage(int key)
     {
-        for (String[] message : keyMessages) {
-            if (message[0].equals(key)) {
-                return message[1];
-            }
-        }
-        return null;
+        return messageMap.get(key);
     }
 
-    public String[] getKeyMessage(String key)
+    public Iterator<Integer> getKeyIter()
     {
-        for (String[] message : keyMessages) {
-            if (message[0].equals(key)) {
-                return message;
-            }
-        }
-        return null;
+        return messageMap.keySet().iterator();
+    }
+
+    public Iterator<String> getValueIter()
+    {
+        return messageMap.values().iterator();
     }
 
     /**
-     * @return An unmodifiable view of the message list.
+     * If there is a message with specified oldKeyCode, changes its key to
+     * specified newKeyCode.
+     * @param oldKey The original keycode.
+     * @param newKey The new keycode.
      */
-    public List<String[]> getKeyMessages()
+    public void setKey(int oldKey, int newKey)
     {
-        return Collections.unmodifiableList(keyMessages);
-    }
-
-    public int getNumMessages()
-    {
-        return keyMessages.size();
-    }
-
-    /**
-     * If there is a message with specified oldKey, changes its key to
-     * specified newKey.
-     * @param oldKey The original key.
-     * @param newKey The new key.
-     * @return 0 if successful, -1 otherwise.
-     */
-    public int setKey(String oldKey, String newKey)
-    {
-        String[] keyMessage = getKeyMessage(oldKey);
-        if (keyMessage != null) {
-            keyMessage[0] = newKey;
-            return 0;
+        String message = messageMap.get(oldKey);
+        if (message != null) {
+            messageMap.remove(oldKey);
+            messageMap.put(newKey, message);
         }
-        return -1;
     }
 
     /**
@@ -78,37 +52,34 @@ public class Config
      * specified newMessage.
      * @param key The message key.
      * @param newMessage The new content.
-     * @return 0 if successful, -1 otherwise.
      */
-    public int setMessage(String key, String newMessage)
+    public void setMessage(int key, String newMessage)
     {
-        String[] keyMessage = getKeyMessage(key);
-        if (keyMessage != null) {
-            keyMessage[1] = newMessage.strip();
-            return 0;
-        }
-        return -1;
+        messageMap.replace(key, newMessage);
     }
 
     /**
-     * Adds a new message with key "" and message "" to the list.
+     * Adds a new message with maximum key and message "", if one does not
+     * already exist.
      */
     public void addMessage()
     {
-        if (getMessage("") == null) {
-            keyMessages.add(new String[]{"", ""});
+        if (!messageMap.containsKey(Integer.MAX_VALUE)) {
+            messageMap.put(Integer.MAX_VALUE, "");
         }
     }
 
-    public void removeMessage(int index)
+    /**
+     * Removes the message with specified key, if it exists.
+     * @param key The input keycode of the message.
+     */
+    public void removeMessage(int key)
     {
-        if (index >= 0 && index < keyMessages.size()) {
-            keyMessages.remove(index);
-        }
+        messageMap.remove(key);
     }
 
     public void purge()
     {
-        keyMessages.removeIf(keyMessage -> keyMessage[1].equals(""));
+        messageMap.values().removeIf(s -> s.equals(""));
     }
 }

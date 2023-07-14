@@ -5,7 +5,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import notryken.quickmessages.client.QuickMessagesClient;
@@ -24,11 +23,11 @@ public class ConfigScreen extends GameOptionsScreen
     public boolean keyReleased(int keyCode, int scanCode, int modifiers)
     {
         // Using keyReleased to avoid key press overlap with next screen.
-
-        listWidget.pressedKey(InputUtil.fromKeyCode(keyCode, scanCode)
-                .getTranslationKey());
-
-        return true;
+        if (!QuickMessagesClient.getKeyBinding().matchesKey(keyCode, scanCode))
+        {
+            listWidget.pressedKey(keyCode);
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -40,12 +39,7 @@ public class ConfigScreen extends GameOptionsScreen
         this.addSelectableChild(listWidget);
 
         this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE,
-                        (button) -> {
-                            QuickMessagesClient.config.purge();
-                            QuickMessagesClient.saveConfig();
-                            assert this.client != null;
-                            this.client.setScreen(this.parent);
-                        })
+                        (button) -> this.close())
                 .size(240, 20)
                 .position(this.width / 2 - 120, this.height - 27)
                 .build());
