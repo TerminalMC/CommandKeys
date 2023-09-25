@@ -80,6 +80,6 @@ public class Config
 
     public void purge()
     {
-        messageMap.values().removeIf(s -> s.equals(""));
+        messageMap.values().removeIf(String::isEmpty);
     }
 }

@@ -30,7 +30,6 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                             Screen parent, Text title)
     {
         super(client, width, height, top, bottom, itemHeight);
-        this.setRenderSelection(true);
 
         this.client = client;
         this.parent = parent;
@@ -131,7 +130,7 @@ public class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry>
                           MinecraftClient client, Text label)
             {
                 super(listWidget);
-                this.options.add(new TextWidget(width / 2 - 120, 0, 240, 20,
+                this.options.add(new TextWidget(width / 2 - 200, 0, 400, 20,
                         label, client.textRenderer));
             }
         }
