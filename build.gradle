@@ -1,84 +1,98 @@
 plugins {
-    id 'fabric-loom' version '1.3.9'
-    id 'maven-publish'
+    // Required for NeoGradle
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.7"
 }
 
-version = project.mod_version + "+mc" + project.minecraft_version
-group = project.maven_group
+subprojects {
+    apply plugin: 'java'
 
-base {
-    archivesName = project.archives_base_name
-}
-
-
-repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
-    maven { url "https://maven.terraformersmc.com/releases/" }
-}
-
-dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // Uncomment the following line to enable the deprecated Fabric API modules.
-    // These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
-
-    // modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
-
-    // ModMenu.
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
-}
-
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.base.archivesName.get()}"}
-    }
-}
-
-// configure the maven publication
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+    java.withSourcesJar()
+    java.withJavadocJar()
+        
+    jar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
+        }
+        manifest {
+            attributes([
+                'Specification-Title'     : mod_name,
+                'Specification-Vendor'    : mod_author,
+                'Specification-Version'   : project.jar.archiveVersion,
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_author,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'Timestamp'               : System.currentTimeMillis(),
+                'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Built-On-Minecraft'      : minecraft_version
+            ])
         }
     }
 
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    sourcesJar {
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${mod_name}" }
+        }
+    }
+
     repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        mavenCentral()
+        maven {
+            name = 'Sponge / Mixin'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+    
+        it.options.encoding = 'UTF-8'
+        it.options.getRelease().set(17)
+    }
+
+    processResources {
+        def expandProps = [
+                "version": version,
+                "mod_group": project.group, // Else we target the task's group.
+                "mod_id": mod_id,
+                "mod_environment": mod_environment,
+                "mod_name": mod_name,
+                "mod_description": mod_description,
+                "mod_author": mod_author,
+                "mod_credits": mod_credits,
+                "mod_license": mod_license,
+                "minecraft_version": minecraft_version,
+                "minecraft_version_range": minecraft_version_range,
+                "fabric_loader_version": fabric_loader_version,
+                "fabric_api_version": fabric_api_version,
+                "modmenu_version": modmenu_version,
+//                "quilt_loader_version": quilt_loader_version,
+//                "quilt_api_version": quilt_api_version,
+                "forge_version": forge_version,
+                "forge_loader_version_range": forge_loader_version_range,
+                "forge_version_range": forge_version_range,
+                "neoforge_version": neoforge_version,
+                "neoforge_loader_version_range": neoforge_loader_version_range,
+                "homepage_url": homepage_url,
+                "sources_url": sources_url,
+                "issues_url": issues_url,
+                "contact_url": contact_url
+        ]
+
+        filesMatching(['pack.mcmeta', 'fabric.mod.json', 'quilt.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+            expand expandProps
+        }
+        inputs.properties(expandProps)
+    }
+
+    // Disables Gradle's custom module metadata from being published to maven. The
+    // metadata includes mapped dependencies which are not reasonably consumable by
+    // other mod developers.
+    tasks.withType(GenerateModuleMetadata).configureEach {
+        enabled = false
     }
 }

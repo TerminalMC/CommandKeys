@@ -1,0 +1,53 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    "environment": "${mod_environment}",
+    "provides": [],
+    "accessWidener": "${mod_id}.accesswidener",
+    "entrypoints": {
+        "main": [],
+        "client": ["notryken.quickmessages.QuickMessagesFabric"],
+        "server": [],
+        "modmenu": ["notryken.quickmessages.gui.screen.ModMenuIntegration"]
+    },
+    "mixins": [
+        "${mod_id}.mixins.json",
+        "${mod_id}.fabric.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.14",
+        "minecraft": "~${minecraft_version}",
+        "java": ">=17"
+    },
+    "recommends": {
+        "modmenu": "${modmenu_version}"
+    },
+    "suggests": {},
+    "conflicts": {},
+    "breaks": {},
+
+    "name": "${mod_name}",
+    "description": "${mod_description}",
+    "contact": {
+        "homepage": "${homepage_url}",
+        "sources": "${sources_url}",
+        "issues": "${issues_url}"
+    },
+    "authors": ["${mod_author}"],
+    "contributors": [],
+    "license": "${mod_license}",
+    "icon": "assets/${mod_id}/icon.png",
+    "custom": {
+        "modmenu": {
+            "links": {
+                "Contact": "${contact_url}"
+            }
+        },
+        "quickmessages": {
+            "links": {
+                "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec"
+            }
+        }
+    }
+}
