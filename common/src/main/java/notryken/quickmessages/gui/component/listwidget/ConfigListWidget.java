@@ -29,8 +29,8 @@ public abstract class ConfigListWidget
     public final Minecraft client;
     public final Screen parentScreen;
     public final Component screenTitle;
-    int top;
-    int bottom;
+    public final int top;
+    public final int bottom;
 
     public ConfigListWidget(Minecraft client, int width, int height, int top, int bottom,
                             int itemHeight, Screen parentScreen, Component screenTitle) {
@@ -56,11 +56,10 @@ public abstract class ConfigListWidget
 
     // Abstract methods
 
-    protected abstract void refreshScreen();
-    public abstract void onKey(int keyCode, int scanCode);
-
-    // TODO need this?
-    //public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
+    protected abstract void reloadScreen();
+    public abstract boolean keyPressed(int keyCode, int scanCode);
+    public abstract boolean keyReleased(int keyCode, int scanCode);
+    public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
 
     /**
      * Base implementation of ChatNotify options list widget entry, with common
@@ -98,6 +97,7 @@ public abstract class ConfigListWidget
                 super();
                 StringWidget header = new StringWidget(width / 2 - 200, 0, 400, 20, label, client.font);
                 header.setTooltip(tooltip == null ? null : Tooltip.create(tooltip));
+                header.setTooltipDelay(500);
                 options.add(header);
             }
         }

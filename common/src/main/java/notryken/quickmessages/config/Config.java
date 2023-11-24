@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import notryken.quickmessages.Constants;
+import notryken.quickmessages.config.deserialize.InputConstantsKeyDeserializer;
+import notryken.quickmessages.config.deserialize.KeyMappingDeserializer;
+import notryken.quickmessages.config.legacy.LegacyConfig;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.FileReader;
@@ -17,11 +21,14 @@ public class Config {
     // Constants
     public static final String DEFAULT_FILE_NAME = "quickmessages.json";
     private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(InputConstants.Key.class, new InputConstantsKeyDeserializer())
+            .registerTypeAdapter(KeyMapping.class, new KeyMappingDeserializer())
+            .setPrettyPrinting().create();
+    private static final Gson LEGACY_GSON = new GsonBuilder()
             .setPrettyPrinting().create();
 
     // Not saved, not user-accessible
     private static Path configPath;
-    private static Map<KeyMapping,String> keyMsgMapMono;
 
     // Saved, not user-accessible
     private final String version = "001";
@@ -30,15 +37,21 @@ public class Config {
     public boolean showHudMessage;
     public boolean addToHistory;
     private final Map<Integer,String> codeMsgMapDual;
-    private Map<Integer,String> codeMsgMapMono;
+    private final Set<MsgKeyMapping> msgKeyListMono;
 
 
     public Config() {
         showHudMessage = true;
         addToHistory = true;
         codeMsgMapDual = new LinkedHashMap<>();
-        codeMsgMapMono = new LinkedHashMap<>();
-        keyMsgMapMono = new LinkedHashMap<>();
+        msgKeyListMono = new LinkedHashSet<>();
+    }
+
+    public Config(Map<Integer,String> codeMsgMapDual) {
+        showHudMessage = true;
+        addToHistory = true;
+        this.codeMsgMapDual = codeMsgMapDual;
+        msgKeyListMono = new LinkedHashSet<>();
     }
 
     // Config load and save
@@ -48,17 +61,37 @@ public class Config {
     }
 
     public static Config load(String name) {
-        Path path = Path.of("config").resolve(name);
+        configPath = Path.of("config").resolve(name);
         Config config;
 
-        if (Files.exists(path)) {
-            try (FileReader reader = new FileReader(path.toFile())) {
-                configPath = path;
-                config = GSON.fromJson(reader, Config.class);
-                /* TODO need either validation or deserializer, since old config
-                    only has "messageMap".
+        if (Files.exists(configPath)) {
+            try (FileReader reader = new FileReader(configPath.toFile())) {
+                /*
+                Check the config file to determine version. v1.0.1 has
+                "messageMap" as the first stored identifier. v1.1.0 and higher
+                have "version". v1.0.0 and lower are unsupported from v1.0.1.
+
+                Backwards-compatibility to v1.0.1 to be maintained until it can
+                be reasonably surmised that the vast majority of v1.0.1 users
+                have updated to v1.1.0 or higher.
+
+                Uses a second reader because apparently FileReader.reset()
+                isn't allowed.
                  */
-                config.loadMonoMap();
+                try (FileReader checkReader = new FileReader(configPath.toFile())) {
+                    for (int i = 0; i < 5; i++) {
+                        checkReader.read();
+                    }
+                    if (checkReader.read() == 118) {
+                        config = GSON.fromJson(reader, Config.class);
+                    }
+                    else {
+                        Constants.LOG.info("Config file using legacy format, applying legacy deserializer.");
+                        LegacyConfig legacyConfig = LEGACY_GSON.fromJson(reader, LegacyConfig.class);
+                        config = new Config(legacyConfig.messageMap);
+                    }
+
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Could not parse config", e);
             }
@@ -71,29 +104,28 @@ public class Config {
     }
 
     public void writeChanges() {
-        if (configPath != null) {
-            Path dir = configPath.getParent();
+        Path dir = configPath == null ? Path.of("config") : configPath.getParent();
 
-            try {
-                if (!Files.exists(dir)) {
-                    Files.createDirectories(dir);
-                } else if (!Files.isDirectory(dir)) {
-                    throw new IOException("Not a directory: " + dir);
-                }
-
-                // Use a temporary location next to the config's final destination
-                Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
-
-                // Write the file to our temporary location
-                Files.writeString(tempPath, GSON.toJson(this));
-
-                // Atomically replace the old config file (if it exists) with the temporary file
-                Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        try {
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir);
+            } else if (!Files.isDirectory(dir)) {
+                throw new IOException("Not a directory: " + dir);
             }
-            catch (IOException e) {
-                throw new RuntimeException("Couldn't update config file", e);
-            }
+
+            // Use a temporary location next to the config's final destination
+            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
+
+            // Write the file to our temporary location
+            Files.writeString(tempPath, GSON.toJson(this));
+
+            // Atomically replace the old config file (if it exists) with the temporary file
+            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         }
+        catch (IOException e) {
+            throw new RuntimeException("Couldn't update config file", e);
+        }
+
     }
 
     // Accessors
@@ -110,16 +142,8 @@ public class Config {
         return codeMsgMapDual.values().iterator();
     }
 
-    public String getMsgMono(KeyMapping key) {
-        return keyMsgMapMono.get(key);
-    }
-
-    public Iterator<KeyMapping> getKeyIterMono() {
-        return keyMsgMapMono.keySet().iterator();
-    }
-
-    public Iterator<String> getValIterMono() {
-        return keyMsgMapMono.values().iterator();
+    public List<MsgKeyMapping> getMsgKeyListMono() {
+        return msgKeyListMono.stream().toList();
     }
 
     // Dual-key map mutators
@@ -156,7 +180,7 @@ public class Config {
      */
     public boolean addMsgDual() {
         if (!codeMsgMapDual.containsKey(GLFW.GLFW_KEY_UNKNOWN)) {
-            codeMsgMapDual.put(Integer.MAX_VALUE, "");
+            codeMsgMapDual.put(GLFW.GLFW_KEY_UNKNOWN, "");
             return true;
         }
         return false;
@@ -172,59 +196,27 @@ public class Config {
 
     // Mono-key map mutators
 
-    public boolean setKey2(KeyMapping oldKey, KeyMapping newKey) {
-        String message = keyMsgMapMono.get(oldKey);
-        if (message != null && !keyMsgMapMono.containsKey(newKey)) {
-            keyMsgMapMono.remove(oldKey);
-            keyMsgMapMono.put(newKey, message);
+    public boolean addMsgKeyMono() {
+        MsgKeyMapping msgKey = new MsgKeyMapping();
+        if (!msgKeyListMono.contains(msgKey)) {
+            msgKeyListMono.add(msgKey);
             return true;
         }
         return false;
     }
 
-    public void setMsgMono(KeyMapping key, String newMessage) {
-        keyMsgMapMono.replace(key, newMessage);
-    }
-
-    public boolean addMsgMono() {
-        KeyMapping NEW_KEY = new KeyMapping(
-                "key.quickmessages.new_key", InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN, "keygroup.quickmessages.title");
-
-        if (!keyMsgMapMono.containsKey(NEW_KEY)) {
-            keyMsgMapMono.put(NEW_KEY, "");
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeMsgMono(KeyMapping key) {
-        return keyMsgMapMono.remove(key) != null;
+    public boolean removeMsgKeyMono(MsgKeyMapping msgKey) {
+        return msgKeyListMono.remove(msgKey);
     }
 
     public void purge() {
         codeMsgMapDual.values().removeIf(String::isBlank);
-        codeMsgMapMono.values().removeIf(String::isBlank);
-        keyMsgMapMono.values().removeIf(String::isBlank);
+        msgKeyListMono.removeIf((MsgKeyMapping) -> MsgKeyMapping.msg.isBlank());
     }
 
-    public void loadMonoMap() {
-        keyMsgMapMono = new LinkedHashMap<>();
-        Iterator<Integer> keyIter = codeMsgMapMono.keySet().iterator();
-        Iterator<String> valIter = codeMsgMapMono.values().iterator();
-        while (keyIter.hasNext()) {
-            int key = keyIter.next();
-            keyMsgMapMono.put(new KeyMapping(String.valueOf(key), InputConstants.Type.KEYSYM,
-                    key, "keygroup.quickmessages.title"), valIter.next());
-        }
-    }
-
-    public void syncMonoMap() {
-        codeMsgMapMono = new LinkedHashMap<>();
-        Iterator<KeyMapping> keyIter = keyMsgMapMono.keySet().iterator();
-        Iterator<String> valIter = keyMsgMapMono.values().iterator();
-        while (keyIter.hasNext()) {
-            codeMsgMapMono.put(keyIter.next().key.getValue(), valIter.next());
+    public void checkDuplicatesMono() {
+        for (MsgKeyMapping msgKey : msgKeyListMono) {
+            msgKey.checkDuplicated(msgKey.keyCode);
         }
     }
 }

@@ -2,85 +2,105 @@ package notryken.quickmessages.gui.component.listwidget;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import notryken.quickmessages.QuickMessages;
-import notryken.quickmessages.gui.screen.ConfigScreen;
+import notryken.quickmessages.config.MsgKeyMapping;
+import notryken.quickmessages.gui.screen.ConfigScreenMono;
 
-import java.util.Iterator;
+import java.util.List;
 
 public class ConfigListWidgetMono extends ConfigListWidget {
 
-    public KeyMapping selectedKey;
+    public MsgKeyMapping selectedMsgKey;
 
     public ConfigListWidgetMono(Minecraft client, int width, int height, int top, int bottom,
                                 int itemHeight, Screen parentScreen, Component title) {
         super(client, width, height, top, bottom, itemHeight, parentScreen, title);
 
-        addEntry(new Entry.SettingToggles(width));
+        addEntry(new Entry.SettingToggles(width, this));
 
-        addEntry(new Entry.ListHeader(width, this, client));
+        addEntry(new ConfigListWidget.Entry.Header(width, client, Component.nullToEmpty(
+                "Single-Hotkey Messages \u2139"), Component.literal("These messages will " +
+                "be sent if you press the corresponding hotkey while in-game, provided no other " +
+                "function is bound to the same key.")));
 
-        Iterator<KeyMapping> keyIter = QuickMessages.config().getKeyIterMono();
-        Iterator<String> valueIter = QuickMessages.config().getValIterMono();
+        addEntry(new Entry.ListHeader(width, client));
 
-        while (keyIter.hasNext()) {
-            addEntry(new Entry.KeyMessageField(width, this, client,
-                    keyIter.next(), valueIter.next()));
+        List<MsgKeyMapping> msgKeyList = QuickMessages.config().getMsgKeyListMono();
+
+        for (MsgKeyMapping e : msgKeyList) {
+            addEntry(new Entry.KeyMessageField(width, this, client, e));
         }
         addEntry(new Entry.AddMessageButton(width, this));
     }
 
-    public void onKey(int keyCode, int scanCode) {
-        if (selectedKey != null) {
-            setKey(selectedKey, keyCode, scanCode);
-        }
+    public boolean keyPressed(int keyCode, int scanCode) {
+        return selectedMsgKey == null;
     }
 
-    protected void setKey(KeyMapping key, int newKeyCode, int newScanCode) {
-        key.setKey(InputConstants.getKey(newKeyCode, newScanCode));
-        refreshScreen();
+    public boolean keyReleased(int keyCode, int scanCode) {
+        if (selectedMsgKey != null) {
+            if (keyCode == 256) {
+                setKeyCode(selectedMsgKey, InputConstants.UNKNOWN);
+            } else {
+                setKeyCode(selectedMsgKey, InputConstants.getKey(keyCode, scanCode));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected void setKeyCode(MsgKeyMapping msgKey, InputConstants.Key keyCode) {
+        msgKey.setKeyCode(keyCode);
+        reloadScreen();
     }
 
     protected void addMessage() {
-        if (QuickMessages.config().addMsgMono()) {
-            refreshScreen();
+        if (QuickMessages.config().addMsgKeyMono()) {
+            reloadScreen();
         }
     }
 
-    protected void removeMessage(KeyMapping key) {
-        if (QuickMessages.config().removeMsgMono(key)) {
-            refreshScreen();
+    protected void removeMessage(MsgKeyMapping msgKey) {
+        if (QuickMessages.config().removeMsgKeyMono(msgKey)) {
+            reloadScreen();
         }
     }
 
-    public void refreshScreen() {
+    public void reloadScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetMono(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
         listWidget.setScrollAmount(this.getScrollAmount());
-        client.setScreen(new ConfigScreen(parentScreen, client.options, screenTitle, listWidget));
+        client.setScreen(new ConfigScreenMono(parentScreen, client.options, screenTitle, listWidget));
+    }
+
+    public ConfigListWidgetMono resize(int width, int height, int top, int bottom) {
+        ConfigListWidgetMono listWidget = new ConfigListWidgetMono(
+                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+        listWidget.setScrollAmount(getScrollAmount());
+        return listWidget;
     }
 
     private void openDualConfigScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetDual(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
-        client.setScreen(new ConfigScreen(parentScreen, client.options, screenTitle, listWidget));
+        client.setScreen(new ConfigScreenMono(parentScreen, client.options, screenTitle, listWidget));
     }
 
     public abstract static class Entry extends ConfigListWidget.Entry {
 
         private static class SettingToggles extends Entry {
-            SettingToggles(int width) {
+            SettingToggles(int width, ConfigListWidgetMono listWidget) {
                 options.add(CycleButton.booleanBuilder(Component.nullToEmpty("Yes"),
                                 Component.nullToEmpty("No"))
                         .withInitialValue(QuickMessages.config().showHudMessage)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Briefly show the sent message as a pop-up above the hotbar.")))
-                        .create(width / 2 - 120, 32, 117, 20,
+                        .create(width / 2 - 200, 0, 120, 20,
                                 Component.literal("Show HUD Display"),
                                 (button, status) -> QuickMessages.config().showHudMessage = status));
 
@@ -89,67 +109,52 @@ public class ConfigListWidgetMono extends ConfigListWidget {
                         .withInitialValue(QuickMessages.config().addToHistory)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Add sent messages/commands to history.")))
-                        .create(width / 2 + 3, 32, 117, 20,
+                        .create(width / 2 - 75, 0, 120, 20,
                                 Component.literal("Add to History"),
                                 (button, status) -> QuickMessages.config().addToHistory = status));
+                options.add(Button.builder(Component.literal("Dual-Key Settings"),
+                                (button) -> listWidget.openDualConfigScreen())
+                        .pos(width / 2 + 80, 0)
+                        .size(120, 20)
+                        .build());
             }
         }
 
         public static class ListHeader extends Entry {
-            public ListHeader(int width, ConfigListWidgetMono listWidget, Minecraft client) {
-                options.add(new StringWidget(width / 2 - 200, 0, 80, 20,
-                        Component.nullToEmpty("Hotkey"), client.font));
-                options.add(new StringWidget(width / 2 - 110, 0, 280, 20,
-                        Component.nullToEmpty("Message/Command"), client.font).alignLeft());
-                options.add(Button.builder(Component.literal("Dual-Key Settings"),
-                                (button) -> listWidget.openDualConfigScreen())
-                        .pos(width / 2 + 100, 0)
-                        .size(100, 20)
-                        .build());
+            public ListHeader(int width, Minecraft client) {
+                StringWidget keyHeader = new StringWidget(width / 2 - 200, 0, 80, 20,
+                        Component.nullToEmpty("Hotkey"), client.font);
+                StringWidget messageHeader = new StringWidget(width / 2 - 110, 0, 280, 20,
+                        Component.nullToEmpty("Message/Command \u2139"), client.font);
+                messageHeader.setTooltip(Tooltip.create(Component.literal("You can list multiple " +
+                        "commands to be sent sequentially by separating them with a pair of commas. " +
+                        "Example: /gamemode creative,,/effect clear @s")));
+                messageHeader.setTooltipDelay(500);
+                options.add(keyHeader);
+                options.add(messageHeader);
             }
         }
 
         private static class KeyMessageField extends Entry {
 
             KeyMessageField(int width, ConfigListWidgetMono listWidget, Minecraft client,
-                            KeyMapping key, String message) {
+                            MsgKeyMapping msgKey) {
 
-                boolean duplicate = false;
-
-                MutableComponent keyName = key.getTranslatedKeyMessage().copy();
+                MutableComponent keyName = msgKey.keyCode.getDisplayName().copy();
                 MutableComponent label = keyName;
-                MutableComponent duplicateKeys = Component.empty();
-                Tooltip tooltip;
+                Tooltip tooltip = null;
 
-                if (!key.isUnbound()) {
-                    KeyMapping[] allKeys = client.options.keyMappings;
-                    // Duplicate detection
-                    for (KeyMapping k : allKeys) {
-                        if (k.same(key)) {
-                            if (duplicate) {
-                                duplicateKeys.append(", ");
-                            }
-                            duplicate = true;
-                            duplicateKeys.append(Component.translatable(k.getName()));
-                        }
-                    }
-                }
-
-                if (duplicate) {
-                    label = Component.literal("[ ")
-                            .append(keyName.copy().withStyle(ChatFormatting.WHITE))
-                            .append(" ]").withStyle(ChatFormatting.RED);
-                    tooltip = Tooltip.create(Component.translatable(
-                            "controls.keybinds.duplicateKeybinds", duplicateKeys));
-                } else {
-                    tooltip = null;
+                if (msgKey.label != null) {
+                    label = msgKey.label;
+                    tooltip = msgKey.tooltip;
                 }
 
                 options.add(
                         Button.builder(label, (button) -> {
-                            listWidget.selectedKey = key;
+                            listWidget.selectedMsgKey = msgKey;
                             button.setMessage(Component.literal("> ")
-                                    .append(keyName.copy().withStyle(ChatFormatting.WHITE))
+                                    .append(keyName.copy().withStyle(ChatFormatting.WHITE)
+                                            .withStyle(ChatFormatting.UNDERLINE))
                                     .append(" <").withStyle(ChatFormatting.YELLOW));
                         })
                                 .tooltip(tooltip)
@@ -159,13 +164,13 @@ public class ConfigListWidgetMono extends ConfigListWidget {
 
                 EditBox messageField = new EditBox(client.font, width / 2 - 110, 0, 280, 20,
                         Component.literal("Message"));
-                messageField.setMaxLength(256);
-                messageField.setValue(message);
-                messageField.setResponder((value) -> QuickMessages.config().setMsgMono(key, value.strip()));
+                messageField.setMaxLength(1024);
+                messageField.setValue(msgKey.msg);
+                messageField.setResponder((value) -> msgKey.msg = value.strip());
                 options.add(messageField);
 
                 options.add(Button.builder(Component.literal("X"),
-                                (button) -> listWidget.removeMessage(key))
+                                (button) -> listWidget.removeMessage(msgKey))
                         .size(20, 20)
                         .pos(width / 2 + 180, 0)
                         .build());

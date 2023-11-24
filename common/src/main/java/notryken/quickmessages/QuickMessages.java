@@ -4,46 +4,50 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import notryken.quickmessages.config.Config;
-import notryken.quickmessages.gui.screen.ConfigScreen;
-
-import java.util.Iterator;
+import notryken.quickmessages.config.MsgKeyMapping;
+import notryken.quickmessages.gui.screen.ConfigScreenDual;
 
 public class QuickMessages {
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
             "key.quickmessages.open_menu", InputConstants.Type.KEYSYM,
-            InputConstants.KEY_K, "keygroup.quickmessages.title");
+            InputConstants.KEY_K, "keygroup.quickmessages.main");
 
     private static Config CONFIG;
 
     public static void init() {
+        Constants.LOG.info("init()");
         CONFIG = loadConfig();
     }
 
     public static void onEndTick(Minecraft client) {
         while (CONFIG_KEY.consumeClick()) {
-            client.setScreen(getScreenDual());
+            client.setScreen(new ConfigScreenDual(client.screen, client.options,
+                    Component.translatable("screen.quickmessages.title"), null));
         }
+    }
+
+    public static void onInput() { // TODO this should go in onEndTick or the other way around
+        Minecraft client = Minecraft.getInstance();
         if (client.screen == null) {
-            Iterator<KeyMapping> iter = config().getKeyIterMono();
-            while (iter.hasNext()) {
-                KeyMapping key = iter.next();
-                while (key.consumeClick()) {
-                    String msg = config().getMsgMono(key);
-                    if (msg != null) {
-                        client.setScreen(new ChatScreen(msg));
-                        if (client.screen instanceof ChatScreen cs) {
-                            cs.handleChatInput(msg, QuickMessages.config().addToHistory);
+            for (MsgKeyMapping msgKey : config().getMsgKeyListMono()) {
+                if (msgKey.isBound() && !msgKey.isDuplicate()) {
+                    while (msgKey.getKeyMapping().consumeClick()) {
+
+                        String[] messageArr = msgKey.msg.split(",,");
+                        for (String msg : messageArr) {
+                            client.setScreen(new ChatScreen(""));
+                            if (client.screen instanceof ChatScreen cs) {
+                                cs.handleChatInput(msg, QuickMessages.config().addToHistory);
+                            }
+                            if (QuickMessages.config().showHudMessage) {
+                                client.gui.setOverlayMessage(Component.literal(msg)
+                                        .setStyle(Style.EMPTY.withColor(12369084)), false);
+                            }
                         }
                         client.setScreen(null);
-                        if (QuickMessages.config().showHudMessage) {
-                            Constants.LOG.info("the thing is true");
-                            client.gui.setOverlayMessage(Component.literal(msg)
-                                    .setStyle(Style.EMPTY.withColor(12369084)), false);
-                        }
                     }
                 }
             }
@@ -58,6 +62,7 @@ public class QuickMessages {
     }
 
     private static Config loadConfig() {
+        Constants.LOG.info("loadConfig()");
         try {
             return Config.load();
         } catch (Exception e) {
@@ -67,17 +72,5 @@ public class QuickMessages {
             newConfig.writeChanges();
             return newConfig;
         }
-    }
-
-    public static Screen getScreenMono() {
-        Minecraft client = Minecraft.getInstance();
-        Component title = Component.literal("Quick Messages");
-        return new ConfigScreen(client.screen, client.options, title, 0);
-    }
-
-    public static Screen getScreenDual() {
-        Minecraft client = Minecraft.getInstance();
-        Component title = Component.literal("Quick Messages");
-        return new ConfigScreen(client.screen, client.options, title, 1);
     }
 }
