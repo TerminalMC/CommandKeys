@@ -44,12 +44,22 @@ public class ConfigListWidgetMono extends ConfigListWidget {
 
     public boolean keyReleased(int keyCode, int scanCode) {
         if (selectedMsgKey != null) {
-            if (keyCode == 256) {
+            if (keyCode == InputConstants.KEY_ESCAPE) {
                 setKeyCode(selectedMsgKey, InputConstants.UNKNOWN);
+                return true;
             } else {
-                setKeyCode(selectedMsgKey, InputConstants.getKey(keyCode, scanCode));
+                boolean alreadyBound = false;
+                for (MsgKeyMapping msgKey : CommandKeys.config().getMsgKeyListMono()) {
+                    if (msgKey.keyCode.getValue() == keyCode) {
+                        alreadyBound = true;
+                        break;
+                    }
+                }
+                if (!alreadyBound) {
+                    setKeyCode(selectedMsgKey, InputConstants.getKey(keyCode, scanCode));
+                    return true;
+                }
             }
-            return true;
         }
         return false;
     }

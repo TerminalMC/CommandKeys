@@ -12,6 +12,28 @@ public class InputConstantsKeyDeserializer implements JsonDeserializer<InputCons
 
         JsonObject jsonObject = json.getAsJsonObject();
 
-        return InputConstants.getKey(jsonObject.get("name").getAsString());
+        /*
+        "name"
+        Fabric/Quilt:   field_1663
+        Forge:          f_84853_
+        NeoForge:       name
+         */
+
+        try {
+            return InputConstants.getKey(jsonObject.get("name").getAsString());
+        }
+        catch (NullPointerException e1) {
+            try {
+                return InputConstants.getKey(jsonObject.get("field_1663").getAsString());
+            }
+            catch (NullPointerException e2) {
+                try {
+                    return InputConstants.getKey(jsonObject.get("f_84853_").getAsString());
+                }
+                catch (NullPointerException e3) {
+                    throw new JsonParseException("Could not parse InputConstants.Key: No key found.", e1);
+                }
+            }
+        }
     }
 }
