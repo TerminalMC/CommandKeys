@@ -7,9 +7,9 @@
         "provides": [],
         "entrypoints": {
             "main": [],
-            "client": "notryken.quickmessages.QuickMessagesQuilt",
+            "client": "notryken.commandkeys.CommandKeysQuilt",
             "server": [],
-            "modmenu": "notryken.quickmessages.gui.screen.ModMenuIntegration"
+            "modmenu": "notryken.commandkeys.gui.screen.ModMenuIntegration"
         },
         "depends": [
             {
@@ -60,7 +60,7 @@
             "Contact": "${contact_url}"
         }
     },
-    "quickmessages": {
+    "commandkeys": {
         "links": {
             "formatSpec": "https://github.com/QuiltMC/rfcs/blob/main/specification/0002-quilt.mod.json.md"
         }

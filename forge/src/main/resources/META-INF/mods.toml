@@ -15,9 +15,9 @@ issueTrackerURL="${issues_url}" #optional: none
   displayURL="${homepage_url}" #optional: none
 
 [[mixins]]
-  config="quickmessages.mixins.json"
+  config="commandkeys.mixins.json"
 [[mixins]]
-  config="quickmessages.forge.mixins.json"
+  config="commandkeys.forge.mixins.json"
 
 [[dependencies.${mod_id}]] #optional
   modId="forge"

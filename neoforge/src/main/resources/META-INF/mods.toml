@@ -15,9 +15,9 @@ issueTrackerURL="${issues_url}" #optional: none
   displayURL="${homepage_url}" #optional: none
 
 [[mixins]]
-  config="quickmessages.mixins.json"
+  config="commandkeys.mixins.json"
 [[mixins]]
-  config="quickmessages.neoforge.mixins.json"
+  config="commandkeys.neoforge.mixins.json"
 
 [[dependencies.${mod_id}]] #optional
   modId="neoforge"

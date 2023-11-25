@@ -7,9 +7,9 @@
     "accessWidener": "${mod_id}.accesswidener",
     "entrypoints": {
         "main": [],
-        "client": ["notryken.quickmessages.QuickMessagesFabric"],
+        "client": ["notryken.commandkeys.CommandKeysFabric"],
         "server": [],
-        "modmenu": ["notryken.quickmessages.gui.screen.ModMenuIntegration"]
+        "modmenu": ["notryken.commandkeys.gui.screen.ModMenuIntegration"]
     },
     "mixins": [
         "${mod_id}.mixins.json",
@@ -44,7 +44,7 @@
                 "Contact": "${contact_url}"
             }
         },
-        "quickmessages": {
+        "commandkeys": {
             "links": {
                 "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec"
             }
