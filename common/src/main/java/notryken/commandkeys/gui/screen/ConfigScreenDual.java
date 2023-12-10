@@ -16,8 +16,8 @@ public class ConfigScreenDual extends ConfigScreen {
     @Override
     protected void init() {
         if (listWidget == null) {
-            listWidget = new ConfigListWidgetDual(Minecraft.getInstance(), width, height,
-                        32, height - 32, 25, lastScreen, title);
+            listWidget = new ConfigListWidgetDual(Minecraft.getInstance(), width, height - 64,
+                        32, 25, lastScreen, title);
         }
         super.init();
     }

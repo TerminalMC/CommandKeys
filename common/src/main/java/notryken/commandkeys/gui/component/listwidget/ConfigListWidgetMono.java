@@ -17,9 +17,9 @@ public class ConfigListWidgetMono extends ConfigListWidget {
 
     public MsgKeyMapping selectedMsgKey;
 
-    public ConfigListWidgetMono(Minecraft client, int width, int height, int top, int bottom,
+    public ConfigListWidgetMono(Minecraft client, int width, int height, int y,
                                 int itemHeight, Screen parentScreen, Component title) {
-        super(client, width, height, top, bottom, itemHeight, parentScreen, title);
+        super(client, width, height, y, itemHeight, parentScreen, title);
 
         addEntry(new Entry.SettingToggles(width, this));
 
@@ -89,22 +89,22 @@ public class ConfigListWidgetMono extends ConfigListWidget {
     @Override
     public void reloadScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetMono(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         listWidget.setScrollAmount(this.getScrollAmount());
         client.setScreen(new ConfigScreenMono(parentScreen, client.options, screenTitle, listWidget));
     }
 
     @Override
-    public ConfigListWidgetMono resize(int width, int height, int top, int bottom) {
+    public ConfigListWidgetMono resize(int width, int height, int y) {
         ConfigListWidgetMono listWidget = new ConfigListWidgetMono(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     private void openDualConfigScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetDual(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         client.setScreen(new ConfigScreenMono(parentScreen, client.options, screenTitle, listWidget));
     }
 

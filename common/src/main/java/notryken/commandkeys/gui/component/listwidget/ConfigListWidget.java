@@ -29,17 +29,15 @@ public abstract class ConfigListWidget
     public final Minecraft client;
     public final Screen parentScreen;
     public final Component screenTitle;
-    public final int top;
-    public final int bottom;
+    public final int y;
 
-    public ConfigListWidget(Minecraft client, int width, int height, int top, int bottom,
+    public ConfigListWidget(Minecraft client, int width, int height, int y,
                             int itemHeight, Screen parentScreen, Component screenTitle) {
-        super(client, width, height, top, bottom, itemHeight);
+        super(client, width, height, y, itemHeight);
         this.client = client;
         this.parentScreen = parentScreen;
         this.screenTitle = screenTitle;
-        this.top = top;
-        this.bottom = bottom;
+        this.y = y;
     }
 
     // Default methods
@@ -61,7 +59,7 @@ public abstract class ConfigListWidget
     protected abstract void reloadScreen();
     public abstract boolean keyPressed(int keyCode, int scanCode);
     public abstract boolean keyReleased(int keyCode, int scanCode);
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
+    public abstract ConfigListWidget resize(int width, int height, int y);
 
     /**
      * Base implementation of ChatNotify options list widget entry, with common

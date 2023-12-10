@@ -19,9 +19,9 @@ public class ConfigListWidgetDual extends ConfigListWidget {
 
     public Integer selectedKeyCode;
 
-    public ConfigListWidgetDual(Minecraft client, int width, int height, int top, int bottom,
+    public ConfigListWidgetDual(Minecraft client, int width, int height, int y,
                                 int itemHeight, Screen parentScreen, Component title) {
-        super(client, width, height, top, bottom, itemHeight, parentScreen, title);
+        super(client, width, height, y, itemHeight, parentScreen, title);
 
         addEntry(new Entry.SettingToggles(width, this));
 
@@ -93,22 +93,22 @@ public class ConfigListWidgetDual extends ConfigListWidget {
     @Override
     public void reloadScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetDual(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         listWidget.setScrollAmount(this.getScrollAmount());
         client.setScreen(new ConfigScreenDual(parentScreen, client.options, screenTitle, listWidget));
     }
 
     @Override
-    public ConfigListWidgetDual resize(int width, int height, int top, int bottom) {
+    public ConfigListWidgetDual resize(int width, int height, int y) {
         ConfigListWidgetDual listWidget = new ConfigListWidgetDual(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         listWidget.setScrollAmount(getScrollAmount());
         return listWidget;
     }
 
     private void openMonoConfigScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetMono(
-                client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
+                client, width, height, y, itemHeight, parentScreen, screenTitle);
         client.setScreen(new ConfigScreenDual(parentScreen, client.options, screenTitle, listWidget));
     }
 

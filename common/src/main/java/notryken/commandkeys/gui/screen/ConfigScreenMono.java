@@ -16,8 +16,8 @@ public class ConfigScreenMono extends ConfigScreen {
     @Override
     protected void init() {
         if (listWidget == null) {
-            listWidget = new ConfigListWidgetMono(Minecraft.getInstance(), width, height,
-                    32, height - 32, 25, lastScreen, title);
+            listWidget = new ConfigListWidgetMono(Minecraft.getInstance(), width, height - 64,
+                    32, 25, lastScreen, title);
         }
         super.init();
     }
