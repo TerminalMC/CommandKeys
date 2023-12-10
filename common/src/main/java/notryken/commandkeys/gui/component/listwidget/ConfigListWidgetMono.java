@@ -38,15 +38,20 @@ public class ConfigListWidgetMono extends ConfigListWidget {
         addEntry(new Entry.AddMessageButton(width, this));
     }
 
+    @Override
     public boolean keyPressed(int keyCode, int scanCode) {
         return selectedMsgKey == null;
     }
 
+    @Override
     public boolean keyReleased(int keyCode, int scanCode) {
         if (selectedMsgKey != null) {
             if (keyCode == InputConstants.KEY_ESCAPE) {
                 setKeyCode(selectedMsgKey, InputConstants.UNKNOWN);
                 return true;
+            }
+            else if (keyCode == selectedMsgKey.keyCode.getValue()) {
+                reloadScreen();
             } else {
                 boolean alreadyBound = false;
                 for (MsgKeyMapping msgKey : CommandKeys.config().getMsgKeyListMono()) {
@@ -81,6 +86,7 @@ public class ConfigListWidgetMono extends ConfigListWidget {
         }
     }
 
+    @Override
     public void reloadScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetMono(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
@@ -88,6 +94,7 @@ public class ConfigListWidgetMono extends ConfigListWidget {
         client.setScreen(new ConfigScreenMono(parentScreen, client.options, screenTitle, listWidget));
     }
 
+    @Override
     public ConfigListWidgetMono resize(int width, int height, int top, int bottom) {
         ConfigListWidgetMono listWidget = new ConfigListWidgetMono(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);

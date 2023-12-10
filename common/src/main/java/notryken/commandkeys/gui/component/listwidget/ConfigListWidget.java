@@ -44,11 +44,13 @@ public abstract class ConfigListWidget
 
     // Default methods
 
+    @Override
     public int getRowWidth() {
         // Sets the position of the scrollbar
         return 400;
     }
 
+    @Override
     protected int getScrollbarPosition() {
         // Offset as a buffer
         return super.getScrollbarPosition() + 82;
@@ -69,6 +71,7 @@ public abstract class ConfigListWidget
 
         public final List<AbstractWidget> options = new ArrayList<>();
 
+        @Override
         public void render(@NotNull GuiGraphics context, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX, int mouseY,
                            boolean hovered, float tickDelta) {
@@ -78,11 +81,15 @@ public abstract class ConfigListWidget
             });
         }
 
-        public @NotNull List<? extends GuiEventListener> children() {
+        @Override
+        @NotNull
+        public List<? extends GuiEventListener> children() {
             return this.options;
         }
 
-        public @NotNull List<? extends NarratableEntry> narratables() {
+        @Override
+        @NotNull
+        public List<? extends NarratableEntry> narratables() {
             return this.options;
         }
 

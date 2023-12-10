@@ -43,10 +43,12 @@ public class ConfigListWidgetDual extends ConfigListWidget {
         addEntry(new Entry.AddMessageButton(width, this));
     }
 
+    @Override
     public boolean keyPressed(int keyCode, int scanCode) {
         return selectedKeyCode == null;
     }
 
+    @Override
     public boolean keyReleased(int keyCode, int scanCode) {
         if (!CommandKeys.CONFIG_KEY.matches(keyCode, scanCode)) {
             if (selectedKeyCode == null) {
@@ -68,18 +70,12 @@ public class ConfigListWidgetDual extends ConfigListWidget {
                         client.setScreen(null);
                     }
                 }
-            }
-            else {
-                setKey(selectedKeyCode, keyCode);
+            } else {
+                CommandKeys.config().setKeyDual(selectedKeyCode, keyCode);
+                reloadScreen();
             }
         }
-        return true; // TODO fix return
-    }
-
-    protected void setKey(int keyCode, int newKeyCode) {
-        if (CommandKeys.config().setKeyDual(keyCode, newKeyCode)) {
-            reloadScreen();
-        }
+        return true; // ?
     }
 
     protected void addMessage() {
@@ -94,6 +90,7 @@ public class ConfigListWidgetDual extends ConfigListWidget {
         }
     }
 
+    @Override
     public void reloadScreen() {
         ConfigListWidget listWidget = new ConfigListWidgetDual(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
@@ -101,6 +98,7 @@ public class ConfigListWidgetDual extends ConfigListWidget {
         client.setScreen(new ConfigScreenDual(parentScreen, client.options, screenTitle, listWidget));
     }
 
+    @Override
     public ConfigListWidgetDual resize(int width, int height, int top, int bottom) {
         ConfigListWidgetDual listWidget = new ConfigListWidgetDual(
                 client, width, height, top, bottom, itemHeight, parentScreen, screenTitle);
