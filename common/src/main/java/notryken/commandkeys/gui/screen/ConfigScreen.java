@@ -21,7 +21,7 @@ public abstract class ConfigScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        listWidget = listWidget.resize(this.width, this.height - 64, 32);
+        listWidget = listWidget.resize(this.width, this.height, 32, this.height - 32);
         addWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
                 .size(240, 20)
