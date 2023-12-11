@@ -4,20 +4,25 @@ plugins {
     id 'maven-publish'
     id 'fabric-loom' version '1.2-SNAPSHOT'
 }
+
 base {
     archivesName = "${mod_name}-Fabric-${minecraft_version}"
 }
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
-
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation project(":common")
 
-    modImplementation "maven.modrinth:modmenu:${modmenu_version}"
+    mod "fabric-loader", "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    mod "modmenu", "maven.modrinth:modmenu:${modmenu_version}"
+
+    includeMod "fabric-api", fabricApi.module("fabric-api-base", fabric_api_version)
+    includeMod "fabric-api", fabricApi.module("fabric-resource-loader-v0", fabric_api_version)
+    includeMod "fabric-api", fabricApi.module("fabric-key-binding-api-v1", fabric_api_version)
+    includeMod "fabric-api", fabricApi.module("fabric-lifecycle-events-v1", fabric_api_version)
 }
 
 loom {
@@ -69,4 +74,20 @@ publishing {
             url "file://" + System.getenv("local_maven")
         }
     }
+}
+
+// https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.5+no-cf/ferry.gradle
+
+def mod(String localOverrideKey, Object dep) {
+    File file = file("../.${localOverrideKey}-local")
+    if (file.exists()) {
+        dependencies.implementation(dep)
+    } else {
+        dependencies.modImplementation(dep)
+    }
+}
+
+def includeMod(String localOverrideKey, Object dep) {
+    mod(localOverrideKey, dep)
+    dependencies.include(dep)
 }
