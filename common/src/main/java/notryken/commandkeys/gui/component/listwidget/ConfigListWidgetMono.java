@@ -47,11 +47,7 @@ public class ConfigListWidgetMono extends ConfigListWidget {
     public boolean keyReleased(int keyCode, int scanCode) {
         if (selectedMsgKey != null) {
             if (keyCode == InputConstants.KEY_ESCAPE) {
-                setKeyCode(selectedMsgKey, InputConstants.UNKNOWN);
-                return true;
-            }
-            else if (keyCode == selectedMsgKey.keyCode.getValue()) {
-                reloadScreen();
+                selectedMsgKey.setKeyCode(InputConstants.UNKNOWN);
             } else {
                 boolean alreadyBound = false;
                 for (MsgKeyMapping msgKey : CommandKeys.config().getMsgKeyListMono()) {
@@ -61,17 +57,12 @@ public class ConfigListWidgetMono extends ConfigListWidget {
                     }
                 }
                 if (!alreadyBound) {
-                    setKeyCode(selectedMsgKey, InputConstants.getKey(keyCode, scanCode));
-                    return true;
+                    selectedMsgKey.setKeyCode(InputConstants.getKey(keyCode, scanCode));
                 }
             }
+            reloadScreen();
         }
-        return false;
-    }
-
-    protected void setKeyCode(MsgKeyMapping msgKey, InputConstants.Key keyCode) {
-        msgKey.setKeyCode(keyCode);
-        reloadScreen();
+        return true; // ?
     }
 
     protected void addMessage() {

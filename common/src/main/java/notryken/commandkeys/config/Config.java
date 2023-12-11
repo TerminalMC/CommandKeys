@@ -152,10 +152,9 @@ public class Config {
      * @param keyCode the original keycode.
      * @param newKeyCode the new keycode.
      */
-    public boolean setKeyDual(int keyCode, int newKeyCode) {
+    public void setKeyDual(int keyCode, int newKeyCode) {
         // Inefficient workaround to maintain order
-        String message = codeMsgMapDual.get(keyCode);
-        if (message != null && !codeMsgMapDual.containsKey(newKeyCode)) {
+        if (codeMsgMapDual.get(keyCode) != null && !codeMsgMapDual.containsKey(newKeyCode)) {
             Map<Integer,String> newMap = new LinkedHashMap<>();
             Iterator<Integer> keyIter = getKeyIterDual();
             Iterator<String> valIter = getValIterDual();
@@ -170,9 +169,7 @@ public class Config {
             }
             codeMsgMapDual.clear();
             codeMsgMapDual.putAll(newMap);
-            return true;
         }
-        return false;
     }
 
     /**
