@@ -8,7 +8,7 @@ issueTrackerURL="${issues_url}" #optional: none
   version="${version}" #optional: "1"
   displayName="${mod_name}" #optional: modId
   description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
-  logoFile="assets/${mod_id}/icon.png" #optional: none
+  logoFile="icon.png" #optional: none
   features={ java_version="[17,)" }
   credits="${mod_credits}" #optional: none
   authors="${mod_author}" #optional: none

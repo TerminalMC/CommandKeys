@@ -38,7 +38,7 @@
     "authors": ["${mod_author}"],
     "contributors": [],
     "license": "${mod_license}",
-    "icon": "assets/${mod_id}/icon.png",
+    "icon": "icon.png",
     "custom": {
         "modmenu": {
             "links": {
