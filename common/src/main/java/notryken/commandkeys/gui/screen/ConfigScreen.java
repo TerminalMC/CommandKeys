@@ -48,14 +48,10 @@ public abstract class ConfigScreen extends OptionsSubScreen {
 
     @Override
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+        this.renderDirtBackground(context);
         listWidget.render(context, mouseX, mouseY, delta);
         context.drawCenteredString(this.font, this.title, this.width / 2, 5, 0xffffff);
-    }
-
-    @Override
-    public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(context);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

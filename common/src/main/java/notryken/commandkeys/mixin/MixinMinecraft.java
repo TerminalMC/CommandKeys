@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
-    @Inject(method = "onResourceLoadFinished", at = @At("TAIL"))
+    @Inject(method = "onGameLoadFinished", at = @At("TAIL"))
     private void checkDuplicates(CallbackInfo ci) {
         /*
         Required in case CommandKeys config is initialized before
