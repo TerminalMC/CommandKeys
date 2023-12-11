@@ -17,8 +17,11 @@
     ],
     "depends": {
         "fabricloader": ">=0.14",
+        "fabric-resource-loader-v0": "*",
+        "fabric-screen-api-v1": ">=1.0.4",
+        "fabric-key-binding-api-v1": "*",
+        "fabric-lifecycle-events-v1": "*",
         "minecraft": "~${min_minecraft_version}",
-        "fabric-api": "*",
         "java": ">=17"
     },
     "recommends": {
