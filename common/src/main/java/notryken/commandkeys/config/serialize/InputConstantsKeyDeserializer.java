@@ -1,4 +1,4 @@
-package notryken.commandkeys.config.deserialize;
+package notryken.commandkeys.config.serialize;
 
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;

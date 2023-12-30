@@ -5,12 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import notryken.commandkeys.config.deserialize.InputConstantsKeyDeserializer;
-import notryken.commandkeys.config.deserialize.KeyMappingDeserializer;
+import notryken.commandkeys.config.serialize.GhettoAsciiWriter;
+import notryken.commandkeys.config.serialize.InputConstantsKeyDeserializer;
+import notryken.commandkeys.config.serialize.KeyMappingDeserializer;
 import notryken.commandkeys.config.legacy.LegacyConfig;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -85,6 +87,7 @@ public class Config {
         }
 
         config.purge();
+
         /*
         Required in case Minecraft instance is initialized before
         CommandKeys config.
@@ -115,7 +118,9 @@ public class Config {
             Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
 
             // Write the file to our temporary location
-            Files.writeString(tempPath, GSON.toJson(this));
+            FileWriter out = new FileWriter(tempPath.toFile());
+            GSON.toJson(this, new GhettoAsciiWriter(out));
+            out.close();
 
             // Atomically replace the old config file (if it exists) with the temporary file
             Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
