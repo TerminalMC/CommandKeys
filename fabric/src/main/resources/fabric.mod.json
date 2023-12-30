@@ -24,7 +24,7 @@
         "java": ">=17"
     },
     "recommends": {
-        "modmenu": "~${modmenu_version}"
+        "modmenu": "*"
     },
     "suggests": {},
     "conflicts": {},
