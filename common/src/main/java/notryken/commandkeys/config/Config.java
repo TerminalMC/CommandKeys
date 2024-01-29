@@ -19,6 +19,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
+/**
+ * CommandKeys configuration options class.
+ * <p>
+ * Includes derivative work of code used by
+ * <a href="https://github.com/CaffeineMC/sodium-fabric/">Sodium</a>
+ */
 public class Config {
     // Constants
     public static final String DEFAULT_FILE_NAME = "commandkeys_v1.json";
