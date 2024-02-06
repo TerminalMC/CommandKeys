@@ -5,10 +5,6 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
-//        maven {
-//            name = 'Quilt'
-//            url = 'https://maven.quiltmc.org/repository/release'
-//        }
         maven {
             name = 'Forge'
             url = 'https://maven.minecraftforge.net/'
@@ -32,6 +28,5 @@ plugins {
 rootProject.name = 'CommandKeys'
 include("common")
 include("fabric")
-//include("quilt")
 include("forge")
 //include("neoforge")

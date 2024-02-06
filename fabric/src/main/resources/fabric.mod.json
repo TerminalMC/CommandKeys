@@ -7,24 +7,24 @@
     "accessWidener": "${mod_id}.accesswidener",
     "entrypoints": {
         "main": [],
-        "client": ["notryken.commandkeys.CommandKeysFabric"],
+        "client": ["${mod_group}.${mod_id}.${mod_name}Fabric"],
         "server": [],
-        "modmenu": ["notryken.commandkeys.gui.screen.ModMenuIntegration"]
+        "modmenu": ["${mod_group}.${mod_id}.gui.screen.ModMenuIntegration"]
     },
     "mixins": [
         "${mod_id}.mixins.json",
         "${mod_id}.fabric.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.14",
+        "java": ">=${java_version}",
+        "minecraft": "~${min_minecraft_version}",
+        "fabricloader": "${fabric_loader_version_range}",
         "fabric-resource-loader-v0": "*",
         "fabric-key-binding-api-v1": "*",
-        "fabric-lifecycle-events-v1": "*",
-        "minecraft": "~${min_minecraft_version}",
-        "java": ">=17"
+        "fabric-lifecycle-events-v1": "*"
     },
     "recommends": {
-        "modmenu": "*"
+        "modmenu": ">=${modmenu_version}"
     },
     "suggests": {},
     "conflicts": {},
@@ -47,7 +47,7 @@
                 "Contact": "${contact_url}"
             }
         },
-        "commandkeys": {
+        "formatSpec": {
             "links": {
                 "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec"
             }

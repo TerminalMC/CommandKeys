@@ -9,15 +9,15 @@ issueTrackerURL="${issues_url}" #optional: none
   displayName="${mod_name}" #optional: modId
   description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
   logoFile="icon.png" #optional: none
-  features={ java_version="[17,)" }
+  features={ java_version="[${java_version},)" }
   credits="${mod_credits}" #optional: none
   authors="${mod_author}" #optional: none
   displayURL="${homepage_url}" #optional: none
 
 [[mixins]]
-  config="commandkeys.mixins.json"
+  config="${mod_id}.mixins.json"
 [[mixins]]
-  config="commandkeys.forge.mixins.json"
+  config="${mod_id}.forge.mixins.json"
 
 [[dependencies.${mod_id}]] #optional
   modId="forge"
@@ -29,7 +29,7 @@ issueTrackerURL="${issues_url}" #optional: none
 [[dependencies.${mod_id}]]
   modId="minecraft"
   mandatory=true
-  versionRange="${minecraft_version_range}"
+  versionRange="${minecraft_version_range_forge}"
   ordering="NONE" #optional: "NONE"
   side="BOTH" #optional: "BOTH"
 
