@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import notryken.commandkeys.config.serialize.GhettoAsciiWriter;
 import notryken.commandkeys.config.serialize.InputConstantsKeyDeserializer;
 import notryken.commandkeys.config.serialize.KeyMappingDeserializer;
-import notryken.commandkeys.config.legacy.LegacyConfig;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.FileReader;
@@ -27,25 +26,31 @@ import java.util.*;
  */
 public class Config {
     // Constants
-    public static final String DEFAULT_FILE_NAME = "commandkeys_v1.json";
-    public static final String LEGACY_FILE_NAME = "quickmessages.json";
+    public static final String DEFAULT_FILE_NAME = "commandkeys.json";
+    public static final String LEGACY_FILE_NAME = "commandkeys_v1.json";
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(InputConstants.Key.class, new InputConstantsKeyDeserializer())
             .registerTypeAdapter(KeyMapping.class, new KeyMappingDeserializer())
-            .setPrettyPrinting().create();
+            .setPrettyPrinting()
+            .create();
     private static final Gson LEGACY_GSON = new GsonBuilder()
-            .setPrettyPrinting().create();
+            .setPrettyPrinting()
+            .create();
 
-    // Not saved, not user-accessible
+
+    // Not saved, not modifiable by user
     private static Path configPath;
     public static boolean configChecked;
 
-    // Saved, user-accessible
+    // Saved, not modifiable by user
+    // 001 is initial version following switch from commandkeys_v1.json
+    private final String version = "001";
+
+    // Saved, modifiable by user
     public boolean showHudMessage;
     public boolean addToHistory;
     private final Map<Integer,String> codeMsgMapDual;
     private final Set<MsgKeyMapping> msgKeyListMono;
-
 
     public Config() {
         showHudMessage = true;
@@ -54,90 +59,8 @@ public class Config {
         msgKeyListMono = new LinkedHashSet<>();
     }
 
-    public Config(Map<Integer,String> codeMsgMapDual) {
-        showHudMessage = true;
-        addToHistory = true;
-        this.codeMsgMapDual = codeMsgMapDual;
-        msgKeyListMono = new LinkedHashSet<>();
-    }
 
-    // Config load and save
-
-    public static Config load() {
-        return load(DEFAULT_FILE_NAME, LEGACY_FILE_NAME);
-    }
-
-    public static Config load(String name, String backup) {
-        Path configDir = Path.of("config");
-        configPath = configDir.resolve(name);
-        Path backupPath = configDir.resolve(backup);
-        Config config;
-
-        if (Files.exists(configPath)) {
-            try (FileReader reader = new FileReader(configPath.toFile())) {
-                config = GSON.fromJson(reader, Config.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not parse config", e);
-            }
-        }
-        else if (Files.exists(backupPath)) {
-            try (FileReader reader = new FileReader(backupPath.toFile())) {
-                LegacyConfig legacyConfig = LEGACY_GSON.fromJson(reader, LegacyConfig.class);
-                config = new Config(legacyConfig.messageMap);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not parse config", e);
-            }
-        }
-        else {
-            config = new Config();
-        }
-
-        config.purge();
-
-        /*
-        Required in case Minecraft instance is initialized before
-        CommandKeys config.
-         */
-        try {
-            KeyMapping[] temp = Minecraft.getInstance().options.keyMappings;
-            config.checkDuplicatesMono();
-        }
-        catch (NullPointerException e) {
-            // Pass
-        }
-
-        config.writeChanges();
-        return config;
-    }
-
-    public void writeChanges() {
-        Path dir = configPath == null ? Path.of("config") : configPath.getParent();
-
-        try {
-            if (!Files.exists(dir)) {
-                Files.createDirectories(dir);
-            } else if (!Files.isDirectory(dir)) {
-                throw new IOException("Not a directory: " + dir);
-            }
-
-            // Use a temporary location next to the config's final destination
-            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
-
-            // Write the file to our temporary location
-            FileWriter out = new FileWriter(tempPath.toFile());
-            GSON.toJson(this, new GhettoAsciiWriter(out));
-            out.close();
-
-            // Atomically replace the old config file (if it exists) with the temporary file
-            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Couldn't update config file", e);
-        }
-
-    }
-
-    // Accessors
+    // Dual-key map
 
     public String getMsgDual(int code) {
         return codeMsgMapDual.get(code);
@@ -150,12 +73,6 @@ public class Config {
     public Iterator<String> getValIterDual() {
         return codeMsgMapDual.values().iterator();
     }
-
-    public List<MsgKeyMapping> getMsgKeyListMono() {
-        return msgKeyListMono.stream().toList();
-    }
-
-    // Dual-key map mutators
 
     /**
      * If there is an entry with specified keyCode, changes its keyCode to
@@ -213,7 +130,12 @@ public class Config {
         return codeMsgMapDual.remove(keyCode) != null;
     }
 
-    // Mono-key map mutators
+
+    // Mono-key map
+
+    public List<MsgKeyMapping> getMsgKeyListMono() {
+        return msgKeyListMono.stream().toList();
+    }
 
     public boolean addMsgKeyMono() {
         MsgKeyMapping msgKey = new MsgKeyMapping();
@@ -228,6 +150,9 @@ public class Config {
         return msgKeyListMono.remove(msgKey);
     }
 
+
+    // Cleanup and validation
+
     public void purge() {
         codeMsgMapDual.values().removeIf(String::isBlank);
         msgKeyListMono.removeIf((MsgKeyMapping) -> MsgKeyMapping.msg.isBlank());
@@ -238,5 +163,81 @@ public class Config {
             msgKey.checkDuplicated(msgKey.keyCode);
         }
         configChecked = true;
+    }
+
+
+    // Load and save
+
+    public static Config load() {
+        return load(DEFAULT_FILE_NAME, LEGACY_FILE_NAME);
+    }
+
+    public static Config load(String name, String backup) {
+        Path configDir = Path.of("config");
+        configPath = configDir.resolve(name);
+        Path backupPath = configDir.resolve(backup);
+        Config config;
+
+        if (Files.exists(configPath)) {
+            try (FileReader reader = new FileReader(configPath.toFile())) {
+                config = GSON.fromJson(reader, Config.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not parse config", e);
+            }
+        }
+        else if (Files.exists(backupPath)) {
+            try (FileReader reader = new FileReader(backupPath.toFile())) {
+                config = GSON.fromJson(reader, Config.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not parse config", e);
+            }
+        }
+        else {
+            config = new Config();
+        }
+
+        config.purge();
+
+        /*
+        Required in case Minecraft instance is initialized before
+        CommandKeys config.
+         */
+        try {
+            KeyMapping[] temp = Minecraft.getInstance().options.keyMappings;
+            config.checkDuplicatesMono();
+        }
+        catch (NullPointerException e) {
+            // Pass
+        }
+
+        config.writeChanges();
+        return config;
+    }
+
+    public void writeChanges() {
+        Path dir = configPath == null ? Path.of("config") : configPath.getParent();
+
+        try {
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir);
+            } else if (!Files.isDirectory(dir)) {
+                throw new IOException("Not a directory: " + dir);
+            }
+
+            // Use a temporary location next to the config's final destination
+            Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
+
+            // Write the file to our temporary location
+            FileWriter out = new FileWriter(tempPath.toFile());
+            GSON.toJson(this, new GhettoAsciiWriter(out));
+            out.close();
+
+            // Atomically replace the old config file (if it exists) with the temporary file
+            Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Couldn't update config file", e);
+        }
+
     }
 }
