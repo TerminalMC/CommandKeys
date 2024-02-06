@@ -33,10 +33,6 @@ public class Config {
             .registerTypeAdapter(KeyMapping.class, new KeyMappingDeserializer())
             .setPrettyPrinting()
             .create();
-    private static final Gson LEGACY_GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
-
 
     // Not saved, not modifiable by user
     private static Path configPath;
