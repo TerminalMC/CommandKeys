@@ -13,7 +13,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import notryken.commandkeys.gui.screen.ConfigScreenMono;
 
-@Mod(Constants.MOD_ID)
+@Mod(CommandKeys.MOD_ID)
 public class CommandKeysNeoForge {
     public CommandKeysNeoForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,

@@ -44,15 +44,24 @@ public class ConfigListWidgetDual extends ConfigListWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode) {
-        return selectedKeyCode == null;
+    public boolean keyPressed(InputConstants.Key key) {
+        return selectedKeyCode != null;
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode) {
-        if (!CommandKeys.CONFIG_KEY.matches(keyCode, scanCode)) {
+    public boolean handleKey(InputConstants.Key key) {
+        if (key.getValue() == InputConstants.KEY_ESCAPE || key.equals(InputConstants.UNKNOWN)) {
+            reloadScreen();
+            return false;
+        }
+        else if (key.equals(CommandKeys.CONFIG_KEY.key) ||
+                key.getType().equals(InputConstants.Type.MOUSE)) {
+            return false;
+        }
+        else {
+            int keyCode = key.getValue();
             if (selectedKeyCode == null) {
-                if (this.getSelected() == null) {
+                if (getSelected() == null) {
                     String messages = CommandKeys.config().getMsgDual(keyCode);
                     if (messages != null && client.getConnection() != null &&
                             client.getConnection().isAcceptingMessages()) {
@@ -70,12 +79,14 @@ public class ConfigListWidgetDual extends ConfigListWidget {
                         client.setScreen(null);
                     }
                 }
-            } else {
+            }
+            else {
                 CommandKeys.config().setKeyDual(selectedKeyCode, keyCode);
                 reloadScreen();
+
             }
+            return true;
         }
-        return true; // ?
     }
 
     protected void addMessage() {

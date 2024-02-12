@@ -86,7 +86,7 @@ public class MsgKeyMapping {
                 this.tooltip = null;
                 KeyMapping.ALL.remove(keyMapping.getName());
                 KeyMapping.resetMapping();
-                this.keyMapping = new KeyMapping("CK" + keyCode.getValue(),
+                this.keyMapping = new KeyMapping("CK" + keyCode.getValue(), keyCode.getType(),
                         keyCode.getValue(), "keygroup.commandkeys.mono");
             }
         }

@@ -14,7 +14,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import notryken.commandkeys.gui.screen.ConfigScreenMono;
 
-@Mod(Constants.MOD_ID)
+@Mod(CommandKeys.MOD_ID)
 public class CommandKeysForge {
     public CommandKeysForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,

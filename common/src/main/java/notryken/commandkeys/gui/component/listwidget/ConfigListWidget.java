@@ -1,5 +1,6 @@
 package notryken.commandkeys.gui.component.listwidget;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
@@ -59,8 +60,8 @@ public abstract class ConfigListWidget
     // Abstract methods
 
     protected abstract void reloadScreen();
-    public abstract boolean keyPressed(int keyCode, int scanCode);
-    public abstract boolean keyReleased(int keyCode, int scanCode);
+    public abstract boolean keyPressed(InputConstants.Key key);
+    public abstract boolean handleKey(InputConstants.Key key);
     public abstract ConfigListWidget resize(int width, int height, int top, int bottom);
 
     /**

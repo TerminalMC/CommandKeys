@@ -56,8 +56,9 @@ subprojects {
 
     processResources {
         def expandProps = [
+                "project_group": project.group,
                 "version": version,
-                "mod_group": project.group, // Else we target the task's group.
+                "mod_group": mod_group,
                 "mod_id": mod_id,
                 "mod_environment": mod_environment,
                 "mod_name": mod_name,

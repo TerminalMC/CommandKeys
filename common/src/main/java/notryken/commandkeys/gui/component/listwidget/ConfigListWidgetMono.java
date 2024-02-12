@@ -39,30 +39,32 @@ public class ConfigListWidgetMono extends ConfigListWidget {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode) {
-        return selectedMsgKey == null;
+    public boolean keyPressed(InputConstants.Key key) {
+        return selectedMsgKey != null;
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode) {
+    public boolean handleKey(InputConstants.Key key) {
         if (selectedMsgKey != null) {
-            if (keyCode == InputConstants.KEY_ESCAPE) {
+            if (key.getValue() == InputConstants.KEY_ESCAPE) {
                 selectedMsgKey.setKeyCode(InputConstants.UNKNOWN);
-            } else {
-                boolean alreadyBound = false;
+            }
+            else {
+                boolean keyBound = false;
                 for (MsgKeyMapping msgKey : CommandKeys.config().getMsgKeyListMono()) {
-                    if (msgKey.keyCode.getValue() == keyCode) {
-                        alreadyBound = true;
+                    if (msgKey.keyCode.equals(key)) {
+                        keyBound = true;
                         break;
                     }
                 }
-                if (!alreadyBound) {
-                    selectedMsgKey.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                if (key.equals(InputConstants.UNKNOWN) || !keyBound) {
+                    selectedMsgKey.setKeyCode(key);
                 }
             }
             reloadScreen();
+            return true;
         }
-        return true; // ?
+        return false;
     }
 
     protected void addMessage() {
