@@ -7,8 +7,8 @@
     "mixins": [
     ],
     "client": [
-        "MixinKeyBindsList",
-        "MixinMinecraft"
+        "MixinKeyboardHandler",
+        "MixinMouseHandler"
     ],
     "server": [
     ],

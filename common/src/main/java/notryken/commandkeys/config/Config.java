@@ -1,18 +1,15 @@
 package notryken.commandkeys.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import notryken.commandkeys.config.serialize.GhettoAsciiWriter;
-import notryken.commandkeys.config.serialize.InputConstantsKeyDeserializer;
-import notryken.commandkeys.config.serialize.KeyMappingDeserializer;
-import org.lwjgl.glfw.GLFW;
+import notryken.commandkeys.CommandKeys;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -20,18 +17,25 @@ import java.util.*;
 
 /**
  * CommandKeys configuration options class.
- * <p>
- * Includes derivative work of code used by
- * <a href="https://github.com/CaffeineMC/sodium-fabric/">Sodium</a>
+ *
+ * <p>Includes derivative work of code used by
+ * <a href="https://github.com/CaffeineMC/sodium-fabric/">Sodium</a></p>
  */
 public class Config {
     // Constants
     public static final String DEFAULT_FILE_NAME = "commandkeys.json";
     public static final String LEGACY_FILE_NAME = "commandkeys_v1.json";
-    private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(InputConstants.Key.class, new InputConstantsKeyDeserializer())
-            .registerTypeAdapter(KeyMapping.class, new KeyMappingDeserializer())
+    private static final Gson CONFIG_GSON = new GsonBuilder()
+            .registerTypeAdapter(Config.class, new Config.Serializer())
+            .registerTypeAdapter(Config.class, new Config.Deserializer())
+            .registerTypeAdapter(CommandMonoKey.class, new CommandMonoKey.Serializer())
+            .registerTypeAdapter(CommandMonoKey.class, new CommandMonoKey.Deserializer())
+            .registerTypeAdapter(CommandDualKey.class, new CommandDualKey.Serializer())
+            .registerTypeAdapter(CommandDualKey.class, new CommandDualKey.Deserializer())
             .setPrettyPrinting()
+            .create();
+    private static final Gson LEGACY_CONFIG_GSON = new GsonBuilder()
+            .registerTypeAdapter(Config.class, new Config.LegacyDeserializer())
             .create();
 
     // Not saved, not modifiable by user
@@ -39,201 +43,266 @@ public class Config {
     public static boolean configChecked;
 
     // Saved, not modifiable by user
-    // 001 is initial version following switch from commandkeys_v1.json
-    private final String version = "001";
+    // 1 is initial version following switch from commandkeys_v1.json
+    private final int version = 1;
 
     // Saved, modifiable by user
-    public boolean showHudMessage;
-    public boolean addToHistory;
-    private final Map<Integer,String> codeMsgMapDual;
-    private final Set<MsgKeyMapping> msgKeyListMono;
+    public boolean monoAddToHistory;
+    public boolean monoShowHudMessage;
+    private final Set<CommandMonoKey> monoKeySet;
+    public boolean dualAddToHistory;
+    public boolean dualShowHudMessage;
+    private final Set<CommandDualKey> dualKeySet;
 
     public Config() {
-        showHudMessage = true;
-        addToHistory = true;
-        codeMsgMapDual = new LinkedHashMap<>();
-        msgKeyListMono = new LinkedHashSet<>();
+        monoAddToHistory = false;
+        monoShowHudMessage = false;
+        monoKeySet = new LinkedHashSet<>();
+        dualAddToHistory = false;
+        dualShowHudMessage = false;
+        dualKeySet = new LinkedHashSet<>();
     }
 
-
-    // Dual-key map
-
-    public String getMsgDual(int code) {
-        return codeMsgMapDual.get(code);
+    public Config(boolean monoAddToHistory, boolean monoShowHudMessage, Set<CommandMonoKey> monoKeySet,
+                  boolean dualAddToHistory, boolean dualShowHudMessage, Set<CommandDualKey> dualKeySet) {
+        this.monoAddToHistory = monoAddToHistory;
+        this.monoShowHudMessage = monoShowHudMessage;
+        this.monoKeySet = monoKeySet;
+        this.dualAddToHistory = dualAddToHistory;
+        this.dualShowHudMessage = dualShowHudMessage;
+        this.dualKeySet = dualKeySet;
     }
 
-    public Iterator<Integer> getKeyIterDual() {
-        return codeMsgMapDual.keySet().iterator();
+    public Set<CommandMonoKey> getMonoKeySet() {
+        return Collections.unmodifiableSet(monoKeySet);
     }
 
-    public Iterator<String> getValIterDual() {
-        return codeMsgMapDual.values().iterator();
+    public void addMonoKey(CommandMonoKey monoKey) {
+        monoKeySet.add(monoKey);
     }
 
-    /**
-     * If there is an entry with specified keyCode, changes its keyCode to
-     * specified newKeyCode.
-     * @param keyCode the original keycode.
-     * @param newKeyCode the new keycode.
-     */
-    public void setKeyDual(int keyCode, int newKeyCode) {
-        // Inefficient workaround to maintain order
-        if (codeMsgMapDual.get(keyCode) != null && !codeMsgMapDual.containsKey(newKeyCode)) {
-            Map<Integer,String> newMap = new LinkedHashMap<>();
-            Iterator<Integer> keyIter = getKeyIterDual();
-            Iterator<String> valIter = getValIterDual();
-            while (keyIter.hasNext()) {
-                int key = keyIter.next();
-                if (key == keyCode) {
-                    newMap.put(newKeyCode, valIter.next());
-                }
-                else {
-                    newMap.put(key, valIter.next());
-                }
-            }
-            codeMsgMapDual.clear();
-            codeMsgMapDual.putAll(newMap);
-        }
+    public void removeMonoKey(CommandMonoKey monoKey) {
+        monoKeySet.remove(monoKey);
+        CommandMonoKey.MAP.remove(monoKey.getKey());
     }
 
-    /**
-     * If there is an entry with specified keyCode, changes its message to
-     * specified newMessage.
-     * @param keyCode the message keyCode.
-     * @param newMessage the new content.
-     */
-    public void setMsgDual(int keyCode, String newMessage) {
-        codeMsgMapDual.replace(keyCode, newMessage);
+    public Set<CommandDualKey> getDualKeySet() {
+        return Collections.unmodifiableSet(dualKeySet);
     }
 
-    /**
-     * Adds a new entry with keyCode GLFW.GLFW_KEY_UNKNOWN and message "", if
-     * one does not already exist.
-     */
-    public boolean addMsgDual() {
-        if (!codeMsgMapDual.containsKey(GLFW.GLFW_KEY_UNKNOWN)) {
-            codeMsgMapDual.put(GLFW.GLFW_KEY_UNKNOWN, "");
-            return true;
-        }
-        return false;
+    public void addDualKey(CommandDualKey dualKey) {
+        dualKeySet.add(dualKey);
     }
 
-    /**
-     * Removes the entry with specified keyCode, if it exists.
-     * @param keyCode the input keycode of the entry.
-     */
-    public boolean removeMsgDual(int keyCode) {
-        return codeMsgMapDual.remove(keyCode) != null;
+    public void removeDualKey(CommandDualKey dualKey) {
+        dualKeySet.remove(dualKey);
+        CommandDualKey.MAP.remove(dualKey.getKey());
     }
-
-
-    // Mono-key map
-
-    public List<MsgKeyMapping> getMsgKeyListMono() {
-        return msgKeyListMono.stream().toList();
-    }
-
-    public boolean addMsgKeyMono() {
-        MsgKeyMapping msgKey = new MsgKeyMapping();
-        if (!msgKeyListMono.contains(msgKey)) {
-            msgKeyListMono.add(msgKey);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeMsgKeyMono(MsgKeyMapping msgKey) {
-        return msgKeyListMono.remove(msgKey);
-    }
-
 
     // Cleanup and validation
 
-    public void purge() {
-        codeMsgMapDual.values().removeIf(String::isBlank);
-        msgKeyListMono.removeIf((MsgKeyMapping) -> MsgKeyMapping.msg.isBlank());
-    }
-
-    public void checkDuplicatesMono() {
-        for (MsgKeyMapping msgKey : msgKeyListMono) {
-            msgKey.checkDuplicated(msgKey.keyCode);
+    public void cleanup() {
+        Iterator<CommandMonoKey> monoKeyIter = monoKeySet.iterator();
+        while (monoKeyIter.hasNext()) {
+            CommandMonoKey cmk = monoKeyIter.next();
+            // Allow blank messages for cycling command keys as spacers
+            if (!cmk.cycle) cmk.messages.removeIf(String::isBlank);
+            if (cmk.fullSend) cmk.messages.replaceAll(String::stripTrailing);
+            if (cmk.messages.isEmpty()) monoKeyIter.remove();
         }
-        configChecked = true;
-    }
 
+        Iterator<CommandDualKey> dualKeyIter = dualKeySet.iterator();
+        while (dualKeyIter.hasNext()) {
+            CommandDualKey cdk = dualKeyIter.next();
+            cdk.messages.removeIf(String::isBlank);
+            if (cdk.messages.isEmpty()) dualKeyIter.remove();
+        }
+    }
 
     // Load and save
 
-    public static Config load() {
-        return load(DEFAULT_FILE_NAME, LEGACY_FILE_NAME);
-    }
+    public static @NotNull Config load() {
+        long time = System.currentTimeMillis();
+        CommandKeys.LOG.info("CommandKeys: Loading config from file...");
 
-    public static Config load(String name, String backup) {
-        Path configDir = Path.of("config");
-        configPath = configDir.resolve(name);
-        Path backupPath = configDir.resolve(backup);
-        Config config;
+        Config config = load(DEFAULT_FILE_NAME, CONFIG_GSON);
 
-        if (Files.exists(configPath)) {
-            try (FileReader reader = new FileReader(configPath.toFile())) {
-                config = GSON.fromJson(reader, Config.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not parse config", e);
-            }
+        if (config == null) {
+            CommandKeys.LOG.info("CommandKeys: Loading legacy config from file...");
+            config = load(LEGACY_FILE_NAME, LEGACY_CONFIG_GSON);
         }
-        else if (Files.exists(backupPath)) {
-            try (FileReader reader = new FileReader(backupPath.toFile())) {
-                config = GSON.fromJson(reader, Config.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not parse config", e);
-            }
-        }
-        else {
+
+        if (config == null) {
+            CommandKeys.LOG.info("CommandKeys: Using default configuration");
             config = new Config();
         }
 
-        config.purge();
-
-        /*
-        Required in case Minecraft instance is initialized before
-        CommandKeys config.
-         */
-        try {
-            KeyMapping[] temp = Minecraft.getInstance().options.keyMappings;
-            config.checkDuplicatesMono();
-        }
-        catch (NullPointerException e) {
-            // Pass
-        }
-
-        config.writeChanges();
+        configPath = Path.of("config").resolve(DEFAULT_FILE_NAME);
+        config.writeToFile();
+        CommandKeys.LOG.info("CommandKeys: Configuration loaded in {} ms",
+                System.currentTimeMillis() - time);
         return config;
     }
 
-    public void writeChanges() {
-        Path dir = configPath == null ? Path.of("config") : configPath.getParent();
+    public static @Nullable Config load(String name, Gson gson) {
+        configPath = Path.of("config").resolve(name);
+        Config config = null;
+
+        if (Files.exists(configPath)) {
+            try (FileReader reader = new FileReader(configPath.toFile())) {
+                config = gson.fromJson(reader, Config.class);
+            } catch (Exception e) {
+                CommandKeys.LOG.warn("CommandKeys: Unable to load config from file '{}'. Reason:", name, e);
+            }
+        }
+        else {
+            CommandKeys.LOG.warn("CommandKeys: Unable to locate config file '{}'", name);
+        }
+        return config;
+    }
+
+    /**
+     * Writes the config to the global configPath.
+     */
+    public void writeToFile() {
+        long time = System.currentTimeMillis();
+        CommandKeys.LOG.info("CommandKeys: Saving config to file...");
+
+        cleanup();
+
+        Path dir = configPath.getParent();
 
         try {
             if (!Files.exists(dir)) {
                 Files.createDirectories(dir);
-            } else if (!Files.isDirectory(dir)) {
+            }
+            else if (!Files.isDirectory(dir)) {
                 throw new IOException("Not a directory: " + dir);
             }
 
             // Use a temporary location next to the config's final destination
             Path tempPath = configPath.resolveSibling(configPath.getFileName() + ".tmp");
 
-            // Write the file to our temporary location
+            // Write the file to the temporary location
             FileWriter out = new FileWriter(tempPath.toFile());
-            GSON.toJson(this, new GhettoAsciiWriter(out));
+            CONFIG_GSON.toJson(this, new GhettoAsciiWriter(out));
             out.close();
 
             // Atomically replace the old config file (if it exists) with the temporary file
             Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+
+            CommandKeys.LOG.info("CommandKeys: Configuration saved in {} ms",
+                    System.currentTimeMillis() - time);
         }
         catch (IOException e) {
-            throw new RuntimeException("Couldn't update config file", e);
+            throw new RuntimeException("CommandKeys: Unable to update config file. Reason:", e);
         }
+    }
 
+    // Serialization / Deserialization
+
+    public static class Serializer implements JsonSerializer<Config> {
+        @Override
+        public JsonElement serialize(Config src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject configObj = new JsonObject();
+
+            configObj.addProperty("version", src.version);
+            
+            configObj.addProperty("monoAddToHistory", src.monoAddToHistory);
+            configObj.addProperty("monoShowHudMessage", src.monoShowHudMessage);
+            JsonElement monoKeySetElement = context.serialize(src.monoKeySet);
+            configObj.add("monoKeySet", monoKeySetElement);
+
+            configObj.addProperty("dualAddToHistory", src.dualAddToHistory);
+            configObj.addProperty("dualShowHudMessage", src.dualShowHudMessage);
+            JsonElement dualKeySetElement = context.serialize(src.dualKeySet);
+            configObj.add("dualKeySet", dualKeySetElement);
+
+            return configObj;
+        }
+    }
+
+    public static class Deserializer implements JsonDeserializer<Config> {
+        @Override
+        public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject configObj = json.getAsJsonObject();
+
+            boolean monoAddToHistory;
+            boolean monoShowHudMessage;
+            Set<CommandMonoKey> monoKeySet = new LinkedHashSet<>();
+            boolean dualAddToHistory;
+            boolean dualShowHudMessage;
+            Set<CommandDualKey> dualKeySet = new LinkedHashSet<>();
+
+            monoAddToHistory = configObj.get("monoAddToHistory").getAsBoolean();
+            monoShowHudMessage = configObj.get("monoShowHudMessage").getAsBoolean();
+            JsonArray monoKeySetArr = configObj.getAsJsonArray("monoKeySet");
+            for (JsonElement element : monoKeySetArr) {
+                monoKeySet.add(context.deserialize(element, CommandMonoKey.class));
+            }
+
+            dualAddToHistory = configObj.get("dualAddToHistory").getAsBoolean();
+            dualShowHudMessage = configObj.get("dualShowHudMessage").getAsBoolean();
+            JsonArray dualKeySetArr = configObj.getAsJsonArray("dualKeySet");
+            for (JsonElement element : dualKeySetArr) {
+                dualKeySet.add(context.deserialize(element, CommandDualKey.class));
+            }
+
+            return new Config(monoAddToHistory, monoShowHudMessage, monoKeySet, 
+                    dualAddToHistory, dualShowHudMessage, dualKeySet);
+        }
+    }
+
+    public static class LegacyDeserializer implements JsonDeserializer<Config> {
+        @Override
+        public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject configObj = json.getAsJsonObject();
+
+            boolean addToHistory;
+            boolean showHudMessage;
+            Set<CommandMonoKey> monoKeySet = new LinkedHashSet<>();
+            Set<CommandDualKey> dualKeySet = new LinkedHashSet<>();
+
+            addToHistory = configObj.get("addToHistory").getAsBoolean();
+            showHudMessage = configObj.get("showHudMessage").getAsBoolean();
+
+            JsonArray monoKeySetArr = configObj.getAsJsonArray("msgKeyListMono");
+            for (JsonElement element : monoKeySetArr) {
+                JsonObject monoKeyObj = element.getAsJsonObject();
+
+                // MonoKey key
+                JsonObject monoKeyKeyObj = monoKeyObj.getAsJsonObject("keyCode");
+
+                // MonoKey key name
+                String monoKeyKeyName;
+                if (monoKeyKeyObj.has("field_1663")) monoKeyKeyName = monoKeyKeyObj.get("field_1663").getAsString();
+                else if (monoKeyKeyObj.has("f_84853_")) monoKeyKeyName = monoKeyKeyObj.get("f_84853_").getAsString();
+                else monoKeyKeyName = monoKeyKeyObj.get("name").getAsString();
+
+                // MonoKey messages
+                ArrayList<String> mkoMessages = new ArrayList<>(List.of(
+                        monoKeyObj.get("msg").getAsString().split(",,")));
+
+                monoKeySet.add(new CommandMonoKey(new TriState(), new QuadState(), true,
+                        false, 0, InputConstants.getKey(monoKeyKeyName), mkoMessages));
+
+            }
+
+
+            LegacyCodeMsgMap legacyCodeMsgMap = new GsonBuilder().create().fromJson(json,
+                    LegacyCodeMsgMap.class);
+            for (int keyCode : legacyCodeMsgMap.codeMsgMapDual.keySet()) {
+                ArrayList<String> messages = new ArrayList<>(List.of(
+                        legacyCodeMsgMap.codeMsgMapDual.get(keyCode).split(",,")));
+                dualKeySet.add(new CommandDualKey(InputConstants.getKey(keyCode, keyCode), messages));
+            }
+
+            return new Config(addToHistory, showHudMessage, monoKeySet,
+                    addToHistory, showHudMessage, dualKeySet);
+        }
+    }
+
+    public class LegacyCodeMsgMap {
+        Map<Integer,String> codeMsgMapDual;
     }
 }

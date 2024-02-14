@@ -1,6 +1,5 @@
 package notryken.commandkeys;
 
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -12,16 +11,15 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import notryken.commandkeys.gui.screen.ConfigScreenMono;
+import notryken.commandkeys.gui.screen.ConfigScreen;
 
 @Mod(CommandKeys.MOD_ID)
 public class CommandKeysForge {
     public CommandKeysForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (client, parent) -> new ConfigScreenMono(parent, client.options,
-                                Component.translatable("screen.commandkeys.title"), null))
-                );
+                        (client, parent) -> new ConfigScreen(parent)
+                ));
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::clientSetup);
