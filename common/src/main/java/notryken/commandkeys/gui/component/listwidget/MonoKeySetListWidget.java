@@ -141,7 +141,14 @@ public class MonoKeySetListWidget extends ConfigListWidget {
                 movingX += smallButtonWidth + spacing;
 
                 // Make the key button's label and tooltip
-                MutableComponent keyName = commandKey.getKey().getDisplayName().copy();
+                Component displayName = commandKey.getKey().getDisplayName();
+                MutableComponent keyName;
+                switch(commandKey.onlyIfKey.state) {
+                    case ONE -> keyName = Component.literal("Control + ").append(displayName);
+                    case TWO -> keyName = Component.literal("Alt + ").append(displayName);
+                    case THREE -> keyName = Component.literal("Shift + ").append(displayName);
+                    default -> keyName = displayName.copy();
+                }
                 MutableComponent label = keyName;
                 Tooltip tooltip = null;
                 if (!commandKey.getKey().equals(InputConstants.UNKNOWN)) {
