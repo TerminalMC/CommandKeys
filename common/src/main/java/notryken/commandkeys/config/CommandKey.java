@@ -1,12 +1,11 @@
 package notryken.commandkeys.config;
 
+import com.google.common.collect.HashMultimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
 Vanilla Minecraft keybind handling works roughly like this:
@@ -59,43 +58,43 @@ KeyMapping::click call of KeyboardHandler::keyPress
  */
 
 
-public class CommandMonoKey {
+public class CommandKey {
     // TODO check access for all fields
 
-    public static final Map<InputConstants.Key, CommandMonoKey> MAP = new HashMap<>();
+    public static final HashMultimap<InputConstants.Key, CommandKey> MAP = HashMultimap.create();
 
     // Key conflict handling
     public TriState conflictStrategy; // Submissive, Assertive or Aggressive
 
     // Send behaviour
-    public QuadState onlyIfKey; // NONE, CTRL, ALT, or SHIFT
     public boolean fullSend; // Send the message (rather than just typing it)
     public boolean cycle; // Whether to cycle through messages
     public int nextIndex; // Next message is messages.get(index)
 
     private InputConstants.Key key;
+    private InputConstants.Key limitKey;
 
     public ArrayList<String> messages;
 
-    public CommandMonoKey() {
+    public CommandKey() {
         this.conflictStrategy = new TriState();
-        this.onlyIfKey = new QuadState();
         this.fullSend = true;
         this.cycle = false;
         this.nextIndex = 0;
         this.key = InputConstants.UNKNOWN;
+        this.limitKey = InputConstants.UNKNOWN;
         this.messages = new ArrayList<>();
     }
 
-    public CommandMonoKey(TriState conflictStrategy, QuadState onlyIfKey,
-                          boolean fullSend, boolean cycle, int nextIndex,
-                          InputConstants.Key key, ArrayList<String> messages) {
+    public CommandKey(TriState conflictStrategy, boolean fullSend, boolean cycle,
+                      int nextIndex, InputConstants.Key key, InputConstants.Key limitKey,
+                      ArrayList<String> messages) {
         this.conflictStrategy = conflictStrategy;
-        this.onlyIfKey = onlyIfKey;
         this.fullSend = fullSend;
         this.cycle = cycle;
         this.nextIndex = nextIndex;
         this.key = key;
+        this.limitKey = limitKey;
         this.messages = messages;
         MAP.put(key, this);
     }
@@ -105,64 +104,77 @@ public class CommandMonoKey {
     }
 
     public void setKey(InputConstants.Key key) {
-        MAP.remove(this.key);
-        MAP.put(key, this);
+        MAP.remove(this.key, this);
         this.key = key;
+        MAP.put(this.key, this);
     }
 
+    public InputConstants.Key getLimitKey() {
+        return limitKey;
+    }
 
-    public static class Serializer implements JsonSerializer<CommandMonoKey> {
+    public void setLimitKey(InputConstants.Key limitKey) {
+        this.limitKey = limitKey;
+    }
+
+    public static class Serializer implements JsonSerializer<CommandKey> {
         @Override
-        public JsonElement serialize(CommandMonoKey src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject cmkObj = new JsonObject();
+        public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject cmdKeyObj = new JsonObject();
 
-            cmkObj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
-            cmkObj.addProperty("onlyIfKey", src.onlyIfKey.state.toString());
-            cmkObj.addProperty("fullSend", src.fullSend);
-            cmkObj.addProperty("cycle", src.cycle);
-            cmkObj.addProperty("nextIndex", src.nextIndex);
+            cmdKeyObj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
+            cmdKeyObj.addProperty("fullSend", src.fullSend);
+            cmdKeyObj.addProperty("cycle", src.cycle);
+            cmdKeyObj.addProperty("nextIndex", src.nextIndex);
 
             JsonObject keyObj = new JsonObject();
             keyObj.addProperty("name", src.key.getName());
             keyObj.addProperty("type", src.key.getType().toString());
             keyObj.addProperty("value", src.key.getValue());
-            cmkObj.add("key", keyObj);
+            cmdKeyObj.add("key", keyObj);
+
+            JsonObject limitKeyObj = new JsonObject();
+            limitKeyObj.addProperty("name", src.limitKey.getName());
+            limitKeyObj.addProperty("type", src.limitKey.getType().toString());
+            limitKeyObj.addProperty("value", src.limitKey.getValue());
+            cmdKeyObj.add("limitKey", limitKeyObj);
 
             JsonArray messagesObj = new JsonArray();
             for (String message : src.messages) messagesObj.add(message);
-            cmkObj.add("messages", messagesObj);
+            cmdKeyObj.add("messages", messagesObj);
 
-            return cmkObj;
+            return cmdKeyObj;
         }
     }
 
-    public static class Deserializer implements JsonDeserializer<CommandMonoKey> {
+    public static class Deserializer implements JsonDeserializer<CommandKey> {
         @Override
-        public CommandMonoKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject cmkObj = json.getAsJsonObject();
+        public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject cmdKeyObj = json.getAsJsonObject();
 
             TriState conflictStrategy;
-            QuadState onlyIfKey;
             boolean fullSend;
             boolean cycle;
             int nextIndex;
             InputConstants.Key key;
+            InputConstants.Key limitKey;
             ArrayList<String> messages = new ArrayList<>();
 
-            conflictStrategy = new TriState(TriState.State.valueOf(cmkObj.get("conflictStrategy").getAsString()));
-            onlyIfKey = new QuadState(QuadState.State.valueOf(cmkObj.get("onlyIfKey").getAsString()));
-            fullSend = cmkObj.get("fullSend").getAsBoolean();
-            cycle = cmkObj.get("cycle").getAsBoolean();
-            nextIndex = cmkObj.get("nextIndex").getAsInt();
+            conflictStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("conflictStrategy").getAsString()));
+            fullSend = cmdKeyObj.get("fullSend").getAsBoolean();
+            cycle = cmdKeyObj.get("cycle").getAsBoolean();
+            nextIndex = cmdKeyObj.get("nextIndex").getAsInt();
 
-            JsonObject keyObj = cmkObj.getAsJsonObject("key");
+            JsonObject keyObj = cmdKeyObj.getAsJsonObject("key");
             key = InputConstants.getKey(keyObj.get("name").getAsString());
 
-            JsonArray messagesObj = cmkObj.getAsJsonArray("messages");
+            JsonObject limitKeyObj = cmdKeyObj.getAsJsonObject("limitKey");
+            limitKey = InputConstants.getKey(limitKeyObj.get("name").getAsString());
+
+            JsonArray messagesObj = cmdKeyObj.getAsJsonArray("messages");
             for (JsonElement element : messagesObj) messages.add(element.getAsString());
 
-            return new CommandMonoKey(conflictStrategy, onlyIfKey, fullSend,
-                    cycle, nextIndex, key, messages);
+            return new CommandKey(conflictStrategy, fullSend, cycle, nextIndex, key, limitKey, messages);
         }
     }
 }

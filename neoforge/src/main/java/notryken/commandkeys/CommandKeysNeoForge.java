@@ -18,9 +18,8 @@ public class CommandKeysNeoForge {
     public CommandKeysNeoForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (client, parent) -> new ConfigScreenMono(parent, client.options,
-                                Component.translatable("screen.commandkeys.title"), null))
-        );
+                        (client, parent) -> CommandKeys.getConfigScreen(parent)
+                ));
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::clientSetup);

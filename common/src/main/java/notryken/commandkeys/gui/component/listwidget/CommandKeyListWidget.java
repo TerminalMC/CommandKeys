@@ -6,18 +6,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
-import notryken.commandkeys.config.CommandMonoKey;
-import notryken.commandkeys.config.QuadState;
+import notryken.commandkeys.config.CommandKey;
 import notryken.commandkeys.config.TriState;
 
 import java.util.ArrayList;
 
-public class MonoKeyListWidget extends ConfigListWidget {
-    private final CommandMonoKey commandKey;
+public class CommandKeyListWidget extends ConfigListWidget {
+    private final CommandKey commandKey;
 
-    public MonoKeyListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                             int scrollWidth, CommandMonoKey commandKey) {
+    public CommandKeyListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
+                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                                int scrollWidth, CommandKey commandKey) {
         super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.commandKey = commandKey;
@@ -28,7 +27,6 @@ public class MonoKeyListWidget extends ConfigListWidget {
                         "selected command key.")), 500));
 
         addEntry(new Entry.ConflictStrategyEntry(entryX, entryWidth, entryHeight, this, commandKey));
-        addEntry(new Entry.RestrictionKeyEntry(entryX, entryWidth, entryHeight, commandKey));
         addEntry(new Entry.SendTypeEntry(entryX, entryWidth, entryHeight, commandKey));
         addEntry(new Entry.CycleToggleEntry(entryX, entryWidth, entryHeight, this, commandKey));
         if (commandKey.cycle) addEntry(new Entry.CycleIndexEntry(entryX, entryWidth, entryHeight, commandKey));
@@ -37,7 +35,7 @@ public class MonoKeyListWidget extends ConfigListWidget {
     @Override
     public ConfigListWidget resize(int width, int height, int top, int bottom,
                                    int itemHeight, double scrollAmount) {
-        MonoKeyListWidget newListWidget = new MonoKeyListWidget(
+        CommandKeyListWidget newListWidget = new CommandKeyListWidget(
                 minecraft, width, height, top, bottom, itemHeight,
                 entryRelX, entryWidth, entryHeight, scrollWidth, commandKey);
         newListWidget.setScrollAmount(scrollAmount);
@@ -45,20 +43,30 @@ public class MonoKeyListWidget extends ConfigListWidget {
     }
 
     @Override
-    public boolean willHandleKey(InputConstants.Key key) {
+    public boolean keyPressed(InputConstants.Key key) {
         return false;
     }
 
     @Override
-    public boolean handleKey(InputConstants.Key key) {
+    public boolean keyReleased(InputConstants.Key key) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(InputConstants.Key key) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(InputConstants.Key key) {
         return false;
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
         private static class ConflictStrategyEntry extends Entry {
-            ConflictStrategyEntry(int x, int width, int height, MonoKeyListWidget listWidget,
-                                  CommandMonoKey commandKey) {
+            ConflictStrategyEntry(int x, int width, int height, CommandKeyListWidget listWidget,
+                                  CommandKey commandKey) {
                 super();
                 CycleButton<TriState.State> cycleButton = CycleButton.<TriState.State>builder(
                         (status) -> switch(status) {
@@ -69,9 +77,11 @@ public class MonoKeyListWidget extends ConfigListWidget {
                         .withValues(TriState.State.values())
                         .withInitialValue(commandKey.conflictStrategy.state)
                         .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
-                            case ZERO -> "If the key is already used by Minecraft, this keybind will be ignored.";
-                            case ONE -> "If the key is already used by Minecraft, this keybind will be activated first, then the other keybind.";
-                            case TWO -> "If the key is already used by Minecraft, the other keybind will be ignored.";
+                            case ZERO -> "If the key is already used by Minecraft, this keybind will be cancelled.";
+                            case ONE -> "If the key is already used by Minecraft, this keybind will be activated " +
+                                    "first, then the other keybind.";
+                            case TWO -> "If the key is already used by Minecraft, the other keybind will be " +
+                                    "cancelled.\nNote: Some keys (including movement and sneak) cannot be cancelled.";
                         })))
                         .create(x, 0, width, height, Component.literal("Conflict Strategy"),
                                 (button, status) -> {
@@ -83,33 +93,8 @@ public class MonoKeyListWidget extends ConfigListWidget {
             }
         }
 
-        private static class RestrictionKeyEntry extends Entry {
-            RestrictionKeyEntry(int x, int width, int height, CommandMonoKey commandKey) {
-                super();
-                CycleButton<QuadState.State> cycleButton = CycleButton.<QuadState.State>builder(
-                                (status) -> switch(status) {
-                                    case ZERO -> Component.literal("None").withStyle(ChatFormatting.GREEN);
-                                    case ONE -> Component.literal("Control").withStyle(ChatFormatting.GOLD);
-                                    case TWO -> Component.literal("Alt").withStyle(ChatFormatting.GOLD);
-                                    case THREE -> Component.literal("Shift").withStyle(ChatFormatting.GOLD);
-                                })
-                        .withValues(QuadState.State.values())
-                        .withInitialValue(commandKey.onlyIfKey.state)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
-                            case ZERO -> "No restriction";
-                            case ONE -> "This command key will only activate if CONTROL is down when the key is pressed.";
-                            case TWO -> "This command key will only activate if ALT is down when the key is pressed.";
-                            case THREE -> "This command key will only activate if SHIFT is down when the key is pressed.";
-                        })))
-                        .create(x, 0, width, height, Component.literal("Restriction Key"),
-                                (button, status) -> commandKey.onlyIfKey.state = status);
-                cycleButton.setTooltipDelay(500);
-                elements.add(cycleButton);
-            }
-        }
-
         private static class SendTypeEntry extends Entry {
-            SendTypeEntry(int x, int width, int height, CommandMonoKey commandKey) {
+            SendTypeEntry(int x, int width, int height, CommandKey commandKey) {
                 super();
                 CycleButton<Boolean> cycleButton = CycleButton.booleanBuilder(
                         Component.literal("Send").withStyle(ChatFormatting.GREEN),
@@ -126,15 +111,17 @@ public class MonoKeyListWidget extends ConfigListWidget {
         }
 
         private static class CycleToggleEntry extends Entry {
-            CycleToggleEntry(int x, int width, int height, MonoKeyListWidget listWidget,
-                             CommandMonoKey commandKey) {
+            CycleToggleEntry(int x, int width, int height, CommandKeyListWidget listWidget,
+                             CommandKey commandKey) {
                 super();
                 CycleButton<Boolean> cycleButton = CycleButton.booleanBuilder(
                         Component.translatable("options.on").withStyle(ChatFormatting.GREEN),
                                 Component.translatable("options.off").withStyle(ChatFormatting.RED))
                         .withInitialValue(commandKey.cycle)
                         .withTooltip((status) -> Tooltip.create(Component.literal(status ?
-                                "Messages will be cycled through as you repeatedly press the key." :
+                                "Messages will be cycled through as you repeatedly press the key. " +
+                                        "To send multiple messages in one keypress, separate them " +
+                                        "with a pair of commas e.g. /lobby,,/nick" :
                                 "All messages will be sent when the key is pressed.")))
                         .create(x, 0, width, height, Component.literal("Cycle Messages"),
                                 (button, status) -> {
@@ -147,7 +134,7 @@ public class MonoKeyListWidget extends ConfigListWidget {
         }
 
         private static class CycleIndexEntry extends Entry {
-            CycleIndexEntry(int x, int width, int height, CommandMonoKey commandKey) {
+            CycleIndexEntry(int x, int width, int height, CommandKey commandKey) {
                 super();
 
                 ArrayList<Integer> values = new ArrayList<>();

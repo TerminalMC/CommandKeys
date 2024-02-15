@@ -1,40 +1,42 @@
 package notryken.commandkeys.gui.component.listwidget;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.netty.channel.local.LocalAddress;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import notryken.commandkeys.CommandKeys;
-import notryken.commandkeys.config.CommandDualKey;
+import notryken.commandkeys.config.CommandKey;
+import notryken.commandkeys.config.Profile;
 import notryken.commandkeys.gui.screen.ConfigScreen;
-import notryken.commandkeys.util.SendingUtil;
 
-import static notryken.commandkeys.CommandKeys.config;
+import java.net.SocketAddress;
 
-public class DualKeySetListWidget extends ConfigListWidget {
-    CommandDualKey selectedCommandKey;
-
-    public DualKeySetListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                int scrollWidth) {
-        super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
+public class ProfileListWidget extends ConfigListWidget {
+    Profile profile;
+    CommandKey selectedCommandKey;
+    InputConstants.Key heldKey;
+    
+    public ProfileListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
+                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                             int scrollWidth, Profile profile) {
+        super(minecraft, width, height, top, bottom, itemHeight, entryRelX, 
                 entryWidth, entryHeight, scrollWidth);
+        this.profile = profile;
 
         addEntry(new Entry.GlobalSettingEntry(entryX, entryWidth, entryHeight, this));
 
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("--------------------- Command Dual-Keys \u2139 ---------------------"),
-                Tooltip.create(Component.literal("If you opened this screen by pressing the config key " +
-                        "in-game, you can now send one of the messages (or sets of messages) below by pressing " +
-                        "the corresponding key on your keyboard.")), 500));
+                Component.literal("------------------------ Command Keys \u2139 ------------------------"),
+                Tooltip.create(Component.literal("The messages for each key will be sent if you press the " +
+                        "corresponding hotkey while in-game (depending on individual settings).")), 500));
 
-        for (CommandDualKey commandKey : config().getDualKeySet()) {
+        for (CommandKey commandKey : profile.getCommandKeys()) {
             int size = commandKey.messages.size();
             addEntry(new Entry.CommandKeyFirstFieldEntry(entryX, entryWidth, entryHeight, this,
                     commandKey, size <= 1));
@@ -46,54 +48,58 @@ public class DualKeySetListWidget extends ConfigListWidget {
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    config().addDualKey(new CommandDualKey());
+                    profile.addCmdKey(new CommandKey());
                     reload();
                 }));
     }
 
     @Override
-    public ConfigListWidget resize(int width, int height, int top, int bottom,
+    public ConfigListWidget resize(int width, int height, int top, int bottom, 
                                    int itemHeight, double scrollAmount) {
-        DualKeySetListWidget newListWidget = new DualKeySetListWidget(
-                minecraft, width, height, top, bottom, itemHeight,
-                entryRelX, entryWidth, entryHeight, scrollWidth);
+        ProfileListWidget newListWidget = new ProfileListWidget(
+                minecraft, width, height, top, bottom, itemHeight, entryRelX,
+                entryWidth, entryHeight, scrollWidth, profile);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
 
     @Override
-    public boolean willHandleKey(InputConstants.Key key) {
-        return ((getSelected() == null &&
-                    key.getValue() != InputConstants.KEY_ESCAPE &&
-                    !key.getType().equals(InputConstants.Type.MOUSE)) ||
-                selectedCommandKey != null);
-    }
-
-    @Override
-    public boolean handleKey(InputConstants.Key key) {
-        if (!key.getType().equals(InputConstants.Type.MOUSE)) {
-            if (selectedCommandKey == null) {
-                if (getSelected() == null) {
-                    CommandDualKey commandKey = CommandDualKey.MAP.get(key);
-                    if (commandKey != null && !commandKey.messages.isEmpty() &&
-                            minecraft.getConnection() != null &&
-                            minecraft.getConnection().isAcceptingMessages()) {
-                        screen.onClose(); // TODO this is a save idea, idk about it
-                        minecraft.setScreen(null);
-                        for (String message : commandKey.messages) {
-                            SendingUtil.send(message, config().dualAddToHistory, config().dualShowHudMessage);
-                        }
-                        return true;
+    public boolean keyPressed(InputConstants.Key key) {
+        if (selectedCommandKey != null) {
+            if (key.getValue() == InputConstants.KEY_ESCAPE) {
+                selectedCommandKey.setKey(InputConstants.UNKNOWN);
+                selectedCommandKey.setLimitKey(InputConstants.UNKNOWN);
+                reload();
+            }
+            else if (!key.equals(CommandKeys.CONFIG_KEY.key)) {
+                if (heldKey == null) {
+                    heldKey = key;
+                }
+                else {
+                    if (key != heldKey) {
+                        selectedCommandKey.setLimitKey(heldKey);
+                        selectedCommandKey.setKey(key);
+                        reload();
+                    }
+                    else {
+                        return false;
                     }
                 }
             }
             else {
-                if (key.getValue() == InputConstants.KEY_ESCAPE) {
-                    selectedCommandKey.setKey(InputConstants.UNKNOWN);
-                }
-                else if (!key.equals(CommandKeys.CONFIG_KEY.key)) { // ((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey()
-                    selectedCommandKey.setKey(key);
-                }
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean keyReleased(InputConstants.Key key) {
+        if (selectedCommandKey != null) {
+            if (heldKey == key) {
+                selectedCommandKey.setKey(key);
+                selectedCommandKey.setLimitKey(InputConstants.UNKNOWN);
                 reload();
                 return true;
             }
@@ -101,40 +107,81 @@ public class DualKeySetListWidget extends ConfigListWidget {
         return false;
     }
 
-    public void openMonoKeyScreen() {
-        minecraft.setScreen(new ConfigScreen(screen.getLastScreen(),
+    @Override
+    public boolean mouseClicked(InputConstants.Key key) {
+        return keyPressed(key);
+    }
+
+    @Override
+    public boolean mouseReleased(InputConstants.Key key) {
+        return keyReleased(key);
+    }
+
+    public void openProfileSetScreen() {
+        boolean singleplayer = false;
+        SocketAddress address = CommandKeys.activeAddress();
+        if (address instanceof LocalAddress) {
+            singleplayer = true;
+        }
+        Screen lastScreen = screen.getLastScreen();
+        if (lastScreen instanceof ConfigScreen lastConfigScreen) {
+            lastScreen = lastConfigScreen.getLastScreen();
+        }
+        minecraft.setScreen(new ConfigScreen(lastScreen,
+                Component.translatable("screen.commandkeys.title.default"),
+                new ProfileSetListWidget(minecraft, screen.width, screen.height, y0, y1,
+                        itemHeight, -150, 300, entryHeight, 320,
+                        singleplayer, null)));
+    }
+
+    public void openMinecraftControlsScreen() {
+        minecraft.setScreen(new KeyBindsScreen(screen, Minecraft.getInstance().options));
+    }
+
+    public void openCommandKeyScreen(CommandKey commandKey) {
+        minecraft.setScreen(new ConfigScreen(screen,
                 Component.translatable("screen.commandkeys.title.mono"),
-                new MonoKeySetListWidget(minecraft, screen.width, screen.height, y0, y1,
-                        itemHeight, entryRelX, entryWidth, entryHeight, scrollWidth)));
+                new CommandKeyListWidget(minecraft, screen.width, screen.height, y0, y1,
+                        itemHeight, -120, 240, entryHeight, 260, commandKey)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
 
         private static class GlobalSettingEntry extends Entry {
-            GlobalSettingEntry(int x, int width, int height, DualKeySetListWidget listWidget) {
+            GlobalSettingEntry(int x, int width, int height, ProfileListWidget listWidget) {
                 super();
-                int spacing = 5;
-                int buttonWidth = (width - spacing * 8) / 3;
-                elements.add(CycleButton.booleanBuilder(
-                                Component.literal("Yes").withStyle(ChatFormatting.GREEN),
+                int spacing = 1;
+                int buttonWidth = (width - spacing * 3) / 4;
+                CycleButton<Boolean> historyButton = CycleButton.booleanBuilder(
+                        Component.literal("Yes").withStyle(ChatFormatting.GREEN), 
                                 Component.literal("No").withStyle(ChatFormatting.RED))
-                        .withInitialValue(config().dualAddToHistory)
+                        .withInitialValue(listWidget.profile.addToHistory)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Add sent messages/commands to history.")))
                         .create(x, 0, buttonWidth, height,
-                                Component.literal("Add to History"),
-                                (button, status) -> config().dualAddToHistory = status));
-                elements.add(CycleButton.booleanBuilder(
+                                Component.literal("Chat History"),
+                                (button, status) -> listWidget.profile.addToHistory = status);
+                historyButton.setTooltipDelay(500);
+                elements.add(historyButton);
+                CycleButton<Boolean> displayButton = CycleButton.booleanBuilder(
                         Component.literal("Yes").withStyle(ChatFormatting.GREEN),
                                 Component.literal("No").withStyle(ChatFormatting.RED))
-                        .withInitialValue(config().dualShowHudMessage)
+                        .withInitialValue(listWidget.profile.showHudMessage)
                         .withTooltip((status) -> Tooltip.create(Component.nullToEmpty(
                                 "Briefly show the sent message/command as a pop-up above the hotbar.")))
                         .create(x + buttonWidth + spacing, 0, buttonWidth, height,
-                                Component.literal("Show HUD Display"),
-                                (button, status) -> config().dualShowHudMessage = status));
-                elements.add(Button.builder(Component.literal("Mono-Key Options"),
-                                (button) -> listWidget.openMonoKeyScreen())
+                                Component.literal("HUD Display"),
+                                (button, status) -> listWidget.profile.showHudMessage = status);
+                displayButton.setTooltipDelay(500);
+                elements.add(displayButton);
+                // Switch to right-justified
+                elements.add(Button.builder(Component.literal("Change Profile"),
+                                (button) -> listWidget.openProfileSetScreen())
+                        .pos(x + width - buttonWidth * 2 - spacing, 0)
+                        .size(buttonWidth, height)
+                        .build());
+                elements.add(Button.builder(Component.literal("Minecraft Controls"),
+                                (button) -> listWidget.openMinecraftControlsScreen())
                         .pos(x + width - buttonWidth, 0)
                         .size(buttonWidth, height)
                         .build());
@@ -142,24 +189,80 @@ public class DualKeySetListWidget extends ConfigListWidget {
         }
 
         private static class CommandKeyFirstFieldEntry extends Entry {
-            CommandKeyFirstFieldEntry(int x, int width, int height, DualKeySetListWidget listWidget,
-                                      CommandDualKey commandKey, boolean showAdd) {
+            CommandKeyFirstFieldEntry(int x, int width, int height, ProfileListWidget listWidget,
+                                      CommandKey commandKey, boolean showAdd) {
                 super();
                 int spacing = 5;
                 int smallButtonWidth = 20;
-                int keyButtonWidth = 100;
-                int messageFieldWidth = width - smallButtonWidth * 3 - keyButtonWidth - spacing * 4;
+                int keyButtonWidth = 75;
+                int messageFieldWidth = width - smallButtonWidth * 4 - keyButtonWidth - spacing * 5;
                 int movingX = x;
 
-                MutableComponent keyName = commandKey.getKey().getDisplayName().copy();
-                elements.add(Button.builder(keyName,
+                elements.add(new ImageButton(movingX, 0, smallButtonWidth, height,
+                        0, 0, 20, ConfigListWidget.Entry.CONFIGURATION_ICON,
+                        32, 64, (button) -> listWidget.openCommandKeyScreen(commandKey),
+                        Component.literal("options")));
+                movingX += smallButtonWidth + spacing;
+
+                // Make the key button's label and tooltip
+                MutableComponent keyDisplayName;
+                if (commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                    keyDisplayName = commandKey.getKey().getDisplayName().copy();
+                } else {
+                    keyDisplayName = commandKey.getLimitKey().getDisplayName().copy()
+                            .append(" + ")
+                            .append(commandKey.getKey().getDisplayName());
+                }
+                MutableComponent label = keyDisplayName;
+                Tooltip tooltip = null;
+                MutableComponent tooltipComponent = Component.empty();
+                boolean conflict = false;
+                if (!commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
+//                    KeyMapping conflictKeyM = KeyUtil.getConflictKeyMapping(commandKey.getLimitKey());
+                    KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getLimitKey());
+                    if (conflictKeyM != null) {
+                        tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
+                                .withStyle(ChatFormatting.RED));
+                        tooltipComponent.append(" is also used for: ");
+                        tooltipComponent.append(Component.translatable(conflictKeyM.getName())
+                                .withStyle(ChatFormatting.GRAY));
+                        conflict = true;
+                    }
+                }
+                if (!commandKey.getKey().equals(InputConstants.UNKNOWN)) {
+//                    KeyMapping conflictKeyM = KeyUtil.getConflictKeyMapping(commandKey.getKey());
+                    KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getKey());
+                    if (conflictKeyM != null) {
+                        if (conflict) tooltipComponent.append("\n");
+                        tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
+                                .withStyle(ChatFormatting.RED));
+                        tooltipComponent.append(" is also used for: ");
+                        tooltipComponent.append(Component.translatable(conflictKeyM.getName())
+                                .withStyle(ChatFormatting.GRAY));
+                        conflict = true;
+                    }
+                }
+                if (conflict) {
+                    label = Component.literal("[ ")
+                            .append(keyDisplayName.withStyle(ChatFormatting.WHITE))
+                            .append(" ]").withStyle(ChatFormatting.RED);
+                    tooltip = Tooltip.create(tooltipComponent
+                            .append("\nConflict Strategy: ")
+                            .append(switch(commandKey.conflictStrategy.state) {
+                                case ZERO -> Component.literal("Submissive").withStyle(ChatFormatting.GREEN);
+                                case ONE -> Component.literal("Assertive").withStyle(ChatFormatting.GOLD);
+                                case TWO -> Component.literal("Aggressive").withStyle(ChatFormatting.RED);
+                            }));
+                }
+                elements.add(Button.builder(label,
                                 (button) -> {
                                     listWidget.selectedCommandKey = commandKey;
                                     button.setMessage(Component.literal("> ")
-                                            .append(keyName.withStyle(ChatFormatting.WHITE)
+                                            .append(keyDisplayName.withStyle(ChatFormatting.WHITE)
                                                     .withStyle(ChatFormatting.UNDERLINE))
                                             .append(" <").withStyle(ChatFormatting.YELLOW));
                                 })
+                        .tooltip(tooltip)
                         .pos(movingX, 0)
                         .size(keyButtonWidth, height)
                         .build());
@@ -172,9 +275,9 @@ public class DualKeySetListWidget extends ConfigListWidget {
                 messageField.setResponder(
                         (value) -> {
                             if (commandKey.messages.isEmpty()) {
-                                commandKey.messages.add(value.strip());
+                                commandKey.messages.add(value.stripLeading());
                             } else {
-                                commandKey.messages.set(0, value.strip());
+                                commandKey.messages.set(0, value.stripLeading());
                             }
                         });
                 elements.add(messageField);
@@ -222,7 +325,7 @@ public class DualKeySetListWidget extends ConfigListWidget {
                 Button removeButton = Button.builder(Component.literal("\u274C"),
                                 (button) -> {
                                     if (commandKey.messages.size() <= 1) {
-                                        config().removeDualKey(commandKey);
+                                        listWidget.profile.removeCmdKey(commandKey);
                                     } else {
                                         commandKey.messages.remove(0);
                                     }
@@ -254,20 +357,20 @@ public class DualKeySetListWidget extends ConfigListWidget {
         }
 
         private static class CommandKeyFieldEntry extends Entry {
-            CommandKeyFieldEntry(int x, int width, int height, DualKeySetListWidget listWidget,
-                                 CommandDualKey commandKey, int index, boolean showAdd) {
+            CommandKeyFieldEntry(int x, int width, int height, ProfileListWidget listWidget,
+                                 CommandKey commandKey, int index, boolean showAdd) {
                 super();
                 int spacing = 5;
                 int smallButtonWidth = 20;
-                int keyButtonWidth = 100;// Not used but required for offset
-                int messageFieldWidth = width - smallButtonWidth * 3 - keyButtonWidth - spacing * 4;
-                int movingX = x + keyButtonWidth + spacing;
+                int keyButtonWidth = 75;
+                int messageFieldWidth = width - smallButtonWidth * 4 - keyButtonWidth - spacing * 5;
+                int movingX = x + smallButtonWidth + spacing + keyButtonWidth + spacing;
 
                 EditBox messageField = new EditBox(Minecraft.getInstance().font, movingX, 0,
                         messageFieldWidth, height, Component.literal("Message"));
                 messageField.setMaxLength(255);
                 messageField.setValue(commandKey.messages.get(index));
-                messageField.setResponder((value) -> commandKey.messages.set(index, value.strip()));
+                messageField.setResponder((value) -> commandKey.messages.set(index, value.stripLeading()));
                 elements.add(messageField);
 
                 // Now switch to right-justified

@@ -1,22 +1,13 @@
 package notryken.commandkeys.mixin;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import notryken.commandkeys.CommandKeys;
-import notryken.commandkeys.config.CommandMonoKey;
-import notryken.commandkeys.util.SendingUtil;
-import org.spongepowered.asm.mixin.Final;
+import notryken.commandkeys.util.KeyUtil;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static notryken.commandkeys.CommandKeys.config;
 
 @Mixin(KeyboardHandler.class)
 public class MixinKeyboardHandler {
@@ -30,7 +21,7 @@ public class MixinKeyboardHandler {
             )
     )
     private void onKeyPress(InputConstants.Key key) {
-        cancelCharTyped = SendingUtil.handleKey(key);
+        cancelCharTyped = KeyUtil.handleKey(key);
     }
 
     @Inject(

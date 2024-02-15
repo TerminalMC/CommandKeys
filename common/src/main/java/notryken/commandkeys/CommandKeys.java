@@ -3,12 +3,15 @@ package notryken.commandkeys;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import notryken.commandkeys.config.Config;
-import notryken.commandkeys.gui.component.listwidget.DualKeySetListWidget;
+import notryken.commandkeys.config.Profile;
 import notryken.commandkeys.gui.screen.ConfigScreen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.SocketAddress;
 
 public class CommandKeys {
     // Constants
@@ -28,10 +31,7 @@ public class CommandKeys {
     public static void onEndTick(Minecraft minecraft) {
         // Open config screen
         while (CONFIG_KEY.consumeClick()) {
-            minecraft.setScreen(new ConfigScreen(minecraft.screen,
-                    Component.translatable("screen.commandkeys.title.default"),
-                    new DualKeySetListWidget(minecraft, 0, 0, 0, 0,
-                            0, -200, 400, 20, 420)));
+            minecraft.setScreen(new ConfigScreen(minecraft.screen, true));
         }
     }
 
@@ -40,5 +40,26 @@ public class CommandKeys {
             throw new IllegalStateException("Config not yet available");
         }
         return CONFIG;
+    }
+
+    public static Profile profile() {
+        if (CONFIG == null) {
+            throw new IllegalStateException("Config not yet available");
+        }
+        return CONFIG.getActiveProfile();
+    }
+
+    public static Screen getConfigScreen(Screen lastScreen) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        boolean inGame = (player != null && player.connection.getConnection().isConnected());
+        return new ConfigScreen(lastScreen, inGame);
+    }
+
+    public static SocketAddress activeAddress() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null && player.connection.getConnection().isConnected()) {
+            return player.connection.getConnection().getRemoteAddress();
+        }
+        return null;
     }
 }

@@ -76,8 +76,11 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     // Abstract methods
     public abstract ConfigListWidget resize(int width, int height, int top, int bottom,
                                             int itemHeight, double scrollAmount);
-    public abstract boolean willHandleKey(InputConstants.Key key);
-    public abstract boolean handleKey(InputConstants.Key key);
+
+    public abstract boolean keyPressed(InputConstants.Key key);
+    public abstract boolean keyReleased(InputConstants.Key key);
+    public abstract boolean mouseClicked(InputConstants.Key key);
+    public abstract boolean mouseReleased(InputConstants.Key key);
 
     /**
      * Base implementation of options list widget entry, with common entries.

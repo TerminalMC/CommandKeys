@@ -1,18 +1,22 @@
 package notryken.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.netty.channel.local.LocalAddress;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import notryken.commandkeys.CommandKeys;
 import notryken.commandkeys.gui.component.listwidget.ConfigListWidget;
-import notryken.commandkeys.gui.component.listwidget.MonoKeySetListWidget;
+import notryken.commandkeys.gui.component.listwidget.ProfileListWidget;
+import notryken.commandkeys.gui.component.listwidget.ProfileSetListWidget;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.SocketAddress;
 import java.util.function.Supplier;
 
 /**
@@ -27,11 +31,19 @@ public class ConfigScreen extends OptionsSubScreen {
     public final Supplier<Integer> listBottom = () -> height - 32;
     public final int listItemHeight = 25;
 
-    public ConfigScreen(Screen lastScreen) {
+    public ConfigScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen, Minecraft.getInstance().options,
                 Component.translatable("screen.commandkeys.title.default"));
-        listWidget = new MonoKeySetListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
-                0, -200, 400, 20, 420);
+        if (inGame) {
+            listWidget = new ProfileListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
+                    0, -200, 400, 20, 420,
+                    CommandKeys.profile());
+        }
+        else {
+            listWidget = new ProfileSetListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
+                    0, -150, 300, 20, 320, false, null);
+        }
+
     }
 
     public ConfigScreen(Screen lastScreen, Component title, ConfigListWidget listWidget) {
@@ -53,23 +65,26 @@ public class ConfigScreen extends OptionsSubScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (listWidget.willHandleKey(InputConstants.getKey(keyCode, scanCode))) return true;
+        if (listWidget.keyPressed(InputConstants.getKey(keyCode, scanCode))) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        // Keys handled by DualKeyListWidget may trigger a screen switch, so we
-        // pass on keyReleased instead of keyPressed to avoid key overlap
-        // TODO check whether this is necessary, maybe can use screen onClose()
-        if (listWidget.handleKey(InputConstants.getKey(keyCode, scanCode))) return true;
+        if (listWidget.keyReleased(InputConstants.getKey(keyCode, scanCode))) return true;
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int delta) {
-        if (listWidget.handleKey(InputConstants.Type.MOUSE.getOrCreate(delta))) return true;
+        if (listWidget.mouseClicked(InputConstants.Type.MOUSE.getOrCreate(delta))) return true;
         return super.mouseClicked(mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int delta) {
+        if (listWidget.mouseReleased(InputConstants.Type.MOUSE.getOrCreate(delta))) return true;
+        return super.mouseReleased(mouseX, mouseY, delta);
     }
 
     @Override

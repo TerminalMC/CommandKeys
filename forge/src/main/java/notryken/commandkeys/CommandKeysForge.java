@@ -18,7 +18,7 @@ public class CommandKeysForge {
     public CommandKeysForge() {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                 () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (client, parent) -> new ConfigScreen(parent)
+                        (client, parent) -> CommandKeys.getConfigScreen(parent)
                 ));
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

@@ -8,7 +8,8 @@
     ],
     "client": [
         "MixinKeyboardHandler",
-        "MixinMouseHandler"
+        "MixinMouseHandler",
+        "MixinClientPacketListener"
     ],
     "server": [
     ],
