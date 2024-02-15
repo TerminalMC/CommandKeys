@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
 import notryken.commandkeys.config.CommandKey;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -49,7 +48,8 @@ public class KeyUtil {
                 boolean send = true;
                 boolean override = false;
                 switch(cmdKey.conflictStrategy.state) {
-                    case ZERO -> send = !KeyMapping.MAP.containsKey(key);
+                    // Can't use MAP.contains(key) because Forge is weird
+                    case ZERO -> send = KeyMapping.MAP.get(key) != null;
                     case TWO -> override = true;
                 }
 
