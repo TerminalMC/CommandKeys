@@ -218,7 +218,6 @@ public class ProfileListWidget extends ConfigListWidget {
                 MutableComponent tooltipComponent = Component.empty();
                 boolean conflict = false;
                 if (!commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
-//                    KeyMapping conflictKeyM = KeyUtil.getConflictKeyMapping(commandKey.getLimitKey());
                     KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getLimitKey());
                     if (conflictKeyM != null) {
                         tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
@@ -230,7 +229,6 @@ public class ProfileListWidget extends ConfigListWidget {
                     }
                 }
                 if (!commandKey.getKey().equals(InputConstants.UNKNOWN)) {
-//                    KeyMapping conflictKeyM = KeyUtil.getConflictKeyMapping(commandKey.getKey());
                     KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getKey());
                     if (conflictKeyM != null) {
                         if (conflict) tooltipComponent.append("\n");

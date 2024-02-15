@@ -49,7 +49,6 @@ public class KeyUtil {
                 boolean send = true;
                 boolean override = false;
                 switch(cmdKey.conflictStrategy.state) {
-//                    case ZERO -> send = getConflictKeyMapping(key) == null;
                     case ZERO -> send = !KeyMapping.MAP.containsKey(key);
                     case TWO -> override = true;
                 }
@@ -115,14 +114,5 @@ public class KeyUtil {
 
     public static void type(String message) {
         Minecraft.getInstance().setScreen(new ChatScreen(message));
-    }
-
-    public static @Nullable KeyMapping getConflictKeyMapping(InputConstants.Key key) {
-        for (KeyMapping mcKeyMapping : Minecraft.getInstance().options.keyMappings) {
-            if (mcKeyMapping.key.equals(key)) {
-                return mcKeyMapping;
-            }
-        }
-        return null;
     }
 }
