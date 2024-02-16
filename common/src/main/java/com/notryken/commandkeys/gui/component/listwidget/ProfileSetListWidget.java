@@ -1,6 +1,7 @@
 package com.notryken.commandkeys.gui.component.listwidget;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
@@ -152,8 +153,15 @@ public class ProfileSetListWidget extends ConfigListWidget {
                 if (name.isBlank()) {
                     name = profile.getAddresses().stream().findFirst().orElse("[No Name]");
                 }
+                String serverInfo = "";
+                int numAddresses = profile.getAddresses().size();
+                if (numAddresses != 0) {
+                    serverInfo = " [" + numAddresses + (numAddresses == 1 ? " server]" : " servers]");
+                }
 
-                elements.add(Button.builder(Component.literal(name),
+                elements.add(Button.builder(Component.literal(name)
+                                        .append(Component.literal(serverInfo)
+                                                .withStyle(ChatFormatting.GRAY)),
                         (button) -> {
                             if (listWidget.editingProfile == null) {
                                 listWidget.editingProfile = profile;
