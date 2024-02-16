@@ -40,7 +40,7 @@ public class ConfigScreen extends OptionsSubScreen {
         }
         else {
             listWidget = new ProfileSetListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
-                    0, -180, 360, 20, 380, false, null);
+                    0, -180, 360, 20, 380, null);
         }
 
     }

@@ -13,9 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 public class Config {
     // Constants
@@ -44,114 +42,86 @@ public class Config {
 
     // Saved, modifiable by user
     private Profile spDefaultProfile;
-    private final ArrayList<Profile> spProfiles;
     private Profile mpDefaultProfile;
-    private final ArrayList<Profile> mpProfiles;
+    public final ArrayList<Profile> profiles;
 
     public Config() {
-        this.spDefaultProfile = new Profile(true);
-        this.spProfiles = new ArrayList<>();
-        this.mpDefaultProfile = new Profile(false);
-        this.mpProfiles = new ArrayList<>();
-        this.activeProfile = this.mpDefaultProfile;
-    }
-
-    public Config(Profile spDefaultProfile, ArrayList<Profile> spProfiles,
-                  Profile mpDefaultProfile, ArrayList<Profile> mpProfiles) {
+        Profile spDefaultProfile = new Profile();
+        spDefaultProfile.name = "Singleplayer Default";
         this.spDefaultProfile = spDefaultProfile;
-        this.spProfiles = spProfiles;
+        Profile mpDefaultProfile = new Profile();
+        mpDefaultProfile.name = "Multiplayer Default";
         this.mpDefaultProfile = mpDefaultProfile;
-        this.mpProfiles = mpProfiles;
+        this.profiles = new ArrayList<>();
+        this.activeProfile = this.mpDefaultProfile;
+    }
+
+    public Config(Profile spDefaultProfile, Profile mpDefaultProfile,
+                  ArrayList<Profile> profiles) {
+        this.spDefaultProfile = spDefaultProfile;
+        this.mpDefaultProfile = mpDefaultProfile;
+        this.profiles = profiles;
         this.activeProfile = this.mpDefaultProfile;
     }
 
 
-    public Profile getActiveProfile() {
+    public @NotNull Profile getActiveProfile() {
         return activeProfile;
     }
 
-    public void setActiveProfile(Profile activeProfile) {
+    public void setActiveProfile(@NotNull Profile activeProfile) {
         this.activeProfile = activeProfile;
     }
 
-
-
-    public Profile getSpDefaultProfile() {
+    public @NotNull Profile getSpDefaultProfile() {
         return spDefaultProfile;
     }
 
-    public List<Profile> getSpProfiles() {
-        return Collections.unmodifiableList(spProfiles);
-    }
-
-    public void addSpProfile() {
-        spProfiles.add(new Profile(false));
-    }
-
-    public void addSpProfile(Profile profile) {
-        spProfiles.add(profile);
-    }
-
-    public Profile getMpDefaultProfile() {
+    public @NotNull Profile getMpDefaultProfile() {
         return mpDefaultProfile;
     }
 
-    public List<Profile> getMpProfiles() {
-        return Collections.unmodifiableList(mpProfiles);
-    }
-
-    public void addMpProfile() {
-        mpProfiles.add(new Profile(false));
-    }
-
-    public void addMpProfile(Profile profile) {
-        mpProfiles.add(profile);
-    }
-
-
-    public void removeProfile(Profile profile) {
-        if (profile.singleplayer) {
-            spProfiles.remove(profile);
-        }
-        else {
-            mpProfiles.remove(profile);
+    public void setSpDefaultProfile(@NotNull Profile profile) {
+        if (!profile.equals(spDefaultProfile)) {
+            Profile temp = spDefaultProfile;
+            spDefaultProfile = profile;
+            profiles.remove(profile);
+            profiles.add(0, temp);
+            // If active was the old default, make active the new default.
+            if (activeProfile.equals(temp)) activeProfile = profile;
         }
     }
 
-    public void setAsDefault(Profile profile) {
-        if (profile.singleplayer) {
-            if (!profile.equals(spDefaultProfile)) {
-                Profile temp = spDefaultProfile;
-                spDefaultProfile = profile;
-                spProfiles.remove(profile);
-                spProfiles.add(0, temp);
-                if (activeProfile.equals(temp)) activeProfile = profile;
-            }
-        }
-        else {
-            if (!profile.equals(mpDefaultProfile)) {
-                Profile temp = mpDefaultProfile;
-                mpDefaultProfile = profile;
-                mpProfiles.remove(profile);
-                mpProfiles.add(0, temp);
-                if (activeProfile.equals(temp)) activeProfile = profile;
-            }
+    public void setMpDefaultProfile(@NotNull Profile profile) {
+        if (!profile.equals(mpDefaultProfile)) {
+            Profile temp = mpDefaultProfile;
+            mpDefaultProfile = profile;
+            profiles.remove(profile);
+            profiles.add(0, temp);
+            // If active was the old default, make active the new default.
+            if (activeProfile.equals(temp)) activeProfile = profile;
         }
     }
 
     public void copyProfile(Profile profile) {
-        if (profile.singleplayer) {
-            Profile copyProfile = new Profile(profile);
-            copyProfile.name = copyProfile.name + " (Copy)";
-            spProfiles.add(copyProfile);
-        }
-        else {
-            Profile copyProfile = new Profile(profile);
-            copyProfile.name = copyProfile.name + " (Copy)";
-            mpProfiles.add(copyProfile);
-        }
+        Profile copyProfile = new Profile(profile);
+        copyProfile.name = copyProfile.name + " (Copy)";
+        profiles.add(copyProfile);
     }
 
+    // Cleanup
+
+    public void cleanup() {
+        spDefaultProfile.cleanup();
+        mpDefaultProfile.cleanup();
+
+        Iterator<Profile> iter = profiles.iterator();
+        while (iter.hasNext()) {
+            Profile profile = iter.next();
+            profile.cleanup();
+            if (profile.getCmdKeys().isEmpty()) iter.remove();
+        }
+    }
 
     // Load and save
 
@@ -197,21 +167,7 @@ public class Config {
         long time = System.currentTimeMillis();
         CommandKeys.LOG.info("CommandKeys: Saving config to file...");
 
-        spDefaultProfile.cleanup();
-        Iterator<Profile> iter = spProfiles.iterator();
-        while (iter.hasNext()) {
-            Profile profile = iter.next();
-            profile.cleanup();
-            if (profile.getCommandKeys().isEmpty()) iter.remove();
-        }
-
-        mpDefaultProfile.cleanup();
-        iter = mpProfiles.iterator();
-        while (iter.hasNext()) {
-            Profile profile = iter.next();
-            profile.cleanup();
-            if (profile.getCommandKeys().isEmpty()) iter.remove();
-        }
+        cleanup();
 
         Path dir = configPath.getParent();
 
@@ -251,9 +207,8 @@ public class Config {
             
             configObj.addProperty("version", src.version);
             configObj.add("spDefaultProfile", context.serialize(src.spDefaultProfile));
-            configObj.add("spProfiles", context.serialize(src.spProfiles));
             configObj.add("mpDefaultProfile", context.serialize(src.mpDefaultProfile));
-            configObj.add("mpProfiles", context.serialize(src.mpProfiles));
+            configObj.add("profiles", context.serialize(src.profiles));
 
             return configObj;
         }
@@ -265,27 +220,21 @@ public class Config {
             JsonObject configObj = json.getAsJsonObject();
 
             Profile spDefaultProfile;
-            ArrayList<Profile> spProfiles = new ArrayList<>();
             Profile mpDefaultProfile;
-            ArrayList<Profile> mpProfiles = new ArrayList<>();
+            ArrayList<Profile> profiles = new ArrayList<>();
 
             JsonObject spDefaultProfileObj = configObj.getAsJsonObject("spDefaultProfile");
             spDefaultProfile = context.deserialize(spDefaultProfileObj, Profile.class);
 
-            JsonArray spProfilesArr = configObj.getAsJsonArray("spProfiles");
-            for (JsonElement element : spProfilesArr) {
-                spProfiles.add(context.deserialize(element, Profile.class));
-            }
-
             JsonObject mdDefaultProfileObj = configObj.getAsJsonObject("mpDefaultProfile");
             mpDefaultProfile = context.deserialize(mdDefaultProfileObj, Profile.class);
 
-            JsonArray mpProfilesArr = configObj.getAsJsonArray("mpProfiles");
+            JsonArray mpProfilesArr = configObj.getAsJsonArray("profiles");
             for (JsonElement element : mpProfilesArr) {
-                mpProfiles.add(context.deserialize(element, Profile.class));
+                profiles.add(context.deserialize(element, Profile.class));
             }
 
-            return new Config(spDefaultProfile, spProfiles, mpDefaultProfile, mpProfiles);
+            return new Config(spDefaultProfile, mpDefaultProfile, profiles);
         }
     }
 }

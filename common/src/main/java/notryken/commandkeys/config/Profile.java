@@ -6,48 +6,42 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public class Profile {
-    
     public static final Map<String, Profile> MAP = new HashMap<>();
 
     public String name;
-    public boolean singleplayer;
     private final Set<String> addresses;
 
     public boolean addToHistory;
     public boolean showHudMessage;
     private final Set<CommandKey> commandKeys;
 
-    public Profile(boolean singleplayer) {
+    public Profile() {
         this.name = "New Profile";
-        this.singleplayer = singleplayer;
         this.addresses = new HashSet<>();
         this.addToHistory = false;
         this.showHudMessage = false;
         this.commandKeys = new LinkedHashSet<>();
     }
 
-    public Profile(String name, boolean singleplayer, Set<String> addresses,
+    public Profile(String name, Set<String> addresses,
                    boolean addToHistory, boolean showHudMessage,
                    Set<CommandKey> commandKeys) {
         this.name = name;
-        this.singleplayer = singleplayer;
         this.addresses = addresses;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
         this.commandKeys = commandKeys;
-        if (!this.singleplayer) {
-            Iterator<String> addressIter = this.addresses.iterator();
-            while(addressIter.hasNext()) {
-                String address = addressIter.next();
-                if (MAP.containsKey(address)) addressIter.remove();
-                else MAP.put(address, this);
-            }
+
+        Iterator<String> addressIter = this.addresses.iterator();
+        while(addressIter.hasNext()) {
+            String address = addressIter.next();
+            if (MAP.containsKey(address)) addressIter.remove();
+            else MAP.put(address, this);
         }
     }
 
     public Profile(Profile profile) {
         this.name = profile.name;
-        this.singleplayer = profile.singleplayer;
         this.addresses = new HashSet<>();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
@@ -66,8 +60,8 @@ public class Profile {
     }
 
     public void forceAddAddress(String address) {
-        addresses.add(address);
-        MAP.put(address, this);
+        if (MAP.containsKey(address)) MAP.get(address).removeAddress(address);
+        addAddress(address);
     }
 
     public void removeAddress(String address) {
@@ -75,7 +69,7 @@ public class Profile {
         MAP.remove(address);
     }
 
-    public Set<CommandKey> getCommandKeys() {
+    public Set<CommandKey> getCmdKeys() {
         return Collections.unmodifiableSet(commandKeys);
     }
 
@@ -114,7 +108,6 @@ public class Profile {
             JsonObject profileObj = new JsonObject();
 
             profileObj.addProperty("name", src.name);
-            profileObj.addProperty("singleplayer", src.singleplayer);
             profileObj.add("addresses", context.serialize(src.addresses));
             
             profileObj.addProperty("addToHistory", src.addToHistory);
@@ -131,7 +124,6 @@ public class Profile {
             JsonObject profileObj = json.getAsJsonObject();
 
             String name;
-            boolean singleplayer;
             Set<String> addresses = new HashSet<>();
 
             boolean addToHistory;
@@ -139,7 +131,6 @@ public class Profile {
             Set<CommandKey> commandKeys = new LinkedHashSet<>();
 
             name = profileObj.get("name").getAsString();
-            singleplayer = profileObj.get("singleplayer").getAsBoolean();
             JsonArray addressesArr = profileObj.getAsJsonArray("addresses");
             for (JsonElement element : addressesArr) {
                 addresses.add(element.getAsString());
@@ -152,7 +143,7 @@ public class Profile {
                 commandKeys.add(context.deserialize(element, CommandKey.class));
             }
 
-            return new Profile(name, singleplayer, addresses, addToHistory, showHudMessage, commandKeys);
+            return new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
         }
     }
 }

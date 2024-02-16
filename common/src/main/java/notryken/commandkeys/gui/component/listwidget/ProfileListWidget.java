@@ -1,7 +1,6 @@
 package notryken.commandkeys.gui.component.listwidget;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.netty.channel.local.LocalAddress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -19,7 +18,6 @@ import notryken.commandkeys.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +44,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 Tooltip.create(Component.literal("The messages for each key will be sent if you press the " +
                         "corresponding hotkey while in-game (depending on individual settings).")), 500));
 
-        for (CommandKey commandKey : profile.getCommandKeys()) {
+        for (CommandKey commandKey : profile.getCmdKeys()) {
             // A CommandKey's message list may be empty, but here we need at
             // least one message, so we add an empty one. Removed in cleanup.
             if (commandKey.messages.isEmpty()) commandKey.messages.add("");
@@ -142,11 +140,6 @@ public class ProfileListWidget extends ConfigListWidget {
     }
 
     public void openProfileSetScreen() {
-        boolean singleplayer = false;
-        SocketAddress address = CommandKeys.activeAddress();
-        if (address instanceof LocalAddress) {
-            singleplayer = true;
-        }
         Screen lastScreen = screen.getLastScreen();
         if (lastScreen instanceof ConfigScreen lastConfigScreen) {
             lastScreen = lastConfigScreen.getLastScreen();
@@ -154,8 +147,7 @@ public class ProfileListWidget extends ConfigListWidget {
         minecraft.setScreen(new ConfigScreen(lastScreen,
                 Component.translatable("screen.commandkeys.title.profiles"),
                 new ProfileSetListWidget(minecraft, screen.width, screen.height, y0, y1,
-                        itemHeight, -180, 360, entryHeight, 380,
-                        singleplayer, null)));
+                        itemHeight, -180, 360, entryHeight, 380, null)));
     }
 
     public void openMinecraftControlsScreen() {
