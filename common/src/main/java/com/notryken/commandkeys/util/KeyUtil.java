@@ -1,12 +1,12 @@
 package com.notryken.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.notryken.commandkeys.config.CommandKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
-import com.notryken.commandkeys.config.CommandKey;
 
 import java.util.Set;
 
@@ -50,7 +50,7 @@ public class KeyUtil {
                 switch(cmdKey.conflictStrategy.state) {
                     // Can't use MAP.contains(key) because Forge replaces the
                     // java.util.Map with a KeyMappingLookup thing.
-                    case ZERO -> send = KeyMapping.MAP.get(key) != null;
+                    case ZERO -> send = KeyMapping.MAP.get(key) == null;
                     case TWO -> override = true;
                 }
 
