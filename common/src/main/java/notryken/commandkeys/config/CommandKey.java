@@ -60,16 +60,11 @@ KeyMapping::click call of KeyboardHandler::keyPress
 
 public class CommandKey {
     // TODO check access for all fields
-
     public static final HashMultimap<InputConstants.Key, CommandKey> MAP = HashMultimap.create();
 
-    // Key conflict handling
     public TriState conflictStrategy; // Submissive, Assertive or Aggressive
-
-    // Send behaviour
-    public boolean fullSend; // Send the message (rather than just typing it)
-    public boolean cycle; // Whether to cycle through messages
-    public int nextIndex; // Next message is messages.get(index)
+    public TriState sendStrategy; // Send, Type or Cycle
+    public transient int cycleIndex; // Index of next message if cycling
 
     private InputConstants.Key key;
     private InputConstants.Key limitKey;
@@ -78,21 +73,19 @@ public class CommandKey {
 
     public CommandKey() {
         this.conflictStrategy = new TriState();
-        this.fullSend = true;
-        this.cycle = false;
-        this.nextIndex = 0;
+        this.sendStrategy = new TriState();
+        this.cycleIndex = 0;
         this.key = InputConstants.UNKNOWN;
         this.limitKey = InputConstants.UNKNOWN;
         this.messages = new ArrayList<>();
     }
 
-    public CommandKey(TriState conflictStrategy, boolean fullSend, boolean cycle,
-                      int nextIndex, InputConstants.Key key, InputConstants.Key limitKey,
+    public CommandKey(TriState conflictStrategy, TriState sendStrategy,
+                      InputConstants.Key key, InputConstants.Key limitKey,
                       ArrayList<String> messages) {
         this.conflictStrategy = conflictStrategy;
-        this.fullSend = fullSend;
-        this.cycle = cycle;
-        this.nextIndex = nextIndex;
+        this.sendStrategy = sendStrategy;
+        this.cycleIndex = 0;
         this.key = key;
         this.limitKey = limitKey;
         this.messages = messages;
@@ -117,15 +110,15 @@ public class CommandKey {
         this.limitKey = limitKey;
     }
 
+    // Serialization / Deserialization
+
     public static class Serializer implements JsonSerializer<CommandKey> {
         @Override
         public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext context) {
             JsonObject cmdKeyObj = new JsonObject();
 
             cmdKeyObj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
-            cmdKeyObj.addProperty("fullSend", src.fullSend);
-            cmdKeyObj.addProperty("cycle", src.cycle);
-            cmdKeyObj.addProperty("nextIndex", src.nextIndex);
+            cmdKeyObj.addProperty("sendStrategy", src.sendStrategy.state.toString());
 
             JsonObject keyObj = new JsonObject();
             keyObj.addProperty("name", src.key.getName());
@@ -153,17 +146,13 @@ public class CommandKey {
             JsonObject cmdKeyObj = json.getAsJsonObject();
 
             TriState conflictStrategy;
-            boolean fullSend;
-            boolean cycle;
-            int nextIndex;
+            TriState sendStrategy;
             InputConstants.Key key;
             InputConstants.Key limitKey;
             ArrayList<String> messages = new ArrayList<>();
 
             conflictStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("conflictStrategy").getAsString()));
-            fullSend = cmdKeyObj.get("fullSend").getAsBoolean();
-            cycle = cmdKeyObj.get("cycle").getAsBoolean();
-            nextIndex = cmdKeyObj.get("nextIndex").getAsInt();
+            sendStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("sendStrategy").getAsString()));
 
             JsonObject keyObj = cmdKeyObj.getAsJsonObject("key");
             key = InputConstants.getKey(keyObj.get("name").getAsString());
@@ -174,7 +163,7 @@ public class CommandKey {
             JsonArray messagesObj = cmdKeyObj.getAsJsonArray("messages");
             for (JsonElement element : messagesObj) messages.add(element.getAsString());
 
-            return new CommandKey(conflictStrategy, fullSend, cycle, nextIndex, key, limitKey, messages);
+            return new CommandKey(conflictStrategy, sendStrategy, key, limitKey, messages);
         }
     }
 }

@@ -63,6 +63,8 @@ public class ProfileSetListWidget extends ConfigListWidget {
                 }
             }
         }
+        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                Component.literal("------------------------------"), null, 500));
         for (Profile profile : profileList) {
             addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
                     profile, false, inGame));
@@ -121,9 +123,12 @@ public class ProfileSetListWidget extends ConfigListWidget {
 
     public void openProfileScreen(Profile profile) {
         minecraft.setScreen(new ConfigScreen(screen,
-                Component.translatable("screen.commandkeys.title.default"),
+                Component.translatable("screen.commandkeys.title.profile")
+                        .append(Component.literal(profile.name))
+                        .append(profile.equals(CommandKeys.profile()) ? " [Active]" : " [Inactive]"),
                 new ProfileListWidget(minecraft, screen.width, screen.height, y0, y1,
-                        itemHeight, -200, 400, entryHeight, 420, profile)));
+                        itemHeight, -200, 400, entryHeight, 420,
+                        profile, null)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -171,8 +176,15 @@ public class ProfileSetListWidget extends ConfigListWidget {
                 int smallButtonWidth = 20;
                 int mainButtonWidth = width - smallButtonWidth * 5 - spacing * 5;
 
-                ImageButton optionsButton = new ImageButton(x, 0, smallButtonWidth, height,
+                ImageButton configureButton = new ImageButton(x, 0, smallButtonWidth, height,
                         0, 0, 20, ConfigListWidget.Entry.CONFIGURATION_ICON, 32, 64,
+                        (button) -> listWidget.openProfileScreen(profile),
+                        Component.empty());
+                elements.add(configureButton);
+
+                String name = profile.name;
+                if (isDefault) name = name + " [Default]";
+                elements.add(Button.builder(Component.literal(name),
                         (button) -> {
                             if (listWidget.editingProfile == null) {
                                 listWidget.editingProfile = profile;
@@ -184,55 +196,44 @@ public class ProfileSetListWidget extends ConfigListWidget {
                                 listWidget.editingProfile = null;
                             }
                             listWidget.reload();
-                        },
-                        Component.literal("options"));
-                elements.add(optionsButton);
-
-                String name = profile.name;
-                if (isDefault) name = name + " (Default)";
-                elements.add(Button.builder(Component.literal(name),
-                        (button) -> listWidget.openProfileScreen(profile))
-                                .pos(x + smallButtonWidth + spacing, 0)
-                                .size(mainButtonWidth, height)
-                                .build());
+                        })
+                        .pos(x + smallButtonWidth + spacing, 0)
+                        .size(mainButtonWidth, height)
+                        .build());
 
                 // Switch to right-justified
                 int movingX = x + width - smallButtonWidth * 4 - spacing * 3;
 
-                Checkbox selectBox = new SelectBox(movingX, 0,
-                        smallButtonWidth, height, Component.literal("Select"),
-                        profile.equals(CommandKeys.profile()));
-                if (inGame) selectBox.setTooltip(Tooltip.create(
-                        Component.literal("Use this profile")));
-                else selectBox.setTooltip(Tooltip.create(
-                        Component.literal("Join a world or server to select a profile")));
-                selectBox.setTooltipDelay(500);
-                selectBox.active = inGame;
-                elements.add(selectBox);
+                if (inGame) {
+                    Checkbox selectBox = new SelectBox(movingX, 0,
+                            smallButtonWidth, height, Component.literal("Select"),
+                            profile.equals(CommandKeys.profile()));
+                    selectBox.setTooltip(Tooltip.create(Component.literal("Use this profile")));
+                    selectBox.setTooltipDelay(500);
+                    elements.add(selectBox);
+                }
                 movingX += smallButtonWidth + spacing;
 
-                Button setAsDefaultButton = Button.builder(Component.literal("D"),
-                                (button) -> {
-                                    config().setAsDefault(profile);
-                                    listWidget.reload();
-                                })
-                        .pos(movingX, 0)
-                        .size(smallButtonWidth, height)
-                        .build();
+                ImageButton setAsDefaultButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                        0, 0, 20, ConfigListWidget.Entry.SET_DEFAULT_ICON, 32, 64,
+                        (button) -> {
+                            config().setAsDefault(profile);
+                            listWidget.reload();
+                        },
+                        Component.empty());
                 setAsDefaultButton.setTooltip(Tooltip.create(Component.literal("Set as default")));
                 setAsDefaultButton.setTooltipDelay(500);
                 setAsDefaultButton.active = !isDefault;
                 elements.add(setAsDefaultButton);
                 movingX += smallButtonWidth + spacing;
 
-                Button copyButton = Button.builder(Component.literal("C"),
-                                (button) -> {
-                                    config().copyProfile(profile);
-                                    listWidget.reload();
-                                })
-                        .pos(movingX, 0)
-                        .size(smallButtonWidth, height)
-                        .build();
+                ImageButton copyButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                        0, 0, 20, ConfigListWidget.Entry.COPY_ICON, 32, 64,
+                        (button) -> {
+                            config().copyProfile(profile);
+                            listWidget.reload();
+                        },
+                        Component.empty());
                 copyButton.setTooltip(Tooltip.create(Component.literal("Copy profile")));
                 copyButton.setTooltipDelay(500);
                 elements.add(copyButton);

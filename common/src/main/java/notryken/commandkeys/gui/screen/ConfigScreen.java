@@ -1,13 +1,11 @@
 package notryken.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.netty.channel.local.LocalAddress;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import notryken.commandkeys.CommandKeys;
@@ -16,7 +14,6 @@ import notryken.commandkeys.gui.component.listwidget.ProfileListWidget;
 import notryken.commandkeys.gui.component.listwidget.ProfileSetListWidget;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.SocketAddress;
 import java.util.function.Supplier;
 
 /**
@@ -33,15 +30,17 @@ public class ConfigScreen extends OptionsSubScreen {
 
     public ConfigScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen, Minecraft.getInstance().options,
-                Component.translatable("screen.commandkeys.title.default"));
+                inGame ? Component.translatable("screen.commandkeys.title.profile")
+                        .append(Component.literal(CommandKeys.profile().name)) :
+                        Component.translatable("screen.commandkeys.title.profiles"));
         if (inGame) {
             listWidget = new ProfileListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
                     0, -200, 400, 20, 420,
-                    CommandKeys.profile());
+                    CommandKeys.profile(), null);
         }
         else {
             listWidget = new ProfileSetListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
-                    0, -150, 300, 20, 320, false, null);
+                    0, -180, 360, 20, 380, false, null);
         }
 
     }

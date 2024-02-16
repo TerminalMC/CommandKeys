@@ -5,6 +5,7 @@ import io.netty.channel.local.LocalAddress;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
@@ -13,21 +14,30 @@ import net.minecraft.network.chat.MutableComponent;
 import notryken.commandkeys.CommandKeys;
 import notryken.commandkeys.config.CommandKey;
 import notryken.commandkeys.config.Profile;
+import notryken.commandkeys.config.TriState;
 import notryken.commandkeys.gui.screen.ConfigScreen;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ProfileListWidget extends ConfigListWidget {
     Profile profile;
+    Set<CommandKey> expandedKeys;
     CommandKey selectedCommandKey;
     InputConstants.Key heldKey;
     
     public ProfileListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
                              int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                             int scrollWidth, Profile profile) {
-        super(minecraft, width, height, top, bottom, itemHeight, entryRelX, 
+                             int scrollWidth, @NotNull Profile profile,
+                             @Nullable Set<CommandKey> expandedKeys) {
+        super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.profile = profile;
+        this.expandedKeys = (expandedKeys == null) ? new HashSet<>() : expandedKeys;
 
         addEntry(new Entry.GlobalSettingEntry(entryX, entryWidth, entryHeight, this));
 
@@ -37,12 +47,26 @@ public class ProfileListWidget extends ConfigListWidget {
                         "corresponding hotkey while in-game (depending on individual settings).")), 500));
 
         for (CommandKey commandKey : profile.getCommandKeys()) {
-            int size = commandKey.messages.size();
-            addEntry(new Entry.CommandKeyFirstFieldEntry(entryX, entryWidth, entryHeight, this,
-                    commandKey, size <= 1));
-            for (int i = 1; i < commandKey.messages.size(); i++) {
-                addEntry(new Entry.CommandKeyFieldEntry(entryX, entryWidth, entryHeight, this,
-                        commandKey, i, i == size -1));
+            // A CommandKey's message list may be empty, but here we need at
+            // least one message, so we add an empty one. Removed in cleanup.
+            if (commandKey.messages.isEmpty()) commandKey.messages.add("");
+
+            addEntry(new Entry.CommandKeyOptionsEntry(entryX, entryWidth, entryHeight, this, commandKey));
+            if (this.expandedKeys.contains(commandKey)) {
+                for (int i = 0; i < commandKey.messages.size(); i++) {
+                    addEntry(new Entry.CommandKeyMessageEntry(entryX, entryWidth, entryHeight, this,
+                            commandKey, i));
+                }
+                addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX + 25, 0, entryWidth - 50,
+                        (int)(entryHeight * 0.7), Component.literal("+"),
+                        Tooltip.create(Component.literal("New message")), 500,
+                        (button) -> {
+                            commandKey.messages.add("");
+                            reload();
+                        }));
+            }
+            else {
+                addEntry(new Entry.CommandKeyMessageTeaserEntry(entryX, entryWidth, (int)(entryHeight * 0.7), this, commandKey));
             }
         }
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
@@ -58,7 +82,7 @@ public class ProfileListWidget extends ConfigListWidget {
                                    int itemHeight, double scrollAmount) {
         ProfileListWidget newListWidget = new ProfileListWidget(
                 minecraft, width, height, top, bottom, itemHeight, entryRelX,
-                entryWidth, entryHeight, scrollWidth, profile);
+                entryWidth, entryHeight, scrollWidth, profile, expandedKeys);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
@@ -128,21 +152,14 @@ public class ProfileListWidget extends ConfigListWidget {
             lastScreen = lastConfigScreen.getLastScreen();
         }
         minecraft.setScreen(new ConfigScreen(lastScreen,
-                Component.translatable("screen.commandkeys.title.default"),
+                Component.translatable("screen.commandkeys.title.profiles"),
                 new ProfileSetListWidget(minecraft, screen.width, screen.height, y0, y1,
-                        itemHeight, -150, 300, entryHeight, 320,
+                        itemHeight, -180, 360, entryHeight, 380,
                         singleplayer, null)));
     }
 
     public void openMinecraftControlsScreen() {
         minecraft.setScreen(new KeyBindsScreen(screen, Minecraft.getInstance().options));
-    }
-
-    public void openCommandKeyScreen(CommandKey commandKey) {
-        minecraft.setScreen(new ConfigScreen(screen,
-                Component.translatable("screen.commandkeys.title.mono"),
-                new CommandKeyListWidget(minecraft, screen.width, screen.height, y0, y1,
-                        itemHeight, -120, 240, entryHeight, 260, commandKey)));
     }
 
     private abstract static class Entry extends ConfigListWidget.Entry {
@@ -188,20 +205,29 @@ public class ProfileListWidget extends ConfigListWidget {
             }
         }
 
-        private static class CommandKeyFirstFieldEntry extends Entry {
-            CommandKeyFirstFieldEntry(int x, int width, int height, ProfileListWidget listWidget,
-                                      CommandKey commandKey, boolean showAdd) {
+        private static class CommandKeyOptionsEntry extends Entry {
+            CommandKeyOptionsEntry(int x, int width, int height, ProfileListWidget listWidget,
+                                   CommandKey commandKey) {
                 super();
                 int spacing = 5;
                 int smallButtonWidth = 20;
-                int keyButtonWidth = 75;
-                int messageFieldWidth = width - smallButtonWidth * 4 - keyButtonWidth - spacing * 5;
+                int largeButtonWidth = (width - smallButtonWidth * 2 - spacing * 4) / 3;
                 int movingX = x;
 
-                elements.add(new ImageButton(movingX, 0, smallButtonWidth, height,
-                        0, 0, 20, ConfigListWidget.Entry.CONFIGURATION_ICON,
-                        32, 64, (button) -> listWidget.openCommandKeyScreen(commandKey),
-                        Component.literal("options")));
+                ImageButton collapseButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                        0, 0, 20, ConfigListWidget.Entry.COLLAPSE_ICON, 32, 64,
+                        (button) -> {
+                            listWidget.expandedKeys.remove(commandKey);
+                            listWidget.reload();
+                        },
+                        Component.empty());
+                if (listWidget.expandedKeys.contains(commandKey)) {
+                    collapseButton.setTooltip(Tooltip.create(Component.literal("Collapse")));
+                    collapseButton.setTooltipDelay(500);
+                } else {
+                    collapseButton.active = false;
+                }
+                elements.add(collapseButton);
                 movingX += smallButtonWidth + spacing;
 
                 // Make the key button's label and tooltip
@@ -247,9 +273,9 @@ public class ProfileListWidget extends ConfigListWidget {
                     tooltip = Tooltip.create(tooltipComponent
                             .append("\nConflict Strategy: ")
                             .append(switch(commandKey.conflictStrategy.state) {
-                                case ZERO -> Component.literal("Submissive").withStyle(ChatFormatting.GREEN);
-                                case ONE -> Component.literal("Assertive").withStyle(ChatFormatting.GOLD);
-                                case TWO -> Component.literal("Aggressive").withStyle(ChatFormatting.RED);
+                                case ZERO -> Component.literal("Submit").withStyle(ChatFormatting.GREEN);
+                                case ONE -> Component.literal("Assert").withStyle(ChatFormatting.GOLD);
+                                case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
                             }));
                 }
                 elements.add(Button.builder(label,
@@ -262,116 +288,156 @@ public class ProfileListWidget extends ConfigListWidget {
                                 })
                         .tooltip(tooltip)
                         .pos(movingX, 0)
-                        .size(keyButtonWidth, height)
+                        .size(largeButtonWidth, height)
                         .build());
-                movingX += keyButtonWidth + spacing;
+                movingX += largeButtonWidth + spacing;
 
-                EditBox messageField = new EditBox(Minecraft.getInstance().font, movingX, 0,
-                        messageFieldWidth, height, Component.literal("Message"));
-                messageField.setMaxLength(255);
-                messageField.setValue(commandKey.messages.isEmpty() ? "" : commandKey.messages.get(0));
-                messageField.setResponder(
-                        (value) -> {
-                            if (commandKey.messages.isEmpty()) {
-                                commandKey.messages.add(value.stripLeading());
-                            } else {
-                                commandKey.messages.set(0, value.stripLeading());
-                            }
-                        });
-                elements.add(messageField);
+                CycleButton<TriState.State> conflictStrategyButton = CycleButton.<TriState.State>builder(
+                                (status) -> switch(status) {
+                                    case ZERO -> Component.literal("Submit").withStyle(ChatFormatting.GREEN);
+                                    case ONE -> Component.literal("Assert").withStyle(ChatFormatting.GOLD);
+                                    case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
+                                })
+                        .withValues(TriState.State.values())
+                        .withInitialValue(commandKey.conflictStrategy.state)
+                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
+                            case ZERO -> "If the key is already used by Minecraft, this keybind will be cancelled.";
+                            case ONE -> "If the key is already used by Minecraft, this keybind will be activated " +
+                                    "first, then the other keybind.";
+                            case TWO -> "If the key is already used by Minecraft, the other keybind will be " +
+                                    "cancelled.\nNote: Some keys (including movement and sneak) cannot be cancelled.";
+                        })))
+                        .create(movingX, 0, largeButtonWidth, height, Component.literal("Conflict"),
+                                (button, status) -> {
+                                    commandKey.conflictStrategy.state = status;
+                                    listWidget.reload();
+                                });
+                conflictStrategyButton.setTooltipDelay(500);
+                elements.add(conflictStrategyButton);
+                movingX += largeButtonWidth + spacing;
+
+                int sendStrategyButtonWidth = width - (movingX - x) - smallButtonWidth - spacing;
+                if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
+                    sendStrategyButtonWidth -= (smallButtonWidth + 2);
+                }
+                CycleButton<TriState.State> sendStrategyButton = CycleButton.<TriState.State>builder(
+                                (status) -> switch(status) {
+                                    case ZERO -> Component.literal("Send").withStyle(ChatFormatting.GREEN);
+                                    case ONE -> Component.literal("Type").withStyle(ChatFormatting.GOLD);
+                                    case TWO -> Component.literal("Cycle").withStyle(ChatFormatting.DARK_AQUA);
+                                })
+                        .withValues(TriState.State.values())
+                        .withInitialValue(commandKey.sendStrategy.state)
+                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
+                            case ZERO -> "All messages will be sent.";
+                            case ONE -> "The first message will by typed in chat, but not sent.";
+                            case TWO -> "Messages will be cycled through, one per key-press. " +
+                                    "\nIn this mode, you can send multiple messages in a single " +
+                                    "key-press by separating them with two commas e.g. /lobby,,/nick";
+                        })))
+                        .create(movingX, 0, sendStrategyButtonWidth, height, Component.literal("Mode"),
+                                (button, status) -> {
+                                    commandKey.sendStrategy.state = status;
+                                    listWidget.reload();
+                                });
+                sendStrategyButton.setTooltipDelay(500);
+                elements.add(sendStrategyButton);
+                // Cycle index button
+                if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
+                    ArrayList<Integer> values = new ArrayList<>();
+                    for (int i = 0; i < commandKey.messages.size(); i++) values.add(i);
+                    if (values.isEmpty()) values.add(0);
+                    if (commandKey.cycleIndex > commandKey.messages.size() - 1) commandKey.cycleIndex = 0;
+
+                    CycleButton<Integer> cycleIndexButton = CycleButton.<Integer>builder(
+                            (status) -> Component.literal(status.toString()))
+                            .withValues(values)
+                            .withInitialValue(commandKey.cycleIndex)
+                            .displayOnlyValue()
+                            .withTooltip((status) -> Tooltip.create(
+                                    Component.literal("The index of the next message to be sent.")))
+                            .create(movingX + sendStrategyButtonWidth + 2, 0, smallButtonWidth, height,
+                                    Component.empty(),
+                                    (button, status) -> commandKey.cycleIndex = status);
+                    cycleIndexButton.setTooltipDelay(500);
+                    elements.add(cycleIndexButton);
+                }
 
                 // Now switch to right-justified
 
-                Button upButton = Button.builder(Component.literal("\u2191"),
-                                (button) -> {})
-                        .pos(x + width - spacing * 2 - smallButtonWidth * 2 - 24, 0)
-                        .size(12, height)
-                        .build();
-                upButton.active = false;
-                elements.add(upButton);
-
-                Button downButton = Button.builder(Component.literal("\u2193"),
+                Button removeButton = Button.builder(Component.literal("\u274C")
+                                        .withStyle(ChatFormatting.RED),
                                 (button) -> {
-                                    int index = 0;
-                                    if (Screen.hasShiftDown()) {
-                                        if (index < commandKey.messages.size() - 1) {
-                                            commandKey.messages.add(commandKey.messages.get(index));
-                                            commandKey.messages.remove(index);
-                                            listWidget.reload();
-                                        }
-                                    } else {
-                                        if (index < commandKey.messages.size() - 1) {
-                                            String temp = commandKey.messages.get(index);
-                                            commandKey.messages.set(index, commandKey.messages.get(index + 1));
-                                            commandKey.messages.set(index + 1, temp);
-                                            listWidget.reload();
-                                        }
-                                    }})
-                        .pos(x + width - spacing * 2 - smallButtonWidth * 2 - 12, 0)
-                        .size(12, height)
-                        .build();
-                if (commandKey.messages.size() > 1) {
-                    downButton.setTooltip(Tooltip.create(Component.literal(
-                            "Click to move down.\nShift-Click to send all the way.")));
-                    downButton.setTooltipDelay(1000);
-                }
-                else {
-                    downButton.active = false;
-                }
-                elements.add(downButton);
-
-                Button removeButton = Button.builder(Component.literal("\u274C"),
-                                (button) -> {
-                                    if (commandKey.messages.size() <= 1) {
-                                        listWidget.profile.removeCmdKey(commandKey);
-                                    } else {
-                                        commandKey.messages.remove(0);
-                                    }
+                                    listWidget.profile.removeCmdKey(commandKey);
                                     listWidget.reload();
                                 })
-                        .pos(x + width - spacing - smallButtonWidth * 2, 0)
+                        .pos(x + width - smallButtonWidth, 0)
                         .size(smallButtonWidth, height)
                         .build();
-                removeButton.setTooltip(Tooltip.create(Component.literal(
-                        commandKey.messages.size() <= 1 ? "Remove command key" : "Remove message")));
+                removeButton.setTooltip(Tooltip.create(Component.literal("Remove command key")));
                 removeButton.setTooltipDelay(500);
                 elements.add(removeButton);
+            }
+        }
 
-                if (showAdd) {
-                    Button addButton = Button.builder(Component.literal("+"),
-                                    (button) -> {
-                                        if (commandKey.messages.isEmpty()) commandKey.messages.add("");
-                                        commandKey.messages.add("");
-                                        listWidget.reload();
-                                    })
-                            .pos(x + width - smallButtonWidth, 0)
-                            .size(smallButtonWidth, height)
-                            .build();
-                    addButton.setTooltip(Tooltip.create(Component.literal("New message")));
-                    addButton.setTooltipDelay(500);
-                    elements.add(addButton);
+        private static class CommandKeyMessageTeaserEntry extends Entry {
+            ProfileListWidget listWidget;
+            CommandKey commandKey;
+
+            CommandKeyMessageTeaserEntry(int x, int width, int height, ProfileListWidget listWidget,
+                                         CommandKey commandKey) {
+                super();
+                this.listWidget = listWidget;
+                this.commandKey = commandKey;
+
+                int spacing = 5;
+                int smallButtonWidth = 20;
+                int moveButtonWidth = 12;
+                int messageFieldWidth = width - smallButtonWidth * 2 - moveButtonWidth * 2 - spacing * 3;
+
+                // Switch to right-justified
+
+                String message = commandKey.messages.isEmpty() ? "" : commandKey.messages.get(0);
+                if (commandKey.messages.size() > 1) {
+                    message = message + " [+" + (commandKey.messages.size() - 1) + "]";
+                }
+                message = message + " [Click to Expand]";
+
+                EditBoxPreview messagePreview = new EditBoxPreview(Minecraft.getInstance().font,
+                        x + width - smallButtonWidth - spacing - messageFieldWidth, 0,
+                        messageFieldWidth, height, Component.empty());
+                messagePreview.setValue(message);
+                elements.add(messagePreview);
+            }
+
+            private class EditBoxPreview extends EditBox {
+
+                public EditBoxPreview(Font font, int x, int y, int width, int height, Component label) {
+                    super(font, x, y, width, height, label);
+                }
+
+                @Override
+                public void onClick(double mouseX, double mouseY) {
+                    listWidget.expandedKeys.add(commandKey);
+                    listWidget.reload();
                 }
             }
         }
 
-        private static class CommandKeyFieldEntry extends Entry {
-            CommandKeyFieldEntry(int x, int width, int height, ProfileListWidget listWidget,
-                                 CommandKey commandKey, int index, boolean showAdd) {
+        private static class CommandKeyMessageEntry extends Entry {
+            ProfileListWidget listWidget;
+            CommandKey commandKey;
+
+            CommandKeyMessageEntry(int x, int width, int height, ProfileListWidget listWidget,
+                                   CommandKey commandKey, int index) {
                 super();
+                this.listWidget = listWidget;
+                this.commandKey = commandKey;
+
                 int spacing = 5;
                 int smallButtonWidth = 20;
-                int keyButtonWidth = 75;
-                int messageFieldWidth = width - smallButtonWidth * 4 - keyButtonWidth - spacing * 5;
-                int movingX = x + smallButtonWidth + spacing + keyButtonWidth + spacing;
-
-                EditBox messageField = new EditBox(Minecraft.getInstance().font, movingX, 0,
-                        messageFieldWidth, height, Component.literal("Message"));
-                messageField.setMaxLength(255);
-                messageField.setValue(commandKey.messages.get(index));
-                messageField.setResponder((value) -> commandKey.messages.set(index, value.stripLeading()));
-                elements.add(messageField);
-
-                // Now switch to right-justified
+                int moveButtonWidth = 12;
+                int messageFieldWidth = width - smallButtonWidth * 2 - spacing * 2;
 
                 Button upButton = Button.builder(Component.literal("\u2191"),
                                 (button) -> {
@@ -388,13 +454,18 @@ public class ProfileListWidget extends ConfigListWidget {
                                             commandKey.messages.set(index - 1, temp);
                                             listWidget.reload();
                                         }
-                                    }})
-                        .pos(x + width - spacing * 2 - smallButtonWidth * 2 - 24, 0)
-                        .size(12, height)
+                                    }
+                                })
+                        .pos(x, 0)
+                        .size(moveButtonWidth, height)
                         .build();
-                upButton.setTooltip(Tooltip.create(Component.literal(
-                        "Click to move up.\nShift-Click to send all the way.")));
-                upButton.setTooltipDelay(1000);
+                if (index > 0) {
+                    upButton.setTooltip(Tooltip.create(Component.literal(
+                            "Click to move up.\nShift-Click to send all the way.")));
+                    upButton.setTooltipDelay(1000);
+                } else {
+                    upButton.active = false;
+                }
                 elements.add(upButton);
 
                 Button downButton = Button.builder(Component.literal("\u2193"),
@@ -412,9 +483,10 @@ public class ProfileListWidget extends ConfigListWidget {
                                             commandKey.messages.set(index + 1, temp);
                                             listWidget.reload();
                                         }
-                                    }})
-                        .pos(x + width - spacing * 2 - smallButtonWidth * 2 - 12, 0)
-                        .size(12, height)
+                                    }
+                                })
+                        .pos(x + moveButtonWidth, 0)
+                        .size(moveButtonWidth, height)
                         .build();
                 if (index < commandKey.messages.size() - 1) {
                     downButton.setTooltip(Tooltip.create(Component.literal(
@@ -425,32 +497,30 @@ public class ProfileListWidget extends ConfigListWidget {
                 }
                 elements.add(downButton);
 
+                EditBox messageField = new EditBox(Minecraft.getInstance().font,
+                        x + smallButtonWidth + spacing, 0,
+                        messageFieldWidth, height, Component.empty());
+                messageField.setMaxLength(255);
+                messageField.setValue(commandKey.messages.get(index));
+                messageField.setResponder((value) -> commandKey.messages.set(index, value.stripLeading()));
+                elements.add(messageField);
+
+                // Switch to right-justified
+
                 Button removeButton = Button.builder(Component.literal("\u274C"),
                                 (button) -> {
                                     commandKey.messages.remove(index);
+                                    if (commandKey.messages.isEmpty()) {
+                                        listWidget.expandedKeys.remove(commandKey);
+                                    }
                                     listWidget.reload();
                                 })
-                        .pos(x + width - spacing - smallButtonWidth * 2, 0)
+                        .pos(x + width - smallButtonWidth, 0)
                         .size(smallButtonWidth, height)
                         .build();
-                removeButton.setTooltip(Tooltip.create(Component.literal(
-                        commandKey.messages.size() <= 1 ? "Remove command key" : "Remove message")));
+                removeButton.setTooltip(Tooltip.create(Component.literal("Remove message")));
                 removeButton.setTooltipDelay(500);
                 elements.add(removeButton);
-
-                if (showAdd) {
-                    Button addButton = Button.builder(Component.literal("+"),
-                                    (button) -> {
-                                        commandKey.messages.add("");
-                                        listWidget.reload();
-                                    })
-                            .pos(x + width - smallButtonWidth, 0)
-                            .size(smallButtonWidth, height)
-                            .build();
-                    addButton.setTooltip(Tooltip.create(Component.literal("New message")));
-                    addButton.setTooltipDelay(500);
-                    elements.add(addButton);
-                }
             }
         }
     }

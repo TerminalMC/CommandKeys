@@ -23,8 +23,8 @@ public class KeyUtil {
             Set<CommandKey> commandKeys = CommandKey.MAP.get(key);
             for (CommandKey ck1 : commandKeys) {
                 if (ck1.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                    // Found a matching CommandKey, but preference the ones
-                    // with modifier keys that are down.
+                    // Found a matching single-key CommandKey, but preference
+                    // the ones with modifier keys that are down.
                     cmdKey = ck1;
                     for (CommandKey ck2 : commandKeys) {
                         if (!ck2.getLimitKey().equals(InputConstants.UNKNOWN) &&
@@ -48,45 +48,45 @@ public class KeyUtil {
                 boolean send = true;
                 boolean override = false;
                 switch(cmdKey.conflictStrategy.state) {
-                    // Can't use MAP.contains(key) because Forge is weird
+                    // Can't use MAP.contains(key) because Forge replaces the
+                    // java.util.Map with a KeyMappingLookup thing.
                     case ZERO -> send = KeyMapping.MAP.get(key) != null;
                     case TWO -> override = true;
                 }
 
                 if (send) {
                     cancelNext = true;
-                    cancelClick = !cmdKey.fullSend || override;
+                    cancelClick = override;
 
-                    if (cmdKey.cycle) {
-                        // Strategy to allow spacer blank messages
-                        String messages = cmdKey.messages.get(cmdKey.nextIndex);
-                        if (messages != null && !messages.isBlank()) {
-                            if (cmdKey.fullSend) {
+                    switch(cmdKey.sendStrategy.state) {
+                        case ZERO -> {
+                            for (String msg : cmdKey.messages) {
+                                KeyUtil.send(msg, profile().addToHistory, profile().showHudMessage);
+                            }
+                        }
+                        case ONE -> {
+                            if (!cmdKey.messages.isEmpty()) {
+                                cancelClick = true;
+                                KeyUtil.type(cmdKey.messages.get(0));
+                            }
+                        }
+                        case TWO -> {
+                            // Strategy to allow spacer blank messages, and multiple
+                            // messages per cycling key-press.
+                            String messages = cmdKey.messages.get(cmdKey.cycleIndex);
+                            if (messages != null && !messages.isBlank()) {
                                 for (String msg : messages.split(",,")) {
                                     if (!msg.isBlank()) {
                                         KeyUtil.send(msg, profile().addToHistory, profile().showHudMessage);
                                     }
                                 }
                             }
+                            if (cmdKey.cycleIndex < cmdKey.messages.size() - 1) {
+                                cmdKey.cycleIndex ++;
+                            }
                             else {
-                                KeyUtil.type(messages);
+                                cmdKey.cycleIndex = 0;
                             }
-                        }
-                        if (cmdKey.nextIndex < cmdKey.messages.size() - 1) {
-                            cmdKey.nextIndex ++;
-                        }
-                        else {
-                            cmdKey.nextIndex = 0;
-                        }
-                    }
-                    else {
-                        if (cmdKey.fullSend) {
-                            for (String msg : cmdKey.messages) {
-                                KeyUtil.send(msg, profile().addToHistory, profile().showHudMessage);
-                            }
-                        }
-                        else if (!cmdKey.messages.isEmpty()) {
-                            KeyUtil.type(cmdKey.messages.get(0));
                         }
                     }
                 }

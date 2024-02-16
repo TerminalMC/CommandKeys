@@ -1,6 +1,6 @@
 {
   "key.commandkeys.open_menu": "Open Menu",
-  "screen.commandkeys.title.default": "Command Keys",
-  "screen.commandkeys.title.mono": "Command Mono-Keys",
-  "screen.commandkeys.title.dual": "Command Dual-Keys"
+  "screen.commandkeys.title.default": "CommandKeys",
+  "screen.commandkeys.title.profile": "CommandKeys Profile: ",
+  "screen.commandkeys.title.profiles": "CommandKeys Profiles"
 }

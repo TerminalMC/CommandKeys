@@ -95,8 +95,13 @@ public class Profile {
         while (cmdKeyIter.hasNext()) {
             CommandKey cmk = cmdKeyIter.next();
             // Allow blank messages for cycling command keys as spacers
-            if (!cmk.cycle) cmk.messages.removeIf(String::isBlank);
-            if (cmk.fullSend) cmk.messages.replaceAll(String::stripTrailing);
+            switch(cmk.sendStrategy.state) {
+                case ZERO -> {
+                    cmk.messages.replaceAll(String::stripTrailing);
+                    cmk.messages.removeIf(String::isBlank);
+                }
+                case TWO -> cmk.messages.replaceAll(String::stripTrailing);
+            }
             if (cmk.messages.isEmpty()) cmdKeyIter.remove();
         }
     }

@@ -87,6 +87,10 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
         public static final ResourceLocation CONFIGURATION_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/configure_button.png");
+        public static final ResourceLocation COPY_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/copy_button.png");
+        public static final ResourceLocation SET_DEFAULT_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/set_default_button.png");
+        public static final ResourceLocation COLLAPSE_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/collapse_button.png");
+
 
         public final List<AbstractWidget> elements;
 

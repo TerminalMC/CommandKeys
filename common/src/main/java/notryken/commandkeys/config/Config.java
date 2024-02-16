@@ -36,7 +36,7 @@ public class Config {
     private static Path configPath;
 
     // Not saved, modifiable by user
-    private Profile activeProfile;
+    private transient Profile activeProfile;
 
     // Saved, not modifiable by user
     // 1 is initial version following switch from commandkeys_v1.json
@@ -141,10 +141,14 @@ public class Config {
 
     public void copyProfile(Profile profile) {
         if (profile.singleplayer) {
-            spProfiles.add(new Profile(profile));
+            Profile copyProfile = new Profile(profile);
+            copyProfile.name = copyProfile.name + " (Copy)";
+            spProfiles.add(copyProfile);
         }
         else {
-            mpProfiles.add(new Profile(profile));
+            Profile copyProfile = new Profile(profile);
+            copyProfile.name = copyProfile.name + " (Copy)";
+            mpProfiles.add(copyProfile);
         }
     }
 
