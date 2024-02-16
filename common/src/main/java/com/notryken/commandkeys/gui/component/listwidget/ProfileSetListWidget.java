@@ -315,6 +315,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
 
                 EditBox addressBox = new EditBox(Minecraft.getInstance().font, x + labelWidth, 0,
                         addressBoxWidth, height, Component.literal("Server Address"));
+                addressBox.setMaxLength(64);
                 addressBox.setValue(address);
                 addressBox.active = false;
                 elements.add(addressBox);
