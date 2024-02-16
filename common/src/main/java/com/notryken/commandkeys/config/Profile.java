@@ -16,7 +16,7 @@ public class Profile {
     private final Set<CommandKey> commandKeys;
 
     public Profile() {
-        this.name = "New Profile";
+        this.name = "";
         this.addresses = new HashSet<>();
         this.addToHistory = false;
         this.showHudMessage = false;

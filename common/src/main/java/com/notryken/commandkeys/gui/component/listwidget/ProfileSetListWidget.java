@@ -10,6 +10,7 @@ import com.notryken.commandkeys.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
 import static com.notryken.commandkeys.CommandKeys.config;
 
@@ -147,7 +148,12 @@ public class ProfileSetListWidget extends ConfigListWidget {
                     mainButtonX += (smallButtonWidth + spacing);
                 }
 
-                elements.add(Button.builder(Component.literal(profile.name),
+                String name = profile.name;
+                if (name.isBlank()) {
+                    name = profile.getAddresses().stream().findFirst().orElse("[No Name]");
+                }
+
+                elements.add(Button.builder(Component.literal(name),
                         (button) -> {
                             if (listWidget.editingProfile == null) {
                                 listWidget.editingProfile = profile;
@@ -266,7 +272,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
                         nameBoxWidth, height, Component.empty());
                 nameBox.setMaxLength(64);
                 nameBox.setValue(profile.name);
-                nameBox.setResponder((value) -> profile.name = value);
+                nameBox.setResponder((value) -> profile.name = value.strip());
                 elements.add(nameBox);
 
                 Button refreshButton = Button.builder(Component.literal("\ud83d\uddd8"),
