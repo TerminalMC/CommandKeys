@@ -28,8 +28,8 @@ Allows the user to send pre-written messages and commands using single and dual-
 
 ### License
 
-Except where otherwise stated, CommandKeys source files are provided under the terms of the GNU LGPL-3.0-only 
-open-source license. For more information, refer to the provided LICENSE file.
+Except where otherwise stated, CommandKeys source files are provided under the terms of the GNU Lesser General Public
+License, version 3. For more information, refer to the provided LICENSE file.
 
 ### Contact
 
