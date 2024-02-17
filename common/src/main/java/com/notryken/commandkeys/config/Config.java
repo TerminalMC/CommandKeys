@@ -25,8 +25,6 @@ public class Config {
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
             .registerTypeAdapter(CommandKey.class, new CommandKey.Serializer())
             .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer())
-            .registerTypeAdapter(KeyPair.class, new KeyPair.Serializer())
-            .registerTypeAdapter(KeyPair.class, new KeyPair.Deserializer())
             .setPrettyPrinting()
             .create();
 
