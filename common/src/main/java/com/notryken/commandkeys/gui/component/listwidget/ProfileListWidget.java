@@ -6,6 +6,7 @@ import com.notryken.commandkeys.config.CommandKey;
 import com.notryken.commandkeys.config.Profile;
 import com.notryken.commandkeys.config.TriState;
 import com.notryken.commandkeys.gui.screen.ConfigScreen;
+import com.notryken.commandkeys.util.KeyUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -124,6 +125,20 @@ public class ProfileListWidget extends ConfigListWidget {
                 selectedCommandKey.setLimitKey(InputConstants.UNKNOWN);
                 reload();
                 return true;
+            }
+        }
+        else if (getSelected() == null) {
+            Set<CommandKey> cmdKeys = CommandKey.MAP.get(key);
+            for (CommandKey cmdKey : cmdKeys) {
+                if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
+                        cmdKey.sendStrategy.state.equals(TriState.State.ZERO)) {
+                    screen.onClose();
+                    minecraft.setScreen(null);
+                    for (String msg : cmdKey.messages) {
+                        if (!msg.isBlank()) KeyUtil.send(msg, profile.addToHistory, profile.showHudMessage);
+                    }
+                    return true;
+                }
             }
         }
         return false;
