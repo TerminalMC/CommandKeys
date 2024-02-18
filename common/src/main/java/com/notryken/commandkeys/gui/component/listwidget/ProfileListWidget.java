@@ -43,7 +43,9 @@ public class ProfileListWidget extends ConfigListWidget {
         addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("------------------------ Command Keys \u2139 ------------------------"),
                 Tooltip.create(Component.literal("The messages for each key will be sent if you press the " +
-                        "corresponding hotkey while in-game (depending on individual settings).")), 500));
+                        "corresponding hotkey while in-game (depending on individual settings).\n" +
+                        "You can also send the message(s) for any CommandKey with a single bound key by pressing " +
+                        "that key whilst on this screen with nothing selected.")), 500));
 
         for (CommandKey commandKey : profile.getCmdKeys()) {
             // A CommandKey's message list may be empty, but here we need at
