@@ -59,18 +59,17 @@ KeyMapping::click call of KeyboardHandler::keyPress
 
 
 public class CommandKey {
-    // TODO check access for all fields
 
     public transient final Profile profile;
 
-    public TriState conflictStrategy; // Submissive, Assertive or Aggressive
-    public TriState sendStrategy; // Send, Type or Cycle
+    public final TriState conflictStrategy; // Submissive, Assertive or Aggressive
+    public final TriState sendStrategy; // Send, Type or Cycle
     public transient int cycleIndex; // Index of next message if cycling
 
     private InputConstants.Key key;
     private InputConstants.Key limitKey;
 
-    public ArrayList<String> messages;
+    public final ArrayList<String> messages;
 
     public CommandKey(Profile profile) {
         this.profile = profile;

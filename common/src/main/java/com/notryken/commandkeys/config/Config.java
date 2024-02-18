@@ -35,7 +35,6 @@ public class Config {
     private transient Profile activeProfile;
 
     // Saved, not modifiable by user
-    // 1 is initial version following switch from commandkeys_v1.json
     private final int version = 1;
 
     // Saved, modifiable by user
