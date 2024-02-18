@@ -1,4 +1,4 @@
-package com.notryken.commandkeys.config;
+package com.notryken.commandkeys.config.serialize;
 
 import java.io.IOException;
 import java.io.Writer;

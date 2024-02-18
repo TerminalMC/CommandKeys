@@ -2,6 +2,7 @@ package com.notryken.commandkeys.config;
 
 import com.google.gson.*;
 import com.notryken.commandkeys.CommandKeys;
+import com.notryken.commandkeys.config.serialize.GhettoAsciiWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
