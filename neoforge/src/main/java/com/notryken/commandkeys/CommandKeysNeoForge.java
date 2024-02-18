@@ -1,6 +1,5 @@
 package com.notryken.commandkeys;
 
-import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -11,7 +10,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import com.notryken.commandkeys.gui.screen.ConfigScreenMono;
+
 @Mod(CommandKeys.MOD_ID)
 public class CommandKeysNeoForge {
     public CommandKeysNeoForge() {
