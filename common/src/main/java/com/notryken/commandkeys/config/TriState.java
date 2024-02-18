@@ -1,5 +1,7 @@
 package com.notryken.commandkeys.config;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a control with three states, arbitrarily ZERO, ONE, TWO.
  */
@@ -11,13 +13,13 @@ public class TriState {
         TWO
     }
 
-    public State state;
+    public @NotNull State state;
 
     public TriState() {
         this.state = State.ZERO;
     }
 
-    public TriState(State state) {
+    public TriState(@NotNull State state) {
         this.state = state;
     }
 }
