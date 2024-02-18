@@ -28,6 +28,7 @@ public class ProfileListWidget extends ConfigListWidget {
     Set<CommandKey> expandedKeys;
     CommandKey selectedCommandKey;
     InputConstants.Key heldKey;
+    InputConstants.Key sendKey;
     
     public ProfileListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
                              int itemHeight, int entryRelX, int entryWidth, int entryHeight,
@@ -114,6 +115,9 @@ public class ProfileListWidget extends ConfigListWidget {
             }
             return true;
         }
+        else if (getSelected() == null && !key.equals(CommandKeys.CONFIG_KEY.key)) {
+            sendKey = key;
+        }
         return false;
     }
 
@@ -127,18 +131,23 @@ public class ProfileListWidget extends ConfigListWidget {
                 return true;
             }
         }
-        else if (getSelected() == null && !key.equals(CommandKeys.CONFIG_KEY.key)) {
-            Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(key);
-            for (CommandKey cmdKey : cmdKeys) {
-                if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
-                        cmdKey.sendStrategy.state.equals(TriState.State.ZERO)) {
-                    screen.onClose();
-                    minecraft.setScreen(null);
-                    for (String msg : cmdKey.messages) {
-                        if (!msg.isBlank()) KeyUtil.send(msg, profile.addToHistory, profile.showHudMessage);
+        else if (key.equals(sendKey)) {
+            if (getSelected() == null) {
+                Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(sendKey);
+                for (CommandKey cmdKey : cmdKeys) {
+                    if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
+                            cmdKey.sendStrategy.state.equals(TriState.State.ZERO)) {
+                        screen.onClose();
+                        minecraft.setScreen(null);
+                        for (String msg : cmdKey.messages) {
+                            if (!msg.isBlank()) KeyUtil.send(msg, profile.addToHistory, profile.showHudMessage);
+                        }
+                        return true;
                     }
-                    return true;
                 }
+            }
+            else {
+                sendKey = null;
             }
         }
         return false;
