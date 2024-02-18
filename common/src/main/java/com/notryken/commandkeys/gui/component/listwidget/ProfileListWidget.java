@@ -94,7 +94,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 selectedCommandKey.setLimitKey(InputConstants.UNKNOWN);
                 reload();
             }
-            else if (!key.equals(CommandKeys.CONFIG_KEY.key)) {
+            else {
                 if (heldKey == null) {
                     heldKey = key;
                 }
@@ -108,8 +108,6 @@ public class ProfileListWidget extends ConfigListWidget {
                         return false;
                     }
                 }
-            }
-            else {
                 return false;
             }
             return true;
@@ -127,7 +125,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 return true;
             }
         }
-        else if (getSelected() == null) {
+        else if (getSelected() == null && !key.equals(CommandKeys.CONFIG_KEY.key)) {
             Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(key);
             for (CommandKey cmdKey : cmdKeys) {
                 if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
