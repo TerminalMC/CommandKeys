@@ -449,7 +449,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 EditBoxPreview messagePreview = new EditBoxPreview(Minecraft.getInstance().font,
                         x + width - smallButtonWidth - spacing - messageFieldWidth, 0,
                         messageFieldWidth, height, Component.empty());
-                messagePreview.setMaxLength(255);
+                messagePreview.setMaxLength(300);
                 messagePreview.setValue(message);
                 elements.add(messagePreview);
             }
