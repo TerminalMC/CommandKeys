@@ -11,7 +11,6 @@ import com.notryken.commandkeys.gui.screen.ConfigScreen;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 import static com.notryken.commandkeys.CommandKeys.config;
 
@@ -182,7 +181,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
                 int movingX = x + width - smallButtonWidth * 5 - spacing * 4;
 
                 ImageButton configureButton = new ImageButton(movingX, 0, smallButtonWidth, height,
-                        0, 0, 20, CONFIGURATION_ICON, 32, 64,
+                        0, 0, 20, CONFIGURE_ICON, 32, 64,
                         (button) -> listWidget.openProfileScreen(profile),
                         Component.empty());
                 elements.add(configureButton);
