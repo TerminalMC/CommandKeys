@@ -11,25 +11,88 @@
 
 [![Modrinth Downloads](https://img.shields.io/modrinth/dt/65UyswbY?label=Modrinth%20Downloads&logo=modrinth&logoColor=%2300AF5C)](https://modrinth.com/mod/commandkeys)
 
-Allows the user to send pre-written messages and commands using single and dual-step hotkeys.
+Allows the user to send pre-written messages and commands using hotkeys.
 
 </center></div>
 
-### Features and Usage
+### Epic Screenshots
 
 <img alt="Editing a Profile" src="https://i.postimg.cc/sDn4TPvC/2024-02-16-14-19-06.png" width="637">
 
 <img alt="Selecting a Profile" src="https://i.postimg.cc/FH7g8fLd/2024-02-16-14-10-21.png" width="637">
+
+### Profiles
+
+- **Access**
+  - View the profile menu by selecting CommandKeys from your mod list ([ModMenu](https://modrinth.com/mod/modmenu/) 
+  list on Fabric/Quilt), or by pressing the edit key (default:K) in-game and clicking the "Change Profile" button.
+  
+
+- **Default Profiles**
+  - There are two default profiles; the Singleplayer Default is loaded whenever you join a singleplayer world, 
+  and the Multiplayer Default is loaded whenever you connect to a server (unless you have previously selected a 
+  different profile on that server, see "Profile Switching" below).
+  - You can set any profile as the default by clicking the "S+" (singleplayer) or "M+" (multiplayer) button.
+  
+
+- **Profile Switching**
+  - You can select a profile while in-game, by clicking the checkbox to the left of the profile.
+  - If you select a profile while on a server, the server's address will be saved to the profile, and the profile will 
+  be automatically selected when you next join the server.
+  - You can edit the name of a profile, and view and remove server addresses by clicking on the profile's main button.
+
+
+### Command Keys
+
+- **Access** 
+  - You can edit a profile by clicking the edit button from the profile selection screen, or by pressing the edit key
+  (default: K) in-game. 
+
+
+- **Binding Keys**
+  - You can bind any* keyboard key or mouse button to a Command Key, similar to Minecraft's own Controls screen. However,
+  you can also bind any *pair* of keys; just press one while holding the other (e.g. press 'T' while holding 'Shift').
+  
+    *(not really) 
+
+
+- **Conflict Strategy**
+  - If a key is already used by Minecraft, you can choose a conflict strategy;
+    - Submit: The Command Key will be ignored, the Minecraft keybind will function normally.
+    - Assert: The Command Key and the Minecraft keybind will both function.
+    - Veto: The Command Key will function, the Minecraft keybind will be cancelled (if possible).
+
+
+- **Mode**
+  - This allows you to choose what happens when the Command Key is activated;
+    - Send: All messages for the Command Key will be sent.
+    - Type: The first message will be typed into the chat box, but not sent.
+    - Cycle: The messages will be cycled through as you repeatedly press the key, one message per key-press.
+      - If you need to send multiple messages in a single cycling key-press, enter them into a single box, separated by
+      pairs of commas (e.g. /say hi,,/say hello,,/say bye) (doesn't work for any other mode).
+
+
+- **Two-Step Sending**
+  - If a Command Key is bound to a single key, and is in 'Send' mode, you can activate it while on the edit screen, by
+  pressing the keyboard key. Why? Good question. It does bypass key conflicts though, so that's cool I guess.
+
+### Still Not Sure?
+
+Questions, ideas, feedback, and bug reports are welcome at [The Terminal](https://discord.gg/sSgQ9AF4mU). There's also 
+[GitHub](https://github.com/NotRyken/CommandKeys/issues) if you're more into that.
+
 
 ### Credits
 
 - CommandKeys includes derivative work of code from the following projects:
     - [Sodium](https://github.com/CaffeineMC/sodium-fabric/)
 
+
 ### License
 
 Except where otherwise stated, CommandKeys source files are provided under the terms of the GNU Lesser General Public
 License, version 3. For more information, refer to the provided LICENSE file.
+
 
 ### Contact
 
