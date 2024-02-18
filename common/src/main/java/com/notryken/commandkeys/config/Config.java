@@ -24,7 +24,6 @@ public class Config {
             .registerTypeAdapter(Profile.class, new Profile.Serializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
             .registerTypeAdapter(CommandKey.class, new CommandKey.Serializer())
-            .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer())
             .setPrettyPrinting()
             .create();
 
@@ -47,14 +46,16 @@ public class Config {
         Profile spDefaultProfile = new Profile();
         spDefaultProfile.name = "Singleplayer Default";
         this.spDefaultProfile = spDefaultProfile;
+
         Profile mpDefaultProfile = new Profile();
         mpDefaultProfile.name = "Multiplayer Default";
         this.mpDefaultProfile = mpDefaultProfile;
+
         this.profiles = new ArrayList<>();
         this.activeProfile = this.mpDefaultProfile;
     }
 
-    public Config(Profile spDefaultProfile, Profile mpDefaultProfile,
+    public Config(@NotNull Profile spDefaultProfile, @NotNull Profile mpDefaultProfile,
                   ArrayList<Profile> profiles) {
         this.spDefaultProfile = spDefaultProfile;
         this.mpDefaultProfile = mpDefaultProfile;

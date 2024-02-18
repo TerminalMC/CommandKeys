@@ -1,12 +1,16 @@
 package com.notryken.commandkeys.config;
 
+import com.google.common.collect.HashMultimap;
 import com.google.gson.*;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.lang.reflect.Type;
 import java.util.*;
 
 public class Profile {
-    public static final Map<String, Profile> MAP = new HashMap<>();
+    public static final Map<String, Profile> PROFILE_MAP = new HashMap<>();
+
+    public transient final HashMultimap<InputConstants.Key, CommandKey> COMMANDKEY_MAP = HashMultimap.create();
 
     public String name;
     private final Set<String> addresses;
@@ -35,8 +39,8 @@ public class Profile {
         Iterator<String> addressIter = this.addresses.iterator();
         while(addressIter.hasNext()) {
             String address = addressIter.next();
-            if (MAP.containsKey(address)) addressIter.remove();
-            else MAP.put(address, this);
+            if (PROFILE_MAP.containsKey(address)) addressIter.remove();
+            else PROFILE_MAP.put(address, this);
         }
     }
 
@@ -53,20 +57,20 @@ public class Profile {
     }
 
     public boolean addAddress(String address) {
-        if (MAP.containsKey(address)) return false;
+        if (PROFILE_MAP.containsKey(address)) return false;
         addresses.add(address);
-        MAP.put(address, this);
+        PROFILE_MAP.put(address, this);
         return true;
     }
 
     public void forceAddAddress(String address) {
-        if (MAP.containsKey(address)) MAP.get(address).removeAddress(address);
+        if (PROFILE_MAP.containsKey(address)) PROFILE_MAP.get(address).removeAddress(address);
         addAddress(address);
     }
 
     public void removeAddress(String address) {
         addresses.remove(address);
-        MAP.remove(address);
+        PROFILE_MAP.remove(address);
     }
 
     public Set<CommandKey> getCmdKeys() {
@@ -79,7 +83,7 @@ public class Profile {
 
     public void removeCmdKey(CommandKey cmdKey) {
         commandKeys.remove(cmdKey);
-        CommandKey.MAP.remove(cmdKey.getKey(), cmdKey);
+        COMMANDKEY_MAP.remove(cmdKey.getKey(), cmdKey);
     }
 
     // Cleanup and validation
@@ -121,6 +125,7 @@ public class Profile {
     public static class Deserializer implements JsonDeserializer<Profile> {
         @Override
         public Profile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+
             JsonObject profileObj = json.getAsJsonObject();
 
             String name;
@@ -138,12 +143,20 @@ public class Profile {
             
             addToHistory = profileObj.get("addToHistory").getAsBoolean();
             showHudMessage = profileObj.get("showHudMessage").getAsBoolean();
+
+            // Deserialize CommandKey objects with link to deserialized Profile
+
+            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
+            Gson commandKeyGson = new GsonBuilder()
+                    .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer(profile))
+                    .create();
+
             JsonArray commandKeysArr = profileObj.getAsJsonArray("commandKeys");
             for (JsonElement element : commandKeysArr) {
-                commandKeys.add(context.deserialize(element, CommandKey.class));
+                commandKeys.add(commandKeyGson.fromJson(element, CommandKey.class));
             }
 
-            return new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
+            return profile;
         }
     }
 }

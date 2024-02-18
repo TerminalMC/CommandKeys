@@ -43,10 +43,7 @@ public class CommandKeys {
     }
 
     public static Profile profile() {
-        if (CONFIG == null) {
-            throw new IllegalStateException("Config not yet available");
-        }
-        return CONFIG.getActiveProfile();
+        return config().getActiveProfile();
     }
 
     public static Screen getConfigScreen(Screen lastScreen) {

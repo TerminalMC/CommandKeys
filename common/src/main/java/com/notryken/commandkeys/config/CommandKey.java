@@ -1,8 +1,8 @@
 package com.notryken.commandkeys.config;
 
-import com.google.common.collect.HashMultimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -60,7 +60,8 @@ KeyMapping::click call of KeyboardHandler::keyPress
 
 public class CommandKey {
     // TODO check access for all fields
-    public static final HashMultimap<InputConstants.Key, CommandKey> MAP = HashMultimap.create();
+
+    public transient final Profile profile;
 
     public TriState conflictStrategy; // Submissive, Assertive or Aggressive
     public TriState sendStrategy; // Send, Type or Cycle
@@ -71,7 +72,8 @@ public class CommandKey {
 
     public ArrayList<String> messages;
 
-    public CommandKey() {
+    public CommandKey(Profile profile) {
+        this.profile = profile;
         this.conflictStrategy = new TriState();
         this.sendStrategy = new TriState();
         this.cycleIndex = 0;
@@ -80,16 +82,17 @@ public class CommandKey {
         this.messages = new ArrayList<>();
     }
 
-    public CommandKey(TriState conflictStrategy, TriState sendStrategy,
+    public CommandKey(Profile profile, TriState conflictStrategy, TriState sendStrategy,
                       InputConstants.Key key, InputConstants.Key limitKey,
                       ArrayList<String> messages) {
+        this.profile = profile;
         this.conflictStrategy = conflictStrategy;
         this.sendStrategy = sendStrategy;
         this.cycleIndex = 0;
         this.key = key;
         this.limitKey = limitKey;
         this.messages = messages;
-        MAP.put(key, this);
+        profile.COMMANDKEY_MAP.put(key, this);
     }
 
     public InputConstants.Key getKey() {
@@ -97,9 +100,9 @@ public class CommandKey {
     }
 
     public void setKey(InputConstants.Key key) {
-        MAP.remove(this.key, this);
+        profile.COMMANDKEY_MAP.remove(this.key, this);
         this.key = key;
-        MAP.put(this.key, this);
+        profile.COMMANDKEY_MAP.put(this.key, this);
     }
 
     public InputConstants.Key getLimitKey() {
@@ -141,6 +144,12 @@ public class CommandKey {
     }
 
     public static class Deserializer implements JsonDeserializer<CommandKey> {
+        Profile profile;
+
+        public Deserializer(@NotNull Profile profile) {
+            this.profile = profile;
+        }
+
         @Override
         public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject cmdKeyObj = json.getAsJsonObject();
@@ -163,7 +172,7 @@ public class CommandKey {
             JsonArray messagesObj = cmdKeyObj.getAsJsonArray("messages");
             for (JsonElement element : messagesObj) messages.add(element.getAsString());
 
-            return new CommandKey(conflictStrategy, sendStrategy, key, limitKey, messages);
+            return new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages);
         }
     }
 }

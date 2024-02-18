@@ -1,6 +1,7 @@
 package com.notryken.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.notryken.commandkeys.CommandKeys;
 import com.notryken.commandkeys.config.CommandKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -17,10 +18,10 @@ public class KeyUtil {
     public static boolean handleKey(InputConstants.Key key) {
         boolean cancelClick = false;
         boolean cancelNext = false;
-        if (Minecraft.getInstance().screen == null && CommandKey.MAP.containsKey(key)) {
+        if (Minecraft.getInstance().screen == null && profile().COMMANDKEY_MAP.containsKey(key)) {
 
             CommandKey cmdKey = null;
-            Set<CommandKey> commandKeys = CommandKey.MAP.get(key);
+            Set<CommandKey> commandKeys = profile().COMMANDKEY_MAP.get(key);
             for (CommandKey ck1 : commandKeys) {
                 if (ck1.getLimitKey().equals(InputConstants.UNKNOWN)) {
                     // Found a matching single-key CommandKey, but preference

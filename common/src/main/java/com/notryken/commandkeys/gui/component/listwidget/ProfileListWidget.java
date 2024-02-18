@@ -71,7 +71,7 @@ public class ProfileListWidget extends ConfigListWidget {
         addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    profile.addCmdKey(new CommandKey());
+                    profile.addCmdKey(new CommandKey(profile));
                     reload();
                 }));
     }
@@ -128,7 +128,7 @@ public class ProfileListWidget extends ConfigListWidget {
             }
         }
         else if (getSelected() == null) {
-            Set<CommandKey> cmdKeys = CommandKey.MAP.get(key);
+            Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(key);
             for (CommandKey cmdKey : cmdKeys) {
                 if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
                         cmdKey.sendStrategy.state.equals(TriState.State.ZERO)) {

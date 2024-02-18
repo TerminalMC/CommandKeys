@@ -23,7 +23,7 @@ public class MixinClientPacketListener {
         SocketAddress address = Minecraft.getInstance().player.connection.getConnection().getRemoteAddress();
 
         if (address instanceof InetSocketAddress netAddress) {
-            Profile profile = Profile.MAP.get(netAddress.getHostName());
+            Profile profile = Profile.PROFILE_MAP.get(netAddress.getHostName());
             CommandKeys.config().setActiveProfile(Objects.requireNonNullElseGet(
                     profile, () -> CommandKeys.config().getMpDefaultProfile()));
         }
