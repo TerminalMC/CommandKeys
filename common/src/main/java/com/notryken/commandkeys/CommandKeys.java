@@ -19,7 +19,7 @@ public class CommandKeys {
     public static final String MOD_NAME = "CommandKeys";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
-            "key.commandkeys.open_menu", InputConstants.Type.KEYSYM,
+            "key.commandkeys.open_config", InputConstants.Type.KEYSYM,
             InputConstants.KEY_K, "keygroup.commandkeys.main");
 
     private static Config CONFIG;

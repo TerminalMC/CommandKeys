@@ -258,31 +258,51 @@ public class ProfileListWidget extends ConfigListWidget {
                 MutableComponent label = keyDisplayName;
                 Tooltip tooltip = null;
                 MutableComponent tooltipComponent = Component.empty();
-                boolean conflict = false;
+
+                boolean internalConflict = false;
+                boolean mcConflict = false;
+
                 if (!commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                    if (!commandKey.profile.COMMANDKEY_MAP.get(commandKey.getLimitKey()).isEmpty()) {
+                        tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
+                                .withStyle(ChatFormatting.GOLD));
+                        tooltipComponent.append(" is used for another CommandKey.")
+                                .withStyle(ChatFormatting.WHITE);
+                        internalConflict = true;
+                    }
                     KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getLimitKey());
                     if (conflictKeyM != null) {
+                        if (internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.RED));
                         tooltipComponent.append(" is also used for: ");
                         tooltipComponent.append(Component.translatable(conflictKeyM.getName())
                                 .withStyle(ChatFormatting.GRAY));
-                        conflict = true;
+                        mcConflict = true;
                     }
                 }
                 if (!commandKey.getKey().equals(InputConstants.UNKNOWN)) {
+                    if (commandKey.profile.COMMANDKEY_MAP.get(commandKey.getKey()).size() != 1) {
+                        if (mcConflict || internalConflict) tooltipComponent.append("\n");
+                        tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
+                                .withStyle(ChatFormatting.GOLD));
+                        tooltipComponent.append(" is used for another CommandKey.")
+                                .withStyle(ChatFormatting.WHITE);
+                        internalConflict = true;
+                    }
                     KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getKey());
                     if (conflictKeyM != null) {
-                        if (conflict) tooltipComponent.append("\n");
+                        if (mcConflict || internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.RED));
                         tooltipComponent.append(" is also used for: ");
                         tooltipComponent.append(Component.translatable(conflictKeyM.getName())
                                 .withStyle(ChatFormatting.GRAY));
-                        conflict = true;
+                        mcConflict = true;
                     }
                 }
-                if (conflict) {
+
+                if (mcConflict) {
                     label = Component.literal("[ ")
                             .append(keyDisplayName.withStyle(ChatFormatting.WHITE))
                             .append(" ]").withStyle(ChatFormatting.RED);
@@ -294,6 +314,13 @@ public class ProfileListWidget extends ConfigListWidget {
                                 case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
                             }));
                 }
+                else if (internalConflict) {
+                    label = Component.literal("[ ")
+                            .append(keyDisplayName.withStyle(ChatFormatting.WHITE))
+                            .append(" ]").withStyle(ChatFormatting.GOLD);
+                    tooltip = Tooltip.create(tooltipComponent);
+                }
+
                 elements.add(Button.builder(label,
                                 (button) -> {
                                     listWidget.selectedCommandKey = commandKey;
