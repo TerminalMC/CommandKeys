@@ -270,7 +270,7 @@ public class ProfileListWidget extends ConfigListWidget {
                                 .withStyle(ChatFormatting.WHITE);
                         internalConflict = true;
                     }
-                    KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getLimitKey());
+                    KeyMapping conflictKeyM = KeyUtil.getConflict(commandKey.getLimitKey());
                     if (conflictKeyM != null) {
                         if (internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
@@ -290,7 +290,7 @@ public class ProfileListWidget extends ConfigListWidget {
                                 .withStyle(ChatFormatting.WHITE);
                         internalConflict = true;
                     }
-                    KeyMapping conflictKeyM = KeyMapping.MAP.get(commandKey.getKey());
+                    KeyMapping conflictKeyM = KeyUtil.getConflict(commandKey.getKey());
                     if (conflictKeyM != null) {
                         if (mcConflict || internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
@@ -348,7 +348,7 @@ public class ProfileListWidget extends ConfigListWidget {
                             case ONE -> "If the key is already used by Minecraft, this keybind will be activated " +
                                     "first, then the other keybind.";
                             case TWO -> "If the key is already used by Minecraft, the other keybind will be " +
-                                    "cancelled.\nNote: Some keys (including movement and sneak) cannot be cancelled.";
+                                    "cancelled.\nNote: Some keys (such as movement keys) cannot be cancelled.";
                         })))
                         .create(movingX, 0, largeButtonWidth, height, Component.literal("Conflict"),
                                 (button, status) -> {
