@@ -100,7 +100,10 @@ public class Profile {
                 }
                 case TWO -> cmk.messages.replaceAll(String::stripTrailing);
             }
-            if (cmk.messages.isEmpty()) cmdKeyIter.remove();
+            if (cmk.messages.isEmpty()) {
+                cmdKeyIter.remove();
+                COMMANDKEY_MAP.remove(cmk.getKey(), cmk);
+            }
         }
     }
 
