@@ -344,7 +344,7 @@ public class ProfileListWidget extends ConfigListWidget {
                                     case ZERO -> Component.literal("Submit").withStyle(ChatFormatting.GREEN);
                                     case ONE -> Component.literal("Assert").withStyle(ChatFormatting.GOLD);
                                     case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
-                                    case THREE -> Component.literal("Avoid").withStyle(ChatFormatting.AQUA);
+                                    case THREE -> Component.literal("Avoid").withStyle(ChatFormatting.DARK_AQUA);
                                 })
                         .withValues(QuadState.State.values())
                         .withInitialValue(commandKey.conflictStrategy.state)
@@ -398,8 +398,10 @@ public class ProfileListWidget extends ConfigListWidget {
                                     (status) -> Component.literal("Send").withStyle(ChatFormatting.GREEN))
                             .withValues(TriState.State.values())
                             .withInitialValue(TriState.State.ZERO)
-                            .withTooltip((status) -> Tooltip.create(Component.literal(
-                                    "Send mode required for conflict strategy 'Avoid'")))
+                            .withTooltip((status) -> Tooltip.create(Component.literal("Mode: ")
+                                            .append(Component.literal("Send ").withStyle(ChatFormatting.GREEN))
+                                            .append(Component.literal("required for Conflict: "))
+                                            .append(Component.literal("Avoid").withStyle(ChatFormatting.DARK_AQUA))))
                             .create(movingX, 0, sendStrategyButtonWidth, height, Component.literal("Mode"),
                                     (button, status) -> {});
                     sendStrategyButton.active = false;
