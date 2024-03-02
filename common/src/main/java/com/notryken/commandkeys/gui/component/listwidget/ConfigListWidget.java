@@ -86,9 +86,9 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
      * Base implementation of options list widget entry, with common entries.
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
-        public static final ResourceLocation COLLAPSE_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/collapse_button");
-        public static final ResourceLocation CONFIGURE_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/configure_button");
-        public static final ResourceLocation COPY_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/copy_button");
+        public static final ResourceLocation COLLAPSE_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/collapse_button.png");
+        public static final ResourceLocation CONFIGURE_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/configure_button.png");
+        public static final ResourceLocation COPY_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/copy_button.png");
 
 
         public final List<AbstractWidget> elements;

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.notryken.commandkeys.CommandKeys;
 import com.notryken.commandkeys.config.CommandKey;
 import com.notryken.commandkeys.config.Profile;
+import com.notryken.commandkeys.config.QuadState;
 import com.notryken.commandkeys.config.TriState;
 import com.notryken.commandkeys.gui.screen.ConfigScreen;
 import com.notryken.commandkeys.util.KeyUtil;
@@ -135,8 +136,7 @@ public class ProfileListWidget extends ConfigListWidget {
             if (getSelected() == null) {
                 Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(sendKey);
                 for (CommandKey cmdKey : cmdKeys) {
-                    if (cmdKey.getLimitKey().equals(InputConstants.UNKNOWN) &&
-                            cmdKey.sendStrategy.state.equals(TriState.State.ZERO)) {
+                    if (cmdKey.conflictStrategy.state.equals(QuadState.State.THREE)) {
                         screen.onClose();
                         minecraft.setScreen(null);
                         for (String msg : cmdKey.messages) {
@@ -261,6 +261,7 @@ public class ProfileListWidget extends ConfigListWidget {
 
                 boolean internalConflict = false;
                 boolean mcConflict = false;
+                boolean checkMc = !commandKey.conflictStrategy.state.equals(QuadState.State.THREE);
 
                 if (!commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
                     if (!commandKey.profile.COMMANDKEY_MAP.get(commandKey.getLimitKey()).isEmpty()) {
@@ -271,7 +272,7 @@ public class ProfileListWidget extends ConfigListWidget {
                         internalConflict = true;
                     }
                     KeyMapping conflictKeyM = KeyUtil.getConflict(commandKey.getLimitKey());
-                    if (conflictKeyM != null) {
+                    if (checkMc && conflictKeyM != null) {
                         if (internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.RED));
@@ -291,7 +292,7 @@ public class ProfileListWidget extends ConfigListWidget {
                         internalConflict = true;
                     }
                     KeyMapping conflictKeyM = KeyUtil.getConflict(commandKey.getKey());
-                    if (conflictKeyM != null) {
+                    if (checkMc && conflictKeyM != null) {
                         if (mcConflict || internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.RED));
@@ -312,6 +313,9 @@ public class ProfileListWidget extends ConfigListWidget {
                                 case ZERO -> Component.literal("Submit").withStyle(ChatFormatting.GREEN);
                                 case ONE -> Component.literal("Assert").withStyle(ChatFormatting.GOLD);
                                 case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
+                                // case THREE should never occur since
+                                // mcConflict is only checked if not case THREE.
+                                case THREE -> Component.literal("Avoid").withStyle(ChatFormatting.DARK_AQUA);
                             }));
                 }
                 else if (internalConflict) {
@@ -335,13 +339,14 @@ public class ProfileListWidget extends ConfigListWidget {
                         .build());
                 movingX += largeButtonWidth + spacing;
 
-                CycleButton<TriState.State> conflictStrategyButton = CycleButton.<TriState.State>builder(
+                CycleButton<QuadState.State> conflictStrategyButton = CycleButton.<QuadState.State>builder(
                                 (status) -> switch(status) {
                                     case ZERO -> Component.literal("Submit").withStyle(ChatFormatting.GREEN);
                                     case ONE -> Component.literal("Assert").withStyle(ChatFormatting.GOLD);
                                     case TWO -> Component.literal("Veto").withStyle(ChatFormatting.RED);
+                                    case THREE -> Component.literal("Avoid").withStyle(ChatFormatting.AQUA);
                                 })
-                        .withValues(TriState.State.values())
+                        .withValues(QuadState.State.values())
                         .withInitialValue(commandKey.conflictStrategy.state)
                         .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
                             case ZERO -> "If the key is already used by Minecraft, this keybind will be cancelled.";
@@ -349,6 +354,8 @@ public class ProfileListWidget extends ConfigListWidget {
                                     "first, then the other keybind.";
                             case TWO -> "If the key is already used by Minecraft, the other keybind will be " +
                                     "cancelled.\nNote: Some keys (such as movement keys) cannot be cancelled.";
+                            case THREE -> "This keybind will not function in-game, but can be activated by pressing " +
+                                    "the key while on this screen (if nothing is selected).";
                         })))
                         .create(movingX, 0, largeButtonWidth, height, Component.literal("Conflict"),
                                 (button, status) -> {
@@ -363,26 +370,40 @@ public class ProfileListWidget extends ConfigListWidget {
                 if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
                     sendStrategyButtonWidth -= (smallButtonWidth + 2);
                 }
-                CycleButton<TriState.State> sendStrategyButton = CycleButton.<TriState.State>builder(
-                                (status) -> switch(status) {
-                                    case ZERO -> Component.literal("Send").withStyle(ChatFormatting.GREEN);
-                                    case ONE -> Component.literal("Type").withStyle(ChatFormatting.GOLD);
-                                    case TWO -> Component.literal("Cycle").withStyle(ChatFormatting.DARK_AQUA);
-                                })
-                        .withValues(TriState.State.values())
-                        .withInitialValue(commandKey.sendStrategy.state)
-                        .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
-                            case ZERO -> "All messages will be sent.";
-                            case ONE -> "The first message will by typed in chat, but not sent.";
-                            case TWO -> "Messages will be cycled through, one per key-press. " +
-                                    "\nIn this mode, you can send multiple messages in a single " +
-                                    "key-press by separating them with two commas e.g. /lobby,,/nick";
-                        })))
-                        .create(movingX, 0, sendStrategyButtonWidth, height, Component.literal("Mode"),
-                                (button, status) -> {
-                                    commandKey.sendStrategy.state = status;
-                                    listWidget.reload();
-                                });
+                CycleButton<TriState.State> sendStrategyButton;
+                if (checkMc) {
+                    sendStrategyButton = CycleButton.<TriState.State>builder(
+                                    (status) -> switch(status) {
+                                        case ZERO -> Component.literal("Send").withStyle(ChatFormatting.GREEN);
+                                        case ONE -> Component.literal("Type").withStyle(ChatFormatting.GOLD);
+                                        case TWO -> Component.literal("Cycle").withStyle(ChatFormatting.DARK_AQUA);
+                                    })
+                            .withValues(TriState.State.values())
+                            .withInitialValue(commandKey.sendStrategy.state)
+                            .withTooltip((status) -> Tooltip.create(Component.literal(switch(status) {
+                                case ZERO -> "All messages will be sent.";
+                                case ONE -> "The first message will by typed in chat, but not sent.";
+                                case TWO -> "Messages will be cycled through, one per key-press. " +
+                                        "\nIn this mode, you can send multiple messages in a single " +
+                                        "key-press by separating them with two commas e.g. /lobby,,/nick";
+                            })))
+                            .create(movingX, 0, sendStrategyButtonWidth, height, Component.literal("Mode"),
+                                    (button, status) -> {
+                                        commandKey.sendStrategy.state = status;
+                                        listWidget.reload();
+                                    });
+                }
+                else {
+                    sendStrategyButton = CycleButton.<TriState.State>builder(
+                                    (status) -> Component.literal("Send").withStyle(ChatFormatting.GREEN))
+                            .withValues(TriState.State.values())
+                            .withInitialValue(TriState.State.ZERO)
+                            .withTooltip((status) -> Tooltip.create(Component.literal(
+                                    "Send mode required for conflict strategy 'Avoid'")))
+                            .create(movingX, 0, sendStrategyButtonWidth, height, Component.literal("Mode"),
+                                    (button, status) -> {});
+                    sendStrategyButton.active = false;
+                }
                 sendStrategyButton.setTooltipDelay(500);
                 elements.add(sendStrategyButton);
                 // Cycle index button

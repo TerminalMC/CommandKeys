@@ -62,7 +62,7 @@ public class CommandKey {
 
     public transient final Profile profile;
 
-    public final TriState conflictStrategy; // Submissive, Assertive or Aggressive
+    public final QuadState conflictStrategy; // Submit, Assert, Veto or Avoid
     public final TriState sendStrategy; // Send, Type or Cycle
     public transient int cycleIndex; // Index of next message if cycling
 
@@ -73,7 +73,7 @@ public class CommandKey {
 
     public CommandKey(Profile profile) {
         this.profile = profile;
-        this.conflictStrategy = new TriState();
+        this.conflictStrategy = new QuadState();
         this.sendStrategy = new TriState();
         this.cycleIndex = 0;
         this.key = InputConstants.UNKNOWN;
@@ -81,7 +81,7 @@ public class CommandKey {
         this.messages = new ArrayList<>();
     }
 
-    public CommandKey(Profile profile, TriState conflictStrategy, TriState sendStrategy,
+    public CommandKey(Profile profile, QuadState conflictStrategy, TriState sendStrategy,
                       InputConstants.Key key, InputConstants.Key limitKey,
                       ArrayList<String> messages) {
         this.profile = profile;
@@ -153,13 +153,13 @@ public class CommandKey {
         public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject cmdKeyObj = json.getAsJsonObject();
 
-            TriState conflictStrategy;
+            QuadState conflictStrategy;
             TriState sendStrategy;
             InputConstants.Key key;
             InputConstants.Key limitKey;
             ArrayList<String> messages = new ArrayList<>();
 
-            conflictStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("conflictStrategy").getAsString()));
+            conflictStrategy = new QuadState(QuadState.State.valueOf(cmdKeyObj.get("conflictStrategy").getAsString()));
             sendStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("sendStrategy").getAsString()));
 
             JsonObject keyObj = cmdKeyObj.getAsJsonObject("key");

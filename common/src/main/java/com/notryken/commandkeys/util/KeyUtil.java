@@ -2,6 +2,7 @@ package com.notryken.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.notryken.commandkeys.config.CommandKey;
+import com.notryken.commandkeys.config.QuadState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -34,24 +35,27 @@ public class KeyUtil {
             CommandKey cmdKey = null;
             Set<CommandKey> commandKeys = profile().COMMANDKEY_MAP.get(key);
             for (CommandKey ck1 : commandKeys) {
-                if (ck1.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                    // Found a matching single-key CommandKey, but preference
-                    // the ones with modifier keys that are down.
-                    cmdKey = ck1;
-                    for (CommandKey ck2 : commandKeys) {
-                        if (!ck2.getLimitKey().equals(InputConstants.UNKNOWN) &&
-                                InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(),
-                                        ck2.getLimitKey().getValue())) {
-                            cmdKey = ck2;
-                            break;
+                if (!ck1.conflictStrategy.state.equals(QuadState.State.THREE)) {
+                    if (ck1.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                        // Found a matching single-key CommandKey, but preference
+                        // the ones with modifier keys that are down.
+                        cmdKey = ck1;
+                        for (CommandKey ck2 : commandKeys) {
+                            if (!ck2.conflictStrategy.state.equals(QuadState.State.THREE) &&
+                                    !ck2.getLimitKey().equals(InputConstants.UNKNOWN) &&
+                                    InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(),
+                                            ck2.getLimitKey().getValue())) {
+                                cmdKey = ck2;
+                                break;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
-                else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(),
-                        ck1.getLimitKey().getValue())) {
-                    cmdKey = ck1;
-                    break;
+                    else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(),
+                            ck1.getLimitKey().getValue())) {
+                        cmdKey = ck1;
+                        break;
+                    }
                 }
             }
             
