@@ -114,11 +114,8 @@ public class Config {
         spDefaultProfile.cleanup();
         mpDefaultProfile.cleanup();
 
-        Iterator<Profile> iter = profiles.iterator();
-        while (iter.hasNext()) {
-            Profile profile = iter.next();
+        for (Profile profile : profiles) {
             profile.cleanup();
-            if (profile.getCmdKeys().isEmpty()) iter.remove();
         }
     }
 
