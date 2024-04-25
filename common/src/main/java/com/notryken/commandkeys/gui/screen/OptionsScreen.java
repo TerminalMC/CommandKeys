@@ -93,9 +93,13 @@ public class OptionsScreen extends OptionsSubScreen {
 
     @Override
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        renderDirtBackground(context);
-        context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
+        context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
+    }
+
+    @Override
+    public void renderBackground(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+        this.renderDirtBackground(context);
     }
 
     @Override
