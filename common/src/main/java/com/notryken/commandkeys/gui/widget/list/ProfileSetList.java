@@ -1,4 +1,9 @@
-package com.notryken.commandkeys.gui.component.listwidget;
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.notryken.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
@@ -7,19 +12,19 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import com.notryken.commandkeys.CommandKeys;
 import com.notryken.commandkeys.config.Profile;
-import com.notryken.commandkeys.gui.screen.ConfigScreen;
+import com.notryken.commandkeys.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 
 import static com.notryken.commandkeys.CommandKeys.config;
 
-public class ProfileSetListWidget extends ConfigListWidget {
+public class ProfileSetList extends OptionsList {
     Profile editingProfile;
 
-    public ProfileSetListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                                int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                                int scrollWidth, @Nullable Profile editingProfile) {
+    public ProfileSetList(Minecraft minecraft, int width, int height, int top, int bottom,
+                          int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                          int scrollWidth, @Nullable Profile editingProfile) {
         super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.editingProfile = editingProfile;
@@ -27,7 +32,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
 
         boolean inGame = CommandKeys.activeAddress() != null;
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Singleplayer Default Profile"), null, 500));
 
         Profile spDefaultProfile = config().getSpDefaultProfile();
@@ -41,7 +46,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
             }
         }
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Multiplayer Default Profile"), null, 500));
 
         Profile mpDefaultProfile = config().getMpDefaultProfile();
@@ -55,7 +60,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
             }
         }
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("Other Profiles"), null, 500));
 
         for (Profile profile : config().profiles) {
@@ -69,9 +74,9 @@ public class ProfileSetListWidget extends ConfigListWidget {
                 }
             }
         }
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.empty(), null, -1));
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     config().profiles.add(new Profile());
@@ -81,9 +86,9 @@ public class ProfileSetListWidget extends ConfigListWidget {
 
 
     @Override
-    public ConfigListWidget resize(int width, int height, int top, int bottom,
-                                   int itemHeight, double scrollAmount) {
-        ProfileSetListWidget newListWidget = new ProfileSetListWidget(
+    public OptionsList resize(int width, int height, int top, int bottom,
+                              int itemHeight, double scrollAmount) {
+        ProfileSetList newListWidget = new ProfileSetList(
                 minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth, editingProfile);
         newListWidget.setScrollAmount(scrollAmount);
@@ -111,22 +116,22 @@ public class ProfileSetListWidget extends ConfigListWidget {
     }
 
     public void openProfileScreen(Profile profile) {
-        minecraft.setScreen(new ConfigScreen(screen,
+        minecraft.setScreen(new OptionsScreen(screen,
                 Component.translatable("screen.commandkeys.title.profile")
                         .append(Component.literal(profile.name))
                         .append(profile.equals(CommandKeys.profile()) ? " [Active]" : " [Inactive]"),
-                new ProfileListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new ProfileList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, -200, 400, entryHeight, 420,
                         profile, null)));
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         private static class ProfileEntry extends Entry {
-            ProfileSetListWidget listWidget;
+            ProfileSetList listWidget;
             Profile profile;
 
-            ProfileEntry(int x, int width, int height, ProfileSetListWidget listWidget,
+            ProfileEntry(int x, int width, int height, ProfileSetList listWidget,
                          Profile profile, boolean isDefault, boolean inGame) {
                 super();
                 this.listWidget = listWidget;
@@ -260,7 +265,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
         }
 
         private static class ProfileNameEntry extends Entry {
-            ProfileNameEntry(int x, int width, int height, ProfileSetListWidget listWidget,
+            ProfileNameEntry(int x, int width, int height, ProfileSetList listWidget,
                              Profile profile) {
                 super();
                 int spacing = 5;
@@ -297,7 +302,7 @@ public class ProfileSetListWidget extends ConfigListWidget {
         }
 
         private static class ServerAddressEntry extends Entry {
-            ServerAddressEntry(int x, int width, int height, ProfileSetListWidget listWidget,
+            ServerAddressEntry(int x, int width, int height, ProfileSetList listWidget,
                                Profile profile, String address) {
                 super();
                 int spacing = 5;

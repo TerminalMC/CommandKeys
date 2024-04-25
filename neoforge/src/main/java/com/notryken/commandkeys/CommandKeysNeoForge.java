@@ -1,15 +1,18 @@
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.notryken.commandkeys;
 
-import net.neoforged.bus.api.IEventBus;
+import net.minecraft.client.Minecraft;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
 
 @Mod(CommandKeys.MOD_ID)
 public class CommandKeysNeoForge {
@@ -19,21 +22,21 @@ public class CommandKeysNeoForge {
                         (client, parent) -> CommandKeys.getConfigScreen(parent)
                 ));
 
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::clientSetup);
-        if (FMLEnvironment.dist.isClient()) {
-            modEventBus.addListener(this::registerKeyMappingsEvent);
-        }
         CommandKeys.init();
-    }
-
-    @SubscribeEvent
-    public void clientSetup(FMLClientSetupEvent event) {
-        NeoForge.EVENT_BUS.addListener(ClientEventHandler::clientTickEvent);
     }
 
     @SubscribeEvent
     public void registerKeyMappingsEvent(RegisterKeyMappingsEvent event) {
         event.register(CommandKeys.CONFIG_KEY);
+    }
+
+    @Mod.EventBusSubscriber(modid = CommandKeys.MOD_ID, value = Dist.CLIENT)
+    static class ClientEventHandler {
+        @SubscribeEvent
+        public static void clientTickEvent(TickEvent.ClientTickEvent event) {
+            if(event.phase.equals(TickEvent.Phase.END)) {
+                CommandKeys.onEndTick(Minecraft.getInstance());
+            }
+        }
     }
 }

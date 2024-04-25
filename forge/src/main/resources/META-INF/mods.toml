@@ -1,37 +1,34 @@
 modLoader="javafml"
-loaderVersion="${forge_loader_version_range}"
+loaderVersion="${forge_loader_versions}"
 license="${mod_license}"
-issueTrackerURL="${issues_url}" #optional: none
+issueTrackerURL="${issues_url}"
 
 [[mods]]
-  modId="${mod_id}"
-  version="${version}" #optional: "1"
-  displayName="${mod_name}" #optional: modId
-  description='''${mod_description}''' # optional: "MISSING DESCRIPTION"
-  logoFile="icon.png" #optional: none
-  features={ java_version="[${java_version},)" }
-  credits="${mod_credits}" #optional: none
-  authors="${mod_author}" #optional: none
-  displayURL="${homepage_url}" #optional: none
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+description='''${mod_description}'''
+logoFile="${mod_icon}"
+features={java_version="${java_versions_neoforge}"}
+credits="${mod_contributors_string}"
+authors="${mod_authors_string}"
+displayURL="${homepage_url}"
 
 [[mixins]]
-  config="${mod_id}.mixins.json"
+config="${mod_id}.mixins.json"
 [[mixins]]
-  config="${mod_id}.forge.mixins.json"
-
-[[dependencies.${mod_id}]] #optional
-  modId="forge"
-  mandatory=true
-  versionRange="${forge_version_range}"
-  ordering="NONE" #optional: "NONE"
-  side="CLIENT" #optional: "BOTH"
+config="${mod_id}.forge.mixins.json"
 
 [[dependencies.${mod_id}]]
-  modId="minecraft"
-  mandatory=true
-  versionRange="${minecraft_version_range_forge}"
-  ordering="NONE" #optional: "NONE"
-  side="BOTH" #optional: "BOTH"
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_versions_neoforge}" #optional:any
+
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${forge_versions}"
+side="CLIENT"
 
 # https://docs.minecraftforge.net/en/latest/gettingstarted/modfiles/
 # https://docs.minecraftforge.net/en/latest/misc/updatechecker/

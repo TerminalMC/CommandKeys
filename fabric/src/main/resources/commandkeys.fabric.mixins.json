@@ -1,8 +1,8 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "${mod_group}.${mod_id}.mixin",
-    "refmap": "${mod_id}.refmap.json",
+    "package": "com.notryken.commandkeys.mixin",
+    "refmap": "commandkeys.refmap.json",
     "compatibilityLevel": "JAVA_${java_version}",
     "mixins": [
     ],

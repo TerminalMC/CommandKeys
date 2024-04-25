@@ -1,46 +1,56 @@
 {
     "schemaVersion": 1,
+    "version": "${mod_version}",
     "id": "${mod_id}",
-    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "${mod_description}",
+    "icon": "${mod_icon}",
+    "authors": [$mod_authors_list],
+    "contributors": [$mod_contributors_list],
+    "license": "${mod_license}",
+
     "environment": "${mod_environment}",
+
     "provides": [],
-    "accessWidener": "${mod_id}.accesswidener",
+
     "entrypoints": {
         "main": [],
         "client": ["${mod_group}.${mod_id}.${mod_name}Fabric"],
         "server": [],
         "modmenu": ["${mod_group}.${mod_id}.gui.screen.ModMenuIntegration"]
     },
+
     "mixins": [
         "${mod_id}.mixins.json",
         "${mod_id}.fabric.mixins.json"
     ],
+
+    "accessWidener": "${mod_id}.accesswidener",
+
     "depends": {
-        "java": ">=${java_version}",
-        "minecraft": "${minecraft_version_range_fabric}",
-        "fabricloader": "${fabric_loader_version_range}",
-        "fabric-resource-loader-v0": "*",
-        "fabric-key-binding-api-v1": "*",
-        "fabric-lifecycle-events-v1": "*"
+        "java": [$java_versions_fabric_list],
+        "minecraft": [$minecraft_versions_fabric_list],
+        "fabricloader": [$fabric_loader_versions_list],
+        "fabric-key-binding-api-v1": [$fabric_api_versions_list],
+        "fabric-lifecycle-events-v1": [$fabric_api_versions_list]
     },
+
     "recommends": {
-        "modmenu": ">=${modmenu_version}"
+        "modmenu": [$modmenu_versions_list]
     },
+
     "suggests": {},
+
     "conflicts": {},
+
     "breaks": {},
 
-    "name": "${mod_name}",
-    "description": "${mod_description}",
     "contact": {
         "homepage": "${homepage_url}",
         "sources": "${sources_url}",
         "issues": "${issues_url}"
     },
-    "authors": ["${mod_author}"],
-    "contributors": [],
-    "license": "${mod_license}",
-    "icon": "icon.png",
+
     "custom": {
         "modmenu": {
             "links": {
@@ -49,7 +59,8 @@
         },
         "formatSpec": {
             "links": {
-                "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec"
+                "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec",
+                "formatExample": "https://github.com/FabricMC/fabric-example-mod"
             }
         }
     }

@@ -1,4 +1,9 @@
-package com.notryken.commandkeys.gui.component.listwidget;
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.notryken.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.notryken.commandkeys.CommandKeys;
@@ -6,7 +11,7 @@ import com.notryken.commandkeys.config.CommandKey;
 import com.notryken.commandkeys.config.Profile;
 import com.notryken.commandkeys.config.QuadState;
 import com.notryken.commandkeys.config.TriState;
-import com.notryken.commandkeys.gui.screen.ConfigScreen;
+import com.notryken.commandkeys.gui.screen.OptionsScreen;
 import com.notryken.commandkeys.util.KeyUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -24,17 +29,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ProfileListWidget extends ConfigListWidget {
+public class ProfileList extends OptionsList {
     Profile profile;
     Set<CommandKey> expandedKeys;
     CommandKey selectedCommandKey;
     InputConstants.Key heldKey;
     InputConstants.Key sendKey;
     
-    public ProfileListWidget(Minecraft minecraft, int width, int height, int top, int bottom,
-                             int itemHeight, int entryRelX, int entryWidth, int entryHeight,
-                             int scrollWidth, @NotNull Profile profile,
-                             @Nullable Set<CommandKey> expandedKeys) {
+    public ProfileList(Minecraft minecraft, int width, int height, int top, int bottom,
+                       int itemHeight, int entryRelX, int entryWidth, int entryHeight,
+                       int scrollWidth, @NotNull Profile profile,
+                       @Nullable Set<CommandKey> expandedKeys) {
         super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.profile = profile;
@@ -42,7 +47,7 @@ public class ProfileListWidget extends ConfigListWidget {
 
         addEntry(new Entry.GlobalSettingEntry(entryX, entryWidth, entryHeight, this));
 
-        addEntry(new ConfigListWidget.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.literal("------------------------ Command Keys \u2139 ------------------------"),
                 Tooltip.create(Component.literal("The messages for each key will be sent if you press the " +
                         "corresponding hotkey while in-game (depending on individual settings).\n" +
@@ -60,7 +65,7 @@ public class ProfileListWidget extends ConfigListWidget {
                     addEntry(new Entry.CommandKeyMessageEntry(entryX, entryWidth, entryHeight, this,
                             commandKey, i));
                 }
-                addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX + 25, 0, entryWidth - 50,
+                addEntry(new OptionsList.Entry.ActionButtonEntry(entryX + 25, 0, entryWidth - 50,
                         (int)(entryHeight * 0.7), Component.literal("+"),
                         Tooltip.create(Component.literal("New message")), 500,
                         (button) -> {
@@ -72,7 +77,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 addEntry(new Entry.CommandKeyMessageTeaserEntry(entryX, entryWidth, (int)(entryHeight * 0.7), this, commandKey));
             }
         }
-        addEntry(new ConfigListWidget.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
+        addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
                     profile.addCmdKey(new CommandKey(profile));
@@ -81,9 +86,9 @@ public class ProfileListWidget extends ConfigListWidget {
     }
 
     @Override
-    public ConfigListWidget resize(int width, int height, int top, int bottom, 
-                                   int itemHeight, double scrollAmount) {
-        ProfileListWidget newListWidget = new ProfileListWidget(
+    public OptionsList resize(int width, int height, int top, int bottom,
+                              int itemHeight, double scrollAmount) {
+        ProfileList newListWidget = new ProfileList(
                 minecraft, width, height, top, bottom, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth, profile, expandedKeys);
         newListWidget.setScrollAmount(scrollAmount);
@@ -165,12 +170,12 @@ public class ProfileListWidget extends ConfigListWidget {
 
     public void openProfileSetScreen() {
         Screen lastScreen = screen.getLastScreen();
-        if (lastScreen instanceof ConfigScreen lastConfigScreen) {
-            lastScreen = lastConfigScreen.getLastScreen();
+        if (lastScreen instanceof OptionsScreen lastOptionsScreen) {
+            lastScreen = lastOptionsScreen.getLastScreen();
         }
-        minecraft.setScreen(new ConfigScreen(lastScreen,
+        minecraft.setScreen(new OptionsScreen(lastScreen,
                 Component.translatable("screen.commandkeys.title.profiles"),
-                new ProfileSetListWidget(minecraft, screen.width, screen.height, y0, y1,
+                new ProfileSetList(minecraft, screen.width, screen.height, y0, y1,
                         itemHeight, -180, 360, entryHeight, 380, null)));
     }
 
@@ -178,10 +183,10 @@ public class ProfileListWidget extends ConfigListWidget {
         minecraft.setScreen(new KeyBindsScreen(screen, Minecraft.getInstance().options));
     }
 
-    private abstract static class Entry extends ConfigListWidget.Entry {
+    private abstract static class Entry extends OptionsList.Entry {
 
         private static class GlobalSettingEntry extends Entry {
-            GlobalSettingEntry(int x, int width, int height, ProfileListWidget listWidget) {
+            GlobalSettingEntry(int x, int width, int height, ProfileList listWidget) {
                 super();
                 int spacing = 1;
                 int buttonWidth = (width - spacing * 3) / 4;
@@ -222,7 +227,7 @@ public class ProfileListWidget extends ConfigListWidget {
         }
 
         private static class CommandKeyOptionsEntry extends Entry {
-            CommandKeyOptionsEntry(int x, int width, int height, ProfileListWidget listWidget,
+            CommandKeyOptionsEntry(int x, int width, int height, ProfileList listWidget,
                                    CommandKey commandKey) {
                 super();
                 int spacing = 5;
@@ -231,7 +236,7 @@ public class ProfileListWidget extends ConfigListWidget {
                 int movingX = x;
 
                 ImageButton collapseButton = new ImageButton(movingX, 0, smallButtonWidth, height,
-                        0, 0, 20, ConfigListWidget.Entry.COLLAPSE_ICON, 32, 64,
+                        0, 0, 20, OptionsList.Entry.COLLAPSE_ICON, 32, 64,
                         (button) -> {
                             listWidget.expandedKeys.remove(commandKey);
                             listWidget.reload();
@@ -447,10 +452,10 @@ public class ProfileListWidget extends ConfigListWidget {
         }
 
         private static class CommandKeyMessageTeaserEntry extends Entry {
-            ProfileListWidget listWidget;
+            ProfileList listWidget;
             CommandKey commandKey;
 
-            CommandKeyMessageTeaserEntry(int x, int width, int height, ProfileListWidget listWidget,
+            CommandKeyMessageTeaserEntry(int x, int width, int height, ProfileList listWidget,
                                          CommandKey commandKey) {
                 super();
                 this.listWidget = listWidget;
@@ -492,10 +497,10 @@ public class ProfileListWidget extends ConfigListWidget {
         }
 
         private static class CommandKeyMessageEntry extends Entry {
-            ProfileListWidget listWidget;
+            ProfileList listWidget;
             CommandKey commandKey;
 
-            CommandKeyMessageEntry(int x, int width, int height, ProfileListWidget listWidget,
+            CommandKeyMessageEntry(int x, int width, int height, ProfileList listWidget,
                                    CommandKey commandKey, int index) {
                 super();
                 this.listWidget = listWidget;

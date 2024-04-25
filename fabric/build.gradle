@@ -1,8 +1,5 @@
 plugins {
-    id 'java'
-    id 'idea'
-    id 'maven-publish'
-    id 'fabric-loom' version '1.2.7' // https://mvnrepository.com/artifact/fabric-loom/fabric-loom.gradle.plugin
+    id "fabric-loom" version "${loom_version}"
 }
 
 base {
@@ -10,19 +7,14 @@ base {
 }
 
 dependencies {
+    compileOnly project(":common")
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
 
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    implementation project(":common")
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
-    mod "fabric-loader", "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    mod "modmenu", "maven.modrinth:modmenu:${modmenu_version}"
-
-    includeMod "fabric-api", fabricApi.module("fabric-api-base", fabric_api_version)
-    includeMod "fabric-api", fabricApi.module("fabric-resource-loader-v0", fabric_api_version)
-    includeMod "fabric-api", fabricApi.module("fabric-key-binding-api-v1", fabric_api_version)
-    includeMod "fabric-api", fabricApi.module("fabric-lifecycle-events-v1", fabric_api_version)
+    modImplementation "maven.modrinth:modmenu:${modmenu_version}"
 }
 
 loom {
@@ -32,62 +24,14 @@ loom {
     mixin {
         defaultRefmapName.set("${mod_id}.refmap.json")
     }
-    runs {
-        client {
-            client()
-            setConfigName("Fabric Client")
-            ideConfigGenerated(true)
-            runDir("run")
-        }
-        server {
-            server()
-            setConfigName("Fabric Server")
-            ideConfigGenerated(true)
-            runDir("run")
-        }
-    }
 }
 
 tasks.withType(JavaCompile).configureEach {
     source(project(":common").sourceSets.main.allSource)
 }
-tasks.withType(Javadoc).configureEach {
-    source(project(":common").sourceSets.main.allJava)
-}
 tasks.named("sourcesJar", Jar) {
     from(project(":common").sourceSets.main.allSource)
 }
-
 processResources {
     from project(":common").sourceSets.main.resources
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId base.archivesName.get()
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
-}
-
-// https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.5+no-cf/ferry.gradle
-
-def mod(String localOverrideKey, Object dep) {
-    File file = file("../.${localOverrideKey}-local")
-    if (file.exists()) {
-        dependencies.implementation(dep)
-    } else {
-        dependencies.modImplementation(dep)
-    }
-}
-
-def includeMod(String localOverrideKey, Object dep) {
-    mod(localOverrideKey, dep)
-    dependencies.include(dep)
 }

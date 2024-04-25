@@ -1,4 +1,9 @@
-package com.notryken.commandkeys.gui.component.listwidget;
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.notryken.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
@@ -9,7 +14,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import com.notryken.commandkeys.CommandKeys;
-import com.notryken.commandkeys.gui.screen.ConfigScreen;
+import com.notryken.commandkeys.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,9 +34,9 @@ import java.util.List;
  * appear side-by-side rather than spaced vertically, you must add them all to a
  * single Entry's list of {@code AbstractWidgets}.
  */
-public abstract class ConfigListWidget extends ContainerObjectSelectionList<ConfigListWidget.Entry> {
+public abstract class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
 
-    protected ConfigScreen screen;
+    protected OptionsScreen screen;
     // Standard positional and dimensional values used by entries
     protected final int entryRelX;
     protected final int entryX;
@@ -39,8 +44,8 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     protected final int entryHeight;
     protected final int scrollWidth;
 
-    public ConfigListWidget(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
-                            int entryRelX, int entryWidth, int entryHeight, int scrollWidth) {
+    public OptionsList(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
+                       int entryRelX, int entryWidth, int entryHeight, int scrollWidth) {
         super(minecraft, width, height, top, bottom, itemHeight);
         this.entryRelX = entryRelX;
         this.entryX = width / 2 + entryRelX;
@@ -65,7 +70,7 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
      * Must be called when the {@code ConfigListWidget} is added to a
      * {@code Screen}, else breaks.
      */
-    public void setScreen(ConfigScreen screen) {
+    public void setScreen(OptionsScreen screen) {
         this.screen = screen;
     }
 
@@ -74,8 +79,8 @@ public abstract class ConfigListWidget extends ContainerObjectSelectionList<Conf
     }
 
     // Abstract methods
-    public abstract ConfigListWidget resize(int width, int height, int top, int bottom,
-                                            int itemHeight, double scrollAmount);
+    public abstract OptionsList resize(int width, int height, int top, int bottom,
+                                       int itemHeight, double scrollAmount);
 
     public abstract boolean keyPressed(InputConstants.Key key);
     public abstract boolean keyReleased(InputConstants.Key key);

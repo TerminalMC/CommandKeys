@@ -1,8 +1,13 @@
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.notryken.commandkeys.config;
 
 import com.google.gson.*;
 import com.notryken.commandkeys.CommandKeys;
-import com.notryken.commandkeys.config.serialize.GhettoAsciiWriter;
+import com.notryken.commandkeys.config.util.GhettoAsciiWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class Config {
     // Constants
@@ -123,18 +127,18 @@ public class Config {
 
     public static @NotNull Config load() {
         long time = System.currentTimeMillis();
-        CommandKeys.LOG.info("CommandKeys: Loading config from file...");
+        CommandKeys.LOG.info("Loading config from file...");
 
         Config config = load(DEFAULT_FILE_NAME, CONFIG_GSON);
 
         if (config == null) {
-            CommandKeys.LOG.info("CommandKeys: Using default configuration");
+            CommandKeys.LOG.info("Using default configuration");
             config = new Config();
         }
 
         configPath = Path.of("config").resolve(DEFAULT_FILE_NAME);
         config.writeToFile();
-        CommandKeys.LOG.info("CommandKeys: Configuration loaded in {} ms",
+        CommandKeys.LOG.info("Configuration loaded in {} ms",
                 System.currentTimeMillis() - time);
         return config;
     }
@@ -147,11 +151,11 @@ public class Config {
             try (FileReader reader = new FileReader(configPath.toFile())) {
                 config = gson.fromJson(reader, Config.class);
             } catch (Exception e) {
-                CommandKeys.LOG.warn("CommandKeys: Unable to load config from file '{}'. Reason:", name, e);
+                CommandKeys.LOG.warn("Unable to load config from file '{}'. Reason:", name, e);
             }
         }
         else {
-            CommandKeys.LOG.warn("CommandKeys: Unable to locate config file '{}'", name);
+            CommandKeys.LOG.warn("Unable to locate config file '{}'", name);
         }
         return config;
     }
@@ -161,7 +165,7 @@ public class Config {
      */
     public void writeToFile() {
         long time = System.currentTimeMillis();
-        CommandKeys.LOG.info("CommandKeys: Saving config to file...");
+        CommandKeys.LOG.info("Saving config to file...");
 
         cleanup();
 
@@ -186,7 +190,7 @@ public class Config {
             // Atomically replace the old config file (if it exists) with the temporary file
             Files.move(tempPath, configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 
-            CommandKeys.LOG.info("CommandKeys: Configuration saved in {} ms",
+            CommandKeys.LOG.info("Configuration saved in {} ms",
                     System.currentTimeMillis() - time);
         }
         catch (IOException e) {

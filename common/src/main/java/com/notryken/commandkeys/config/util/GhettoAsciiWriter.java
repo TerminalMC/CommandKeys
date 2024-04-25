@@ -1,10 +1,15 @@
-package com.notryken.commandkeys.config.serialize;
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.notryken.commandkeys.config.util;
 
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Allows proper serialization/deserialization of non-ASCII characters.
+ * Allows proper serialization of non-ASCII characters.
  * Source: <a href="https://github.com/google/gson/issues/388">gson issue 388</a>
  */
 public class GhettoAsciiWriter extends Writer {

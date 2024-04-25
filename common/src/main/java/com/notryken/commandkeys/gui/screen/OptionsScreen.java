@@ -1,8 +1,13 @@
+/*
+ * Copyright 2023, 2024 NotRyken
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.notryken.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.notryken.commandkeys.gui.component.listwidget.ConfigListWidget;
-import com.notryken.commandkeys.gui.component.listwidget.ProfileSetListWidget;
+import com.notryken.commandkeys.gui.widget.list.OptionsList;
+import com.notryken.commandkeys.gui.widget.list.ProfileSetList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -11,7 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import com.notryken.commandkeys.CommandKeys;
-import com.notryken.commandkeys.gui.component.listwidget.ProfileListWidget;
+import com.notryken.commandkeys.gui.widget.list.ProfileList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -20,32 +25,32 @@ import java.util.function.Supplier;
  * A {@code ConfigScreen} contains one tightly-coupled {@code ConfigListWidget},
  * which is used to display all configuration options required for the screen.
  */
-public class ConfigScreen extends OptionsSubScreen {
+public class OptionsScreen extends OptionsSubScreen {
 
-    protected ConfigListWidget listWidget;
+    protected OptionsList listWidget;
 
     public final int listTop = 32;
     public final Supplier<Integer> listBottom = () -> height - 32;
     public final int listItemHeight = 25;
 
-    public ConfigScreen(Screen lastScreen, boolean inGame) {
+    public OptionsScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen, Minecraft.getInstance().options,
                 inGame ? Component.translatable("screen.commandkeys.title.profile")
                         .append(Component.literal(CommandKeys.profile().name)) :
                         Component.translatable("screen.commandkeys.title.profiles"));
         if (inGame) {
-            listWidget = new ProfileListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
+            listWidget = new ProfileList(Minecraft.getInstance(), 0, 0, 0, 0,
                     0, -200, 400, 20, 420,
                     CommandKeys.profile(), null);
         }
         else {
-            listWidget = new ProfileSetListWidget(Minecraft.getInstance(), 0, 0, 0, 0,
+            listWidget = new ProfileSetList(Minecraft.getInstance(), 0, 0, 0, 0,
                     0, -180, 360, 20, 380, null);
         }
 
     }
 
-    public ConfigScreen(Screen lastScreen, Component title, ConfigListWidget listWidget) {
+    public OptionsScreen(Screen lastScreen, Component title, OptionsList listWidget) {
         super(lastScreen, Minecraft.getInstance().options, title);
         this.listWidget = listWidget;
     }
@@ -95,7 +100,7 @@ public class ConfigScreen extends OptionsSubScreen {
 
     @Override
     public void onClose() {
-        if (!(lastScreen instanceof ConfigScreen)) {
+        if (!(lastScreen instanceof OptionsScreen)) {
             CommandKeys.config().writeToFile();
         }
         super.onClose();
@@ -106,6 +111,6 @@ public class ConfigScreen extends OptionsSubScreen {
     }
 
     public void reload() {
-        minecraft.setScreen(new ConfigScreen(lastScreen, title, listWidget));
+        minecraft.setScreen(new OptionsScreen(lastScreen, title, listWidget));
     }
 }
