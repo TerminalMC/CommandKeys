@@ -30,7 +30,7 @@ public class OptionsScreen extends OptionsSubScreen {
     protected OptionsList listWidget;
 
     public final int listTop = 32;
-    public final Supplier<Integer> listBottom = () -> height - 32;
+    public final int bottomMargin = 32;
     public final int listItemHeight = 25;
 
     public OptionsScreen(Screen lastScreen, boolean inGame) {
@@ -39,12 +39,12 @@ public class OptionsScreen extends OptionsSubScreen {
                         .append(Component.literal(CommandKeys.profile().name)) :
                         Component.translatable("screen.commandkeys.title.profiles"));
         if (inGame) {
-            listWidget = new ProfileList(Minecraft.getInstance(), 0, 0, 0, 0,
+            listWidget = new ProfileList(Minecraft.getInstance(), 0, 0, 0,
                     0, -200, 400, 20, 420,
                     CommandKeys.profile(), null);
         }
         else {
-            listWidget = new ProfileSetList(Minecraft.getInstance(), 0, 0, 0, 0,
+            listWidget = new ProfileSetList(Minecraft.getInstance(), 0, 0, 0,
                     0, -180, 360, 20, 380, null);
         }
 
@@ -57,7 +57,8 @@ public class OptionsScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        listWidget = listWidget.resize(width, height, listTop, listBottom.get(), listItemHeight, listWidget.getScrollAmount());
+        listWidget = listWidget.resize(width, height - listTop - bottomMargin, listTop,
+                listItemHeight, listWidget.getScrollAmount());
         listWidget.setScreen(this);
         addRenderableWidget(listWidget);
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,

@@ -22,10 +22,10 @@ import static com.notryken.commandkeys.CommandKeys.config;
 public class ProfileSetList extends OptionsList {
     Profile editingProfile;
 
-    public ProfileSetList(Minecraft minecraft, int width, int height, int top, int bottom,
+    public ProfileSetList(Minecraft minecraft, int width, int height, int y,
                           int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                           int scrollWidth, @Nullable Profile editingProfile) {
-        super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
+        super(minecraft, width, height, y, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.editingProfile = editingProfile;
 
@@ -86,10 +86,10 @@ public class ProfileSetList extends OptionsList {
 
 
     @Override
-    public OptionsList resize(int width, int height, int top, int bottom,
+    public OptionsList resize(int width, int height, int y,
                               int itemHeight, double scrollAmount) {
         ProfileSetList newListWidget = new ProfileSetList(
-                minecraft, width, height, top, bottom, itemHeight, entryRelX,
+                minecraft, width, height, y, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth, editingProfile);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -120,7 +120,7 @@ public class ProfileSetList extends OptionsList {
                 Component.translatable("screen.commandkeys.title.profile")
                         .append(Component.literal(profile.name))
                         .append(profile.equals(CommandKeys.profile()) ? " [Active]" : " [Inactive]"),
-                new ProfileList(minecraft, screen.width, screen.height, y0, y1,
+                new ProfileList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, -200, 400, entryHeight, 420,
                         profile, null)));
     }
@@ -143,9 +143,20 @@ public class ProfileSetList extends OptionsList {
                 int mainButtonX = x;
 
                 if (inGame) {
-                    Checkbox selectBox = new SelectBox(x, 0,
-                            smallButtonWidth, height, Component.empty(),
-                            profile.equals(CommandKeys.profile()));
+                    Checkbox selectBox = Checkbox.builder(Component.empty(),
+                                    Minecraft.getInstance().font)
+                            .pos(x, 0)
+                            .selected(profile.equals(CommandKeys.profile()))
+                            .onValueChange((checkbox, value) -> {
+                                if (value) {
+                                    if (CommandKeys.activeAddress() instanceof InetSocketAddress netAddress) {
+                                        profile.forceAddAddress(netAddress.getHostName());
+                                    }
+                                    config().setActiveProfile(profile);
+                                    listWidget.reload();
+                                }
+                            })
+                            .build();
                     selectBox.setTooltip(Tooltip.create(Component.literal("Use this profile")));
                     selectBox.setTooltipDelay(500);
                     elements.add(selectBox);
@@ -248,21 +259,6 @@ public class ProfileSetList extends OptionsList {
                 deleteButton.setTooltipDelay(500);
                 deleteButton.active = !isDefault;
                 elements.add(deleteButton);
-            }
-
-            private class SelectBox extends Checkbox {
-                public SelectBox(int x, int y, int width, int height, Component message, boolean selected) {
-                    super(x, y, width, height, message, selected, false);
-                }
-
-                @Override
-                public void onPress() {
-                    if (CommandKeys.activeAddress() instanceof InetSocketAddress netAddress) {
-                        profile.forceAddAddress(netAddress.getHostName());
-                    }
-                    config().setActiveProfile(profile);
-                    listWidget.reload();
-                }
             }
         }
 

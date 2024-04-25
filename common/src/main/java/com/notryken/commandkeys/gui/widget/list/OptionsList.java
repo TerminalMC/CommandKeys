@@ -44,9 +44,9 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
     protected final int entryHeight;
     protected final int scrollWidth;
 
-    public OptionsList(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight,
+    public OptionsList(Minecraft minecraft, int width, int height, int y, int itemHeight,
                        int entryRelX, int entryWidth, int entryHeight, int scrollWidth) {
-        super(minecraft, width, height, top, bottom, itemHeight);
+        super(minecraft, width, height, y, itemHeight);
         this.entryRelX = entryRelX;
         this.entryX = width / 2 + entryRelX;
         this.entryWidth = entryWidth;
@@ -79,7 +79,7 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
     }
 
     // Abstract methods
-    public abstract OptionsList resize(int width, int height, int top, int bottom,
+    public abstract OptionsList resize(int width, int height, int y,
                                        int itemHeight, double scrollAmount);
 
     public abstract boolean keyPressed(InputConstants.Key key);

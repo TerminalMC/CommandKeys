@@ -36,11 +36,11 @@ public class ProfileList extends OptionsList {
     InputConstants.Key heldKey;
     InputConstants.Key sendKey;
     
-    public ProfileList(Minecraft minecraft, int width, int height, int top, int bottom,
+    public ProfileList(Minecraft minecraft, int width, int height, int y,
                        int itemHeight, int entryRelX, int entryWidth, int entryHeight,
                        int scrollWidth, @NotNull Profile profile,
                        @Nullable Set<CommandKey> expandedKeys) {
-        super(minecraft, width, height, top, bottom, itemHeight, entryRelX,
+        super(minecraft, width, height, y, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth);
         this.profile = profile;
         this.expandedKeys = (expandedKeys == null) ? new HashSet<>() : expandedKeys;
@@ -86,10 +86,10 @@ public class ProfileList extends OptionsList {
     }
 
     @Override
-    public OptionsList resize(int width, int height, int top, int bottom,
+    public OptionsList resize(int width, int height, int y,
                               int itemHeight, double scrollAmount) {
         ProfileList newListWidget = new ProfileList(
-                minecraft, width, height, top, bottom, itemHeight, entryRelX,
+                minecraft, width, height, y, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth, profile, expandedKeys);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
@@ -175,7 +175,7 @@ public class ProfileList extends OptionsList {
         }
         minecraft.setScreen(new OptionsScreen(lastScreen,
                 Component.translatable("screen.commandkeys.title.profiles"),
-                new ProfileSetList(minecraft, screen.width, screen.height, y0, y1,
+                new ProfileSetList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, -180, 360, entryHeight, 380, null)));
     }
 
