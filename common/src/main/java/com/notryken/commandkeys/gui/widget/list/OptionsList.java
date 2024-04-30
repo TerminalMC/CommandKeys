@@ -18,6 +18,7 @@ import com.notryken.commandkeys.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,7 +144,7 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
                             .setCentered(true);
                 }
                 if (tooltip != null) widget.setTooltip(tooltip);
-                if (tooltipDelay >= 0) widget.setTooltipDelay(tooltipDelay);
+                if (tooltipDelay >= 0) widget.setTooltipDelay(Duration.ofMillis(tooltipDelay));
 
                 elements.add(widget);
             }
@@ -160,7 +161,7 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
                         .size(width, height)
                         .build();
                 if (tooltip != null) button.setTooltip(tooltip);
-                if (tooltipDelay >= 0) button.setTooltipDelay(tooltipDelay);
+                if (tooltipDelay >= 0) button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
 
                 elements.add(button);
             }

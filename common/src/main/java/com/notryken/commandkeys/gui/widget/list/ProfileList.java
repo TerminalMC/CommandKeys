@@ -25,6 +25,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -199,7 +200,7 @@ public class ProfileList extends OptionsList {
                         .create(x, 0, buttonWidth, height,
                                 Component.literal("Chat History"),
                                 (button, status) -> listWidget.profile.addToHistory = status);
-                historyButton.setTooltipDelay(500);
+                historyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(historyButton);
                 CycleButton<Boolean> displayButton = CycleButton.booleanBuilder(
                         Component.literal("Yes").withStyle(ChatFormatting.GREEN),
@@ -210,7 +211,7 @@ public class ProfileList extends OptionsList {
                         .create(x + buttonWidth + spacing, 0, buttonWidth, height,
                                 Component.literal("HUD Display"),
                                 (button, status) -> listWidget.profile.showHudMessage = status);
-                displayButton.setTooltipDelay(500);
+                displayButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(displayButton);
                 // Switch to right-justified
                 elements.add(Button.builder(Component.literal("Change Profile"),
@@ -245,7 +246,7 @@ public class ProfileList extends OptionsList {
                         Component.empty());
                 if (listWidget.expandedKeys.contains(commandKey)) {
                     collapseButton.setTooltip(Tooltip.create(Component.literal("Collapse")));
-                    collapseButton.setTooltipDelay(500);
+                    collapseButton.setTooltipDelay(Duration.ofMillis(500));
                 } else {
                     collapseButton.active = false;
                 }
@@ -368,7 +369,7 @@ public class ProfileList extends OptionsList {
                                     commandKey.conflictStrategy.state = status;
                                     listWidget.reload();
                                 });
-                conflictStrategyButton.setTooltipDelay(500);
+                conflictStrategyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(conflictStrategyButton);
                 movingX += largeButtonWidth + spacing;
 
@@ -412,7 +413,7 @@ public class ProfileList extends OptionsList {
                                     (button, status) -> {});
                     sendStrategyButton.active = false;
                 }
-                sendStrategyButton.setTooltipDelay(500);
+                sendStrategyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(sendStrategyButton);
                 // Cycle index button
                 if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
@@ -431,7 +432,7 @@ public class ProfileList extends OptionsList {
                             .create(movingX + sendStrategyButtonWidth + 2, 0, smallButtonWidth, height,
                                     Component.empty(),
                                     (button, status) -> commandKey.cycleIndex = status);
-                    cycleIndexButton.setTooltipDelay(500);
+                    cycleIndexButton.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(cycleIndexButton);
                 }
 
@@ -447,7 +448,7 @@ public class ProfileList extends OptionsList {
                         .size(smallButtonWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(Component.literal("Remove command key")));
-                removeButton.setTooltipDelay(500);
+                removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
             }
         }
@@ -535,7 +536,7 @@ public class ProfileList extends OptionsList {
                 if (index > 0) {
                     upButton.setTooltip(Tooltip.create(Component.literal(
                             "Click to move up.\nShift-Click to send all the way.")));
-                    upButton.setTooltipDelay(1000);
+                    upButton.setTooltipDelay(Duration.ofMillis(1000));
                 } else {
                     upButton.active = false;
                 }
@@ -564,7 +565,7 @@ public class ProfileList extends OptionsList {
                 if (index < commandKey.messages.size() - 1) {
                     downButton.setTooltip(Tooltip.create(Component.literal(
                             "Click to move down.\nShift-Click to send all the way.")));
-                    downButton.setTooltipDelay(1000);
+                    downButton.setTooltipDelay(Duration.ofMillis(1000));
                 } else {
                     downButton.active = false;
                 }
@@ -592,7 +593,7 @@ public class ProfileList extends OptionsList {
                         .size(smallButtonWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(Component.literal("Remove message")));
-                removeButton.setTooltipDelay(500);
+                removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
             }
         }

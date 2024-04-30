@@ -16,6 +16,7 @@ import com.notryken.commandkeys.gui.screen.OptionsScreen;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 
 import static com.notryken.commandkeys.CommandKeys.config;
 
@@ -158,7 +159,7 @@ public class ProfileSetList extends OptionsList {
                             })
                             .build();
                     selectBox.setTooltip(Tooltip.create(Component.literal("Use this profile")));
-                    selectBox.setTooltipDelay(500);
+                    selectBox.setTooltipDelay(Duration.ofMillis(500));
                     elements.add(selectBox);
                     mainButtonWidth -= (smallButtonWidth + spacing);
                     mainButtonX += (smallButtonWidth + spacing);
@@ -214,7 +215,7 @@ public class ProfileSetList extends OptionsList {
                         .build();
                 setAsSpDefaultButton.setTooltip(Tooltip.create(
                         Component.literal("Set as Singleplayer Default")));
-                setAsSpDefaultButton.setTooltipDelay(500);
+                setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !isDefault;
                 elements.add(setAsSpDefaultButton);
                 movingX += smallButtonWidth + spacing;
@@ -229,7 +230,7 @@ public class ProfileSetList extends OptionsList {
                         .build();
                 setAsMpDefaultButton.setTooltip(Tooltip.create(
                         Component.literal("Set as Multiplayer Default")));
-                setAsMpDefaultButton.setTooltipDelay(500);
+                setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsMpDefaultButton.active = !isDefault;
                 elements.add(setAsMpDefaultButton);
                 movingX += smallButtonWidth + spacing;
@@ -243,7 +244,7 @@ public class ProfileSetList extends OptionsList {
                         },
                         Component.empty());
                 copyButton.setTooltip(Tooltip.create(Component.literal("Copy profile")));
-                copyButton.setTooltipDelay(500);
+                copyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(copyButton);
                 movingX += smallButtonWidth + spacing;
 
@@ -256,7 +257,7 @@ public class ProfileSetList extends OptionsList {
                         .size(smallButtonWidth, height)
                         .build();
                 deleteButton.setTooltip(Tooltip.create(Component.literal("Delete profile")));
-                deleteButton.setTooltipDelay(500);
+                deleteButton.setTooltipDelay(Duration.ofMillis(500));
                 deleteButton.active = !isDefault;
                 elements.add(deleteButton);
             }
@@ -294,7 +295,7 @@ public class ProfileSetList extends OptionsList {
                         .size(smallButtonWidth, height)
                         .build();
                 refreshButton.setTooltip(Tooltip.create(Component.literal("Refresh name")));
-                refreshButton.setTooltipDelay(500);
+                refreshButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(refreshButton);
             }
         }
@@ -331,7 +332,7 @@ public class ProfileSetList extends OptionsList {
                         .size(smallButtonWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(Component.literal("Remove server")));
-                removeButton.setTooltipDelay(500);
+                removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
             }
         }

@@ -107,7 +107,7 @@ subprojects {
                 "contact_url": contact_url
         ]
 
-        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
+        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/neoforge.mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
             expand expandProps
         }
         inputs.properties(expandProps)
