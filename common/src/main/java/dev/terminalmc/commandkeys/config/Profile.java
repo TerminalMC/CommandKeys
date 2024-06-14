@@ -8,20 +8,29 @@ package dev.terminalmc.commandkeys.config;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.config.util.JsonRequired;
+import dev.terminalmc.commandkeys.config.util.JsonValidator;
 
 import java.lang.reflect.Type;
 import java.util.*;
 
 public class Profile {
+    public final int version = 1;
+
     public static final Map<String, Profile> PROFILE_MAP = new HashMap<>();
 
     public transient final HashMultimap<InputConstants.Key, CommandKey> COMMANDKEY_MAP = HashMultimap.create();
 
+    @JsonRequired
     public String name;
+    @JsonRequired
     private final Set<String> addresses;
 
+    @JsonRequired
     public boolean addToHistory;
+    @JsonRequired
     public boolean showHudMessage;
+    @JsonRequired
     private final Set<CommandKey> commandKeys;
 
     public Profile() {
@@ -112,57 +121,32 @@ public class Profile {
         }
     }
 
-    // Serialization / Deserialization
-
-    public static class Serializer implements JsonSerializer<Profile> {
-        @Override
-        public JsonElement serialize(Profile src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject profileObj = new JsonObject();
-
-            profileObj.addProperty("name", src.name);
-            profileObj.add("addresses", context.serialize(src.addresses));
-            
-            profileObj.addProperty("addToHistory", src.addToHistory);
-            profileObj.addProperty("showHudMessage", src.showHudMessage);
-            profileObj.add("commandKeys", context.serialize(src.commandKeys));
-
-            return profileObj;
-        }
-    }
+    // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Profile> {
         @Override
-        public Profile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public Profile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
 
-            JsonObject profileObj = json.getAsJsonObject();
-
-            String name;
+            String name = obj.get("name").getAsString();
             Set<String> addresses = new HashSet<>();
-
-            boolean addToHistory;
-            boolean showHudMessage;
-            Set<CommandKey> commandKeys = new LinkedHashSet<>();
-
-            name = profileObj.get("name").getAsString();
-            JsonArray addressesArr = profileObj.getAsJsonArray("addresses");
-            for (JsonElement element : addressesArr) {
-                addresses.add(element.getAsString());
-            }
-            
-            addToHistory = profileObj.get("addToHistory").getAsBoolean();
-            showHudMessage = profileObj.get("showHudMessage").getAsBoolean();
+            for (JsonElement je : obj.getAsJsonArray("addresses")) addresses.add(je.getAsString());
+            boolean addToHistory = obj.get("addToHistory").getAsBoolean();
+            boolean showHudMessage = obj.get("showHudMessage").getAsBoolean();
 
             // Deserialize CommandKey objects with link to deserialized Profile
+            Set<CommandKey> commandKeys = new LinkedHashSet<>();
 
-            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
+            Profile profile = new JsonValidator<Profile>().validateRequired(
+                    new Profile(name, addresses, addToHistory, showHudMessage, commandKeys));
+
             Gson commandKeyGson = new GsonBuilder()
                     .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer(profile))
                     .create();
 
-            JsonArray commandKeysArr = profileObj.getAsJsonArray("commandKeys");
-            for (JsonElement element : commandKeysArr) {
-                commandKeys.add(commandKeyGson.fromJson(element, CommandKey.class));
-            }
+            for (JsonElement je : obj.getAsJsonArray("commandKeys"))
+                commandKeys.add(commandKeyGson.fromJson(je, CommandKey.class));
 
             return profile;
         }

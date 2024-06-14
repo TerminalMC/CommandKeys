@@ -27,4 +27,8 @@ public class TriState {
     public TriState(@NotNull State state) {
         this.state = state;
     }
+
+    public TriState(String state) {
+        this.state = State.valueOf(state);
+    }
 }

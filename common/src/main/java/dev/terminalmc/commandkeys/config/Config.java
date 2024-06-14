@@ -7,6 +7,8 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import dev.terminalmc.commandkeys.CommandKeys;
+import dev.terminalmc.commandkeys.config.util.JsonRequired;
+import dev.terminalmc.commandkeys.config.util.JsonValidator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,15 +20,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Config {
     public final int version = 1;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Config.class, new Serializer())
-            .registerTypeAdapter(Config.class, new Deserializer())
-            .registerTypeAdapter(Profile.class, new Profile.Serializer())
+            .registerTypeAdapter(Config.class, new Config.Deserializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
             .registerTypeAdapter(CommandKey.class, new CommandKey.Serializer())
             .setPrettyPrinting()
@@ -36,9 +37,16 @@ public class Config {
 
     // Options
 
+    private Profile fallbackProfile() {
+        return new Profile();
+    }
+
+    @JsonRequired(fallback = "fallbackProfile")
     private Profile spDefaultProfile;
+    @JsonRequired
     private Profile mpDefaultProfile;
-    public final ArrayList<Profile> profiles;
+    @JsonRequired
+    public final List<Profile> profiles;
 
     public Config() {
         Profile spDefaultProfile = new Profile();
@@ -54,7 +62,7 @@ public class Config {
     }
 
     public Config(@NotNull Profile spDefaultProfile, @NotNull Profile mpDefaultProfile,
-                  ArrayList<Profile> profiles) {
+                  List<Profile> profiles) {
         this.spDefaultProfile = spDefaultProfile;
         this.mpDefaultProfile = mpDefaultProfile;
         this.profiles = profiles;
@@ -83,7 +91,7 @@ public class Config {
             spDefaultProfile = profile;
             profiles.remove(profile);
             profiles.addFirst(temp);
-            // If active was the old default, make active the new default.
+            // If the old default was the active profile, activate the new one
             if (activeProfile.equals(temp)) activeProfile = profile;
         }
     }
@@ -94,7 +102,7 @@ public class Config {
             mpDefaultProfile = profile;
             profiles.remove(profile);
             profiles.addFirst(temp);
-            // If active was the old default, make active the new default.
+            // If the old default was the active profile, activate the new one
             if (activeProfile.equals(temp)) activeProfile = profile;
         }
     }
@@ -166,6 +174,7 @@ public class Config {
     }
 
     public static void save() {
+        instance.cleanup();
         try {
             if (!Files.isDirectory(DIR_PATH)) Files.createDirectories(DIR_PATH);
             Path file = DIR_PATH.resolve(FILE_NAME);
@@ -184,43 +193,24 @@ public class Config {
         }
     }
 
-    // Serialization / Deserialization
-
-    public static class Serializer implements JsonSerializer<Config> {
-        @Override
-        public JsonElement serialize(Config src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject configObj = new JsonObject();
-            
-            configObj.addProperty("version", src.version);
-            configObj.add("spDefaultProfile", context.serialize(src.spDefaultProfile));
-            configObj.add("mpDefaultProfile", context.serialize(src.mpDefaultProfile));
-            configObj.add("profiles", context.serialize(src.profiles));
-
-            return configObj;
-        }
-    }
+    // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Config> {
         @Override
-        public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject configObj = json.getAsJsonObject();
+        public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
 
-            Profile spDefaultProfile;
-            Profile mpDefaultProfile;
-            ArrayList<Profile> profiles = new ArrayList<>();
+            Profile spDefaultProfile = ctx.deserialize(obj.get("spDefaultProfile"), Profile.class);
+            Profile mpDefaultProfile = ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class);
 
-            JsonObject spDefaultProfileObj = configObj.getAsJsonObject("spDefaultProfile");
-            spDefaultProfile = context.deserialize(spDefaultProfileObj, Profile.class);
-
-            JsonObject mdDefaultProfileObj = configObj.getAsJsonObject("mpDefaultProfile");
-            mpDefaultProfile = context.deserialize(mdDefaultProfileObj, Profile.class);
-
-            JsonArray mpProfilesArr = configObj.getAsJsonArray("profiles");
-            for (JsonElement element : mpProfilesArr) {
-                profiles.add(context.deserialize(element, Profile.class));
+            List<Profile> profiles = new ArrayList<>();
+            for (JsonElement je : obj.getAsJsonArray("profiles")) {
+                profiles.add(ctx.deserialize(je, Profile.class));
             }
 
-            return new Config(spDefaultProfile, mpDefaultProfile, profiles);
+            return new JsonValidator<Config>().validateRequired(
+                    new Config(spDefaultProfile, mpDefaultProfile, profiles));
         }
     }
 }

@@ -28,4 +28,8 @@ public class QuadState {
     public QuadState(@NotNull State state) {
         this.state = state;
     }
+
+    public QuadState(String state) {
+        this.state = State.valueOf(state);
+    }
 }

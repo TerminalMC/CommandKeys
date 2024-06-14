@@ -7,12 +7,17 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.config.util.JsonRequired;
+import dev.terminalmc.commandkeys.config.util.JsonValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 /*
+FIXME: This comment is out of date
+
 Vanilla Minecraft keybind handling works roughly like this:
 
 Minecraft.options.keyMappings is a hardcoded final KeyMapping[], initialised on
@@ -64,17 +69,23 @@ KeyMapping::click call of KeyboardHandler::keyPress
 
 
 public class CommandKey {
+    public final int version = 1;
 
     public transient final Profile profile;
 
+    @JsonRequired
     public final QuadState conflictStrategy; // Submit, Assert, Veto or Avoid
+    @JsonRequired
     public final TriState sendStrategy; // Send, Type or Cycle
     public transient int cycleIndex; // Index of next message if cycling
 
+    @JsonRequired
     private InputConstants.Key key;
+    @JsonRequired
     private InputConstants.Key limitKey;
 
-    public final ArrayList<String> messages;
+    @JsonRequired
+    public final List<String> messages;
 
     public CommandKey(Profile profile) {
         this.profile = profile;
@@ -88,7 +99,7 @@ public class CommandKey {
 
     public CommandKey(Profile profile, QuadState conflictStrategy, TriState sendStrategy,
                       InputConstants.Key key, InputConstants.Key limitKey,
-                      ArrayList<String> messages) {
+                      List<String> messages) {
         this.profile = profile;
         this.conflictStrategy = conflictStrategy;
         this.sendStrategy = sendStrategy;
@@ -121,29 +132,29 @@ public class CommandKey {
 
     public static class Serializer implements JsonSerializer<CommandKey> {
         @Override
-        public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject cmdKeyObj = new JsonObject();
+        public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext ctx) {
+            JsonObject obj = new JsonObject();
 
-            cmdKeyObj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
-            cmdKeyObj.addProperty("sendStrategy", src.sendStrategy.state.toString());
+            obj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
+            obj.addProperty("sendStrategy", src.sendStrategy.state.toString());
 
             JsonObject keyObj = new JsonObject();
             keyObj.addProperty("name", src.key.getName());
             keyObj.addProperty("type", src.key.getType().toString());
             keyObj.addProperty("value", src.key.getValue());
-            cmdKeyObj.add("key", keyObj);
+            obj.add("key", keyObj);
 
             JsonObject limitKeyObj = new JsonObject();
             limitKeyObj.addProperty("name", src.limitKey.getName());
             limitKeyObj.addProperty("type", src.limitKey.getType().toString());
             limitKeyObj.addProperty("value", src.limitKey.getValue());
-            cmdKeyObj.add("limitKey", limitKeyObj);
+            obj.add("limitKey", limitKeyObj);
 
             JsonArray messagesObj = new JsonArray();
             for (String message : src.messages) messagesObj.add(message);
-            cmdKeyObj.add("messages", messagesObj);
+            obj.add("messages", messagesObj);
 
-            return cmdKeyObj;
+            return obj;
         }
     }
 
@@ -155,28 +166,19 @@ public class CommandKey {
         }
 
         @Override
-        public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            JsonObject cmdKeyObj = json.getAsJsonObject();
+        public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+                throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
 
-            QuadState conflictStrategy;
-            TriState sendStrategy;
-            InputConstants.Key key;
-            InputConstants.Key limitKey;
+            QuadState conflictStrategy = new QuadState(obj.get("conflictStrategy").getAsString());
+            TriState sendStrategy = new TriState(obj.get("sendStrategy").getAsString());
+            InputConstants.Key key = InputConstants.getKey(obj.getAsJsonObject("key").get("name").getAsString());
+            InputConstants.Key limitKey = InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString());
             ArrayList<String> messages = new ArrayList<>();
+            for (JsonElement je : obj.getAsJsonArray("messages")) messages.add(je.getAsString());
 
-            conflictStrategy = new QuadState(QuadState.State.valueOf(cmdKeyObj.get("conflictStrategy").getAsString()));
-            sendStrategy = new TriState(TriState.State.valueOf(cmdKeyObj.get("sendStrategy").getAsString()));
-
-            JsonObject keyObj = cmdKeyObj.getAsJsonObject("key");
-            key = InputConstants.getKey(keyObj.get("name").getAsString());
-
-            JsonObject limitKeyObj = cmdKeyObj.getAsJsonObject("limitKey");
-            limitKey = InputConstants.getKey(limitKeyObj.get("name").getAsString());
-
-            JsonArray messagesObj = cmdKeyObj.getAsJsonArray("messages");
-            for (JsonElement element : messagesObj) messages.add(element.getAsString());
-
-            return new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages);
+            return new JsonValidator<CommandKey>().validateRequired(
+                    new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages));
         }
     }
 }
