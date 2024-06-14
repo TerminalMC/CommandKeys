@@ -1,29 +1,29 @@
-plugins {
-    id "java"
-    id "java-library"
-    id "idea"
-    id "maven-publish"
-    id "org.jetbrains.gradle.plugin.idea-ext" version "${ideaext_version}" // Required for NeoGradle
-    id "com.modrinth.minotaur" version "${minotaur_version}"
-    id "com.github.breadmoirai.github-release" version "${githubrelease_version}"
-    id "org.ajoberstar.grgit.service" version "${grgitservice_version}"
-}
-
 import com.modrinth.minotaur.dependencies.ModDependency
+
+plugins {
+    id("java")
+    id("java-library")
+    id("idea")
+    id("maven-publish")
+    id("org.jetbrains.gradle.plugin.idea-ext") version("${ideaext_version}") // Required for NeoGradle
+    id("com.modrinth.minotaur") version("${minotaur_version}")
+    id("com.github.breadmoirai.github-release") version("${githubrelease_version}")
+    id("org.ajoberstar.grgit.service") version("${grgitservice_version}")
+}
 
 subprojects {
     version = mod_version
     group = mod_group
 
-    apply plugin: "java"
-    apply plugin: "java-library"
-    apply plugin: "idea"
-    apply plugin: "maven-publish"
+    apply(plugin: "java")
+    apply(plugin: "java-library")
+    apply(plugin: "idea")
+    apply(plugin: "maven-publish")
 
     if (project.name != "common") {
-        apply plugin: "com.modrinth.minotaur"
-        apply plugin: "com.github.breadmoirai.github-release"
-        apply plugin: "org.ajoberstar.grgit.service"
+        apply(plugin: "com.modrinth.minotaur")
+        apply(plugin: "com.github.breadmoirai.github-release")
+        apply(plugin: "org.ajoberstar.grgit.service")
     }
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.valueOf(java_version))
@@ -34,16 +34,16 @@ subprojects {
         }
         manifest {
             attributes([
-                    "Specification-Title"     : mod_name,
-                    "Specification-Vendor"    : mod_owner,
-                    "Specification-Version"   : project.jar.archiveVersion,
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : project.jar.archiveVersion,
-                    "Implementation-Vendor"   : mod_owner,
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    "Timestamp"               : System.currentTimeMillis(),
-                    "Built-On-Java"           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
-                    "Built-On-Minecraft"      : minecraft_version
+                "Specification-Title"     : mod_name,
+                "Specification-Vendor"    : mod_owner,
+                "Specification-Version"   : project.jar.archiveVersion,
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : mod_owner,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "Timestamp"               : System.currentTimeMillis(),
+                "Built-On-Java"           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                "Built-On-Minecraft"      : minecraft_version
             ])
         }
     }
@@ -58,10 +58,6 @@ subprojects {
         maven {
             name = "Modrinth"
             url = "https://api.modrinth.com/maven"
-        }
-        maven {
-            name = "Shedaniel"
-            url = "https://maven.shedaniel.me/"
         }
     }
 
@@ -107,7 +103,7 @@ subprojects {
                 "contact_url": contact_url
         ]
 
-        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/neoforge.mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
+        filesMatching(["pack.mcmeta", "*.mod.json", "META-INF/*mods.toml", "*.mixins.json", "assets/"+mod_id+"/lang/*.json"]) {
             expand expandProps
         }
         inputs.properties(expandProps)
@@ -120,13 +116,7 @@ subprojects {
     afterEvaluate {
         if (name != "common") {
             modrinth {
-                def modrinthToken = dotenv().get("MODRINTH_TOKEN")
-                if (modrinthToken == null) {
-                    getLogger().error(".env missing key: MODRINTH_TOKEN")
-                    return
-                }
-
-                token = modrinthToken
+                token = System.getenv().MODRINTH_TOKEN ? System.getenv().MODRINTH_TOKEN : "empty"
                 projectId = modrinth_id
                 versionNumber = mod_version
                 versionType = release_type
@@ -155,26 +145,24 @@ subprojects {
                 dependencies = deps
                 syncBodyFrom = rootProject.file("README.md").text
             }
-            tasks.modrinth.dependsOn(tasks.modrinthSyncBody)
-            tasks.modrinth.dependsOn(build)
-            githubRelease {
-                def githubToken = dotenv().get("GITHUB_TOKEN")
-                if (githubToken == null) {
-                    getLogger().error(".env missing key: GITHUB_TOKEN")
-                    return
-                }
+            tasks.modrinth.onlyIf { System.getenv().MODRINTH_TOKEN }
+            tasks.modrinth.dependsOn(build, tasks.modrinthSyncBody)
+            tasks.modrinthSyncBody.onlyIf { System.getenv().MODRINTH_TOKEN }
 
-                token = githubToken
+            githubRelease {
+                token = System.getenv().GITHUB_TOKEN ? System.getenv().GITHUB_TOKEN : "empty"
                 owner = github_repo_owner
                 repo = github_repo
-                tagName = "v${mod_version}-${name}-${minecraft_version}"
+                tagName = "v${mod_version}"
                 prerelease = release_type == "alpha" || release_type == "beta"
-                releaseName = "v${mod_version}-${capsLoader(name)}-${minecraft_version}"
+                releaseName = "v${mod_version} for ${minecraft_version}"
                 body = rootProject.file("changelog.md").text
                 targetCommitish = grgitService.service.get().grgit.branch.current().name
-                overwrite = true
-                releaseAssets = jar.destinationDirectory.asFileTree.files
+                overwrite = false
+                allowUploadToExisting = true
+                releaseAssets = List.of(name == "fabric" ? remapJar : jar, sourcesJar)
             }
+            tasks.githubRelease.onlyIf { System.getenv().GITHUB_TOKEN }
             tasks.githubRelease.dependsOn(build)
         }
     }
@@ -192,20 +180,4 @@ static String capsLoader(String loader) {
         case "neoforge": return "NeoForge"
         default: return loader
     }
-}
-
-Map<String,String> dotenv() {
-    def map = new HashMap<String,String>()
-    try {
-        file(".env").readLines().each() {
-            if (!it.isBlank() && !it.startsWith("#")) {
-                def pos = it.indexOf("=")
-                def key = it.substring(0, pos)
-                def value = it.substring(pos + 1)
-                map.put(key, value)
-            }
-        }
-    }
-    catch (IOException ignored) {}
-    return map
 }

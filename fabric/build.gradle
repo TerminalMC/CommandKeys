@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "${loom_version}"
+    id("fabric-loom") version("${loom_version}")
 }
 
 base {
@@ -7,22 +7,25 @@ base {
 }
 
 dependencies {
-    compileOnly project(":common")
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.officialMojangMappings()
+    compileOnly(project(":common"))
+    minecraft("com.mojang:minecraft:${minecraft_version}")
+    mappings(loom.officialMojangMappings())
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    compileOnly("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")
+    annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")
 
-    modImplementation "maven.modrinth:modmenu:${modmenu_version}"
+    modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
+
+    modImplementation("maven.modrinth:modmenu:${modmenu_version}")
 }
 
 loom {
     if (project(":common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
-        accessWidenerPath.set(project(":common").file("src/main/resources/${mod_id}.accesswidener"))
+        accessWidenerPath = project(":common").file("src/main/resources/${mod_id}.accesswidener")
     }
     mixin {
-        defaultRefmapName.set("${mod_id}.refmap.json")
+        defaultRefmapName = "${mod_id}.refmap.json"
     }
 }
 

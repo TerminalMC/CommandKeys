@@ -1,7 +1,8 @@
 {
-  "keygroup.commandkeys.main": "Command Keys",
-  "key.commandkeys.open_config": "Edit Profile",
-  "screen.commandkeys.title.default": "CommandKeys",
-  "screen.commandkeys.title.profile": "CommandKeys Profile: ",
-  "screen.commandkeys.title.profiles": "CommandKeys Profiles"
+  "screen.${mod_id}.default": "CommandKeys",
+  "screen.${mod_id}.select_profile": "CommandKeys Profile Selection",
+  "screen.${mod_id}.edit_profile": "CommandKeys Profile: %s",
+
+  "${mod_id}.key_group":  "CommandKeys",
+  "key.${mod_id}.open_config": "Edit Active Profile"
 }

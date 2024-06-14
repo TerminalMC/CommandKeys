@@ -1,5 +1,5 @@
 plugins {
-    id "net.neoforged.gradle.userdev" version "${userdev_version}"
+    id("net.neoforged.gradle.userdev") version("${userdev_version}")
 }
 
 base {
@@ -7,12 +7,20 @@ base {
 }
 
 dependencies {
-    compileOnly project(":common")
-    implementation "net.neoforged:neoforge:${neoforge_version}"
+    compileOnly(project(":common"))
+    implementation("net.neoforged:neoforge:${neoforge_version}")
+
+    compileOnly("io.github.llamalad7:mixinextras-neoforge:${mixinextras_version}")
+    annotationProcessor("io.github.llamalad7:mixinextras-neoforge:${mixinextras_version}")
+}
+
+// Temporary workaround for a NeoGradle bug
+tasks.named("test").configure {
+    enabled = false
 }
 
 if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
-    minecraft.accessTransformers.file file("src/main/resources/META-INF/accesstransformer.cfg")
+    minecraft.accessTransformers.file(file("src/main/resources/META-INF/accesstransformer.cfg"))
 }
 
 Spec<Task> notNeoTask = { Task it -> !it.name.startsWith("neo") } as Spec<Task>
