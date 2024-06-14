@@ -8,8 +8,6 @@ package dev.terminalmc.commandkeys.config;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.config.util.JsonRequired;
-import dev.terminalmc.commandkeys.config.util.JsonValidator;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -21,16 +19,11 @@ public class Profile {
 
     public transient final HashMultimap<InputConstants.Key, CommandKey> COMMANDKEY_MAP = HashMultimap.create();
 
-    @JsonRequired
     public String name;
-    @JsonRequired
     private final Set<String> addresses;
 
-    @JsonRequired
     public boolean addToHistory;
-    @JsonRequired
     public boolean showHudMessage;
-    @JsonRequired
     private final Set<CommandKey> commandKeys;
 
     public Profile() {
@@ -41,9 +34,8 @@ public class Profile {
         this.commandKeys = new LinkedHashSet<>();
     }
 
-    public Profile(String name, Set<String> addresses,
-                   boolean addToHistory, boolean showHudMessage,
-                   Set<CommandKey> commandKeys) {
+    public Profile(String name, Set<String> addresses, boolean addToHistory,
+                   boolean showHudMessage, Set<CommandKey> commandKeys) {
         this.name = name;
         this.addresses = addresses;
         this.addToHistory = addToHistory;
@@ -138,8 +130,7 @@ public class Profile {
             // Deserialize CommandKey objects with link to deserialized Profile
             Set<CommandKey> commandKeys = new LinkedHashSet<>();
 
-            Profile profile = new JsonValidator<Profile>().validateRequired(
-                    new Profile(name, addresses, addToHistory, showHudMessage, commandKeys));
+            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
 
             Gson commandKeyGson = new GsonBuilder()
                     .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer(profile))

@@ -7,8 +7,6 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import dev.terminalmc.commandkeys.CommandKeys;
-import dev.terminalmc.commandkeys.config.util.JsonRequired;
-import dev.terminalmc.commandkeys.config.util.JsonValidator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,15 +35,8 @@ public class Config {
 
     // Options
 
-    private Profile fallbackProfile() {
-        return new Profile();
-    }
-
-    @JsonRequired(fallback = "fallbackProfile")
     private Profile spDefaultProfile;
-    @JsonRequired
     private Profile mpDefaultProfile;
-    @JsonRequired
     public final List<Profile> profiles;
 
     public Config() {
@@ -61,31 +52,30 @@ public class Config {
         this.activeProfile = this.mpDefaultProfile;
     }
 
-    public Config(@NotNull Profile spDefaultProfile, @NotNull Profile mpDefaultProfile,
-                  List<Profile> profiles) {
+    public Config(Profile spDefaultProfile, Profile mpDefaultProfile, List<Profile> profiles) {
         this.spDefaultProfile = spDefaultProfile;
         this.mpDefaultProfile = mpDefaultProfile;
         this.profiles = profiles;
         this.activeProfile = this.mpDefaultProfile;
     }
 
-    public @NotNull Profile getActiveProfile() {
+    public Profile getActiveProfile() {
         return activeProfile;
     }
 
-    public void setActiveProfile(@NotNull Profile activeProfile) {
+    public void setActiveProfile(Profile activeProfile) {
         this.activeProfile = activeProfile;
     }
 
-    public @NotNull Profile getSpDefaultProfile() {
+    public Profile getSpDefaultProfile() {
         return spDefaultProfile;
     }
 
-    public @NotNull Profile getMpDefaultProfile() {
+    public Profile getMpDefaultProfile() {
         return mpDefaultProfile;
     }
 
-    public void setSpDefaultProfile(@NotNull Profile profile) {
+    public void setSpDefaultProfile(Profile profile) {
         if (!profile.equals(spDefaultProfile)) {
             Profile temp = spDefaultProfile;
             spDefaultProfile = profile;
@@ -96,7 +86,7 @@ public class Config {
         }
     }
 
-    public void setMpDefaultProfile(@NotNull Profile profile) {
+    public void setMpDefaultProfile(Profile profile) {
         if (!profile.equals(mpDefaultProfile)) {
             Profile temp = mpDefaultProfile;
             mpDefaultProfile = profile;
@@ -209,8 +199,7 @@ public class Config {
                 profiles.add(ctx.deserialize(je, Profile.class));
             }
 
-            return new JsonValidator<Config>().validateRequired(
-                    new Config(spDefaultProfile, mpDefaultProfile, profiles));
+            return new Config(spDefaultProfile, mpDefaultProfile, profiles);
         }
     }
 }

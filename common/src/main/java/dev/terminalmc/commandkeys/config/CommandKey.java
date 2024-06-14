@@ -7,9 +7,6 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.config.util.JsonRequired;
-import dev.terminalmc.commandkeys.config.util.JsonValidator;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -73,18 +70,13 @@ public class CommandKey {
 
     public transient final Profile profile;
 
-    @JsonRequired
     public final QuadState conflictStrategy; // Submit, Assert, Veto or Avoid
-    @JsonRequired
     public final TriState sendStrategy; // Send, Type or Cycle
     public transient int cycleIndex; // Index of next message if cycling
 
-    @JsonRequired
     private InputConstants.Key key;
-    @JsonRequired
     private InputConstants.Key limitKey;
 
-    @JsonRequired
     public final List<String> messages;
 
     public CommandKey(Profile profile) {
@@ -98,8 +90,7 @@ public class CommandKey {
     }
 
     public CommandKey(Profile profile, QuadState conflictStrategy, TriState sendStrategy,
-                      InputConstants.Key key, InputConstants.Key limitKey,
-                      List<String> messages) {
+                      InputConstants.Key key, InputConstants.Key limitKey, List<String> messages) {
         this.profile = profile;
         this.conflictStrategy = conflictStrategy;
         this.sendStrategy = sendStrategy;
@@ -161,7 +152,7 @@ public class CommandKey {
     public static class Deserializer implements JsonDeserializer<CommandKey> {
         Profile profile;
 
-        public Deserializer(@NotNull Profile profile) {
+        public Deserializer(Profile profile) {
             this.profile = profile;
         }
 
@@ -177,8 +168,7 @@ public class CommandKey {
             ArrayList<String> messages = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("messages")) messages.add(je.getAsString());
 
-            return new JsonValidator<CommandKey>().validateRequired(
-                    new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages));
+            return new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages);
         }
     }
 }
