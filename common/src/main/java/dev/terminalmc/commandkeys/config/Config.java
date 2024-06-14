@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
-    public final int version = 1;
+    public final int version = 2;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
@@ -31,69 +31,64 @@ public class Config {
             .setPrettyPrinting()
             .create();
 
-    private transient Profile activeProfile;
-
     // Options
 
-    private Profile spDefaultProfile;
-    private Profile mpDefaultProfile;
     public final List<Profile> profiles;
+    public int spDefault;
+    public int mpDefault;
 
     public Config() {
+        this.profiles = new ArrayList<>();
+
         Profile spDefaultProfile = new Profile();
         spDefaultProfile.name = "Singleplayer Default";
-        this.spDefaultProfile = spDefaultProfile;
+        this.profiles.add(spDefaultProfile);
 
         Profile mpDefaultProfile = new Profile();
-        mpDefaultProfile.name = "Multiplayer Default";
-        this.mpDefaultProfile = mpDefaultProfile;
-
-        this.profiles = new ArrayList<>();
-        this.activeProfile = this.mpDefaultProfile;
+        mpDefaultProfile.name = "Singleplayer Default";
+        this.profiles.add(mpDefaultProfile);
     }
 
-    public Config(Profile spDefaultProfile, Profile mpDefaultProfile, List<Profile> profiles) {
-        this.spDefaultProfile = spDefaultProfile;
-        this.mpDefaultProfile = mpDefaultProfile;
+    public Config(List<Profile> profiles, int spDefault, int mpDefault) {
         this.profiles = profiles;
-        this.activeProfile = this.mpDefaultProfile;
+        this.spDefault = spDefault;
+        this.mpDefault = mpDefault;
+        activateProfile(spDefault);
     }
 
-    public Profile getActiveProfile() {
-        return activeProfile;
+    public Profile activeProfile() {
+        return profiles.getFirst();
     }
 
-    public void setActiveProfile(Profile activeProfile) {
-        this.activeProfile = activeProfile;
+    public void activateProfile(int index) {
+        profiles.addFirst(profiles.remove(index));
     }
 
     public Profile getSpDefaultProfile() {
-        return spDefaultProfile;
+        return profiles.get(spDefault);
     }
 
     public Profile getMpDefaultProfile() {
-        return mpDefaultProfile;
+        return profiles.get(mpDefault);
     }
 
-    public void setSpDefaultProfile(Profile profile) {
-        if (!profile.equals(spDefaultProfile)) {
-            Profile temp = spDefaultProfile;
-            spDefaultProfile = profile;
-            profiles.remove(profile);
-            profiles.addFirst(temp);
-            // If the old default was the active profile, activate the new one
-            if (activeProfile.equals(temp)) activeProfile = profile;
+    public void setSpDefaultProfile(int index) {
+        if (index != spDefault) {
+            if (spDefault == 0) {
+                activateProfile(index);
+            } else {
+                spDefault = index;
+            }
         }
     }
 
-    public void setMpDefaultProfile(Profile profile) {
-        if (!profile.equals(mpDefaultProfile)) {
-            Profile temp = mpDefaultProfile;
-            mpDefaultProfile = profile;
-            profiles.remove(profile);
-            profiles.addFirst(temp);
-            // If the old default was the active profile, activate the new one
-            if (activeProfile.equals(temp)) activeProfile = profile;
+    public void setMpDefaultProfile(int index) {
+        if (index != mpDefault) {
+            if (mpDefault == 0) {
+                activateProfile(index);
+            } else {
+                mpDefault = index;
+            }
         }
     }
 
@@ -103,15 +98,23 @@ public class Config {
         profiles.add(copyProfile);
     }
 
+    public void activateServerProfile(String server) {
+        int i = 0;
+        for (Profile profile : profiles) {
+            for (String address : profile.getAddresses()) {
+                if (address.equals(server)) {
+                    activateProfile(i);
+                    return;
+                }
+            }
+        }
+        activateProfile(mpDefault);
+    }
+
     // Cleanup
 
     public void cleanup() {
-        spDefaultProfile.cleanup();
-        mpDefaultProfile.cleanup();
-
-        for (Profile profile : profiles) {
-            profile.cleanup();
-        }
+        for (Profile p : profiles) p.cleanup();
     }
 
     // Instance management
@@ -190,16 +193,33 @@ public class Config {
         public Config deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
-
-            Profile spDefaultProfile = ctx.deserialize(obj.get("spDefaultProfile"), Profile.class);
-            Profile mpDefaultProfile = ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class);
+            int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
             List<Profile> profiles = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("profiles")) {
                 profiles.add(ctx.deserialize(je, Profile.class));
             }
+            int spDefault;
+            int mpDefault;
 
-            return new Config(spDefaultProfile, mpDefaultProfile, profiles);
+            if (version == 1) {
+                profiles.addFirst(ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class));
+                profiles.addFirst(ctx.deserialize(obj.get("spDefaultProfile"), Profile.class));
+                if (profiles.size() < 2) throw new JsonParseException(
+                        "Expected 2 or more profiles, got " + profiles.size());
+                spDefault = 0;
+                mpDefault = 1;
+            }
+            else {
+                spDefault = obj.get("spDefault").getAsInt();
+                mpDefault = obj.get("mpDefault").getAsInt();
+            }
+
+            // Validate
+            if (spDefault < 0 || spDefault >= profiles.size()) throw new JsonParseException("Config #1");
+            if (mpDefault < 0 || mpDefault >= profiles.size()) throw new JsonParseException("Config #2");
+
+            return new Config(profiles, spDefault, mpDefault);
         }
     }
 }

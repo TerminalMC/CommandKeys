@@ -72,6 +72,7 @@ public class CommandKey {
 
     public final QuadState conflictStrategy; // Submit, Assert, Veto or Avoid
     public final TriState sendStrategy; // Send, Type or Cycle
+    public int spaceTicks;
     public transient int cycleIndex; // Index of next message if cycling
 
     private InputConstants.Key key;
@@ -83,17 +84,20 @@ public class CommandKey {
         this.profile = profile;
         this.conflictStrategy = new QuadState();
         this.sendStrategy = new TriState();
+        this.spaceTicks = 0;
         this.cycleIndex = 0;
         this.key = InputConstants.UNKNOWN;
         this.limitKey = InputConstants.UNKNOWN;
         this.messages = new ArrayList<>();
     }
 
-    public CommandKey(Profile profile, QuadState conflictStrategy, TriState sendStrategy,
-                      InputConstants.Key key, InputConstants.Key limitKey, List<String> messages) {
+    public CommandKey(Profile profile, QuadState conflictStrategy,
+                      TriState sendStrategy, int spaceTicks, InputConstants.Key key,
+                      InputConstants.Key limitKey, List<String> messages) {
         this.profile = profile;
         this.conflictStrategy = conflictStrategy;
         this.sendStrategy = sendStrategy;
+        this.spaceTicks = spaceTicks;
         this.cycleIndex = 0;
         this.key = key;
         this.limitKey = limitKey;
@@ -125,9 +129,11 @@ public class CommandKey {
         @Override
         public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext ctx) {
             JsonObject obj = new JsonObject();
+            obj.addProperty("version", src.version);
 
             obj.addProperty("conflictStrategy", src.conflictStrategy.state.toString());
             obj.addProperty("sendStrategy", src.sendStrategy.state.toString());
+            obj.addProperty("spaceTicks", src.spaceTicks);
 
             JsonObject keyObj = new JsonObject();
             keyObj.addProperty("name", src.key.getName());
@@ -160,15 +166,27 @@ public class CommandKey {
         public CommandKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
             QuadState conflictStrategy = new QuadState(obj.get("conflictStrategy").getAsString());
             TriState sendStrategy = new TriState(obj.get("sendStrategy").getAsString());
+            int spaceTicks;
             InputConstants.Key key = InputConstants.getKey(obj.getAsJsonObject("key").get("name").getAsString());
             InputConstants.Key limitKey = InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString());
             ArrayList<String> messages = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("messages")) messages.add(je.getAsString());
 
-            return new CommandKey(profile, conflictStrategy, sendStrategy, key, limitKey, messages);
+            if (version == 0) {
+                spaceTicks = 0;
+            }
+            else {
+                spaceTicks = obj.get("spaceTicks").getAsInt();
+            }
+
+            // Validate
+            if (spaceTicks < 0) throw new JsonParseException("CommandKey #1");
+
+            return new CommandKey(profile, conflictStrategy, sendStrategy, spaceTicks, key, limitKey, messages);
         }
     }
 }

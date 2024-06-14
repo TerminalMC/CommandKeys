@@ -120,6 +120,7 @@ public class Profile {
         public Profile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
+            int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
             String name = obj.get("name").getAsString();
             Set<String> addresses = new HashSet<>();
@@ -138,6 +139,9 @@ public class Profile {
 
             for (JsonElement je : obj.getAsJsonArray("commandKeys"))
                 commandKeys.add(commandKeyGson.fromJson(je, CommandKey.class));
+
+            // Validate
+            if (name == null) throw new JsonParseException("Profile #1");
 
             return profile;
         }

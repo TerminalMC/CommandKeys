@@ -377,7 +377,9 @@ public class ProfileEditList extends OptionsList {
                 movingX += largeButtonWidth + spacing;
 
                 int sendStrategyButtonWidth = width - (movingX - x) - smallButtonWidth - spacing;
-                if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
+                if (commandKey.sendStrategy.state.equals(TriState.State.ZERO)) {
+                    sendStrategyButtonWidth -= (smallButtonWidth * 2 + 2);
+                } else if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
                     sendStrategyButtonWidth -= (smallButtonWidth + 2);
                 }
                 CycleButton<TriState.State> sendStrategyButton;
@@ -418,8 +420,27 @@ public class ProfileEditList extends OptionsList {
                 }
                 sendStrategyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(sendStrategyButton);
-                // Cycle index button
-                if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
+                if (commandKey.sendStrategy.state.equals(TriState.State.ZERO)) {
+                    // Delay field
+                    EditBox spaceField = new EditBox(Minecraft.getInstance().font,
+                            movingX + sendStrategyButtonWidth + 2, 0, smallButtonWidth * 2,
+                            height, Component.empty());
+                    spaceField.setMaxLength(4);
+                    spaceField.setValue(String.valueOf(commandKey.spaceTicks));
+                    spaceField.setResponder((value) -> {
+                        try {
+                            int ticks = Integer.parseInt(value);
+                            if (ticks < 0) ticks = 0;
+                            commandKey.spaceTicks = ticks;
+                        } catch (NumberFormatException ignored) {}
+                    });
+                    spaceField.setTooltip(Tooltip.create(Component.literal(
+                            "Delay in ticks between consecutive commands")));
+                    spaceField.setTooltipDelay(Duration.ofMillis(500));
+                    elements.add(spaceField);
+                }
+                else if (commandKey.sendStrategy.state.equals(TriState.State.TWO)) {
+                    // Cycle index button
                     ArrayList<Integer> values = new ArrayList<>();
                     for (int i = 0; i < commandKey.messages.size(); i++) values.add(i);
                     if (values.isEmpty()) values.add(0);
@@ -431,7 +452,7 @@ public class ProfileEditList extends OptionsList {
                             .withInitialValue(commandKey.cycleIndex)
                             .displayOnlyValue()
                             .withTooltip((status) -> Tooltip.create(
-                                    Component.literal("The index of the next message to be sent.")))
+                                    Component.literal("The index of the next message to be sent")))
                             .create(movingX + sendStrategyButtonWidth + 2, 0, smallButtonWidth, height,
                                     Component.empty(),
                                     (button, status) -> commandKey.cycleIndex = status);

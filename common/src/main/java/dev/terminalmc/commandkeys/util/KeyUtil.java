@@ -6,6 +6,7 @@
 package dev.terminalmc.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.CommandKey;
 import dev.terminalmc.commandkeys.config.QuadState;
 import dev.terminalmc.commandkeys.mixin.KeyMappingAccessor;
@@ -82,8 +83,11 @@ public class KeyUtil {
 
                     switch(cmdKey.sendStrategy.state) {
                         case ZERO -> {
+                            int i = 0;
                             for (String msg : cmdKey.messages) {
-                                KeyUtil.send(msg, profile().addToHistory, profile().showHudMessage);
+                                CommandKeys.queuedCommands.add(new CommandKeys.QueuedCommand(
+                                        i++ * cmdKey.spaceTicks, msg,
+                                        profile().addToHistory, profile().showHudMessage));
                             }
                         }
                         case ONE -> {

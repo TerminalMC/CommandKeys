@@ -35,39 +35,13 @@ public class ProfileSelectList extends OptionsList {
         boolean inGame = CommandKeys.activeAddress() != null;
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Singleplayer Default Profile"), null, 500));
+                Component.literal("Profiles"), null, -1));
 
-        Profile spDefaultProfile = Config.get().getSpDefaultProfile();
-        addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
-                spDefaultProfile, true, inGame));
-        if (spDefaultProfile.equals(editingProfile)) {
-            addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, this, spDefaultProfile));
-            for (String address : spDefaultProfile.getAddresses()) {
-                addEntry(new Entry.ServerAddressEntry(entryX, entryWidth, entryHeight, this,
-                        spDefaultProfile, address));
-            }
-        }
-
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Multiplayer Default Profile"), null, 500));
-
-        Profile mpDefaultProfile = Config.get().getMpDefaultProfile();
-        addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
-                mpDefaultProfile, true, inGame));
-        if (mpDefaultProfile.equals(editingProfile)) {
-            addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, this, mpDefaultProfile));
-            for (String address : mpDefaultProfile.getAddresses()) {
-                addEntry(new Entry.ServerAddressEntry(entryX, entryWidth, entryHeight, this,
-                        mpDefaultProfile, address));
-            }
-        }
-
-        addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Other Profiles"), null, 500));
-
-        for (Profile profile : Config.get().profiles) {
+        Config config = Config.get();
+        for (int i = 0; i < config.profiles.size(); i++) {
+            Profile profile = config.profiles.get(i);
             addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
-                    profile, false, inGame));
+                    profile, i, i == config.spDefault, i == config.mpDefault, inGame));
             if (profile.equals(editingProfile)) {
                 addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, this, profile));
                 for (String address : profile.getAddresses()) {
@@ -76,6 +50,7 @@ public class ProfileSelectList extends OptionsList {
                 }
             }
         }
+
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 Component.empty(), null, -1));
         addEntry(new OptionsList.Entry.ActionButtonEntry(entryX, 0, entryWidth, entryHeight,
@@ -132,8 +107,8 @@ public class ProfileSelectList extends OptionsList {
             ProfileSelectList listWidget;
             Profile profile;
 
-            ProfileEntry(int x, int width, int height, ProfileSelectList listWidget,
-                         Profile profile, boolean isDefault, boolean inGame) {
+            ProfileEntry(int x, int width, int height, ProfileSelectList listWidget, Profile profile,
+                         int index, boolean spDefault, boolean mpDefault, boolean inGame) {
                 super();
                 this.listWidget = listWidget;
                 this.profile = profile;
@@ -153,7 +128,7 @@ public class ProfileSelectList extends OptionsList {
                                     if (CommandKeys.activeAddress() instanceof InetSocketAddress netAddress) {
                                         profile.forceAddAddress(netAddress.getHostName());
                                     }
-                                    Config.get().setActiveProfile(profile);
+                                    Config.get().activateProfile(index);
                                     listWidget.reload();
                                 }
                             })
@@ -207,7 +182,7 @@ public class ProfileSelectList extends OptionsList {
 
                 Button setAsSpDefaultButton = Button.builder(Component.literal("S+"),
                         (button) -> {
-                            Config.get().setSpDefaultProfile(profile);
+                            Config.get().setSpDefaultProfile(index);
                             listWidget.reload();
                         })
                         .pos(movingX, 0)
@@ -216,13 +191,13 @@ public class ProfileSelectList extends OptionsList {
                 setAsSpDefaultButton.setTooltip(Tooltip.create(
                         Component.literal("Set as Singleplayer Default")));
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
-                setAsSpDefaultButton.active = !isDefault;
+                setAsSpDefaultButton.active = !spDefault;
                 elements.add(setAsSpDefaultButton);
                 movingX += smallButtonWidth + spacing;
 
                 Button setAsMpDefaultButton = Button.builder(Component.literal("M+"),
                                 (button) -> {
-                                    Config.get().setMpDefaultProfile(profile);
+                                    Config.get().setMpDefaultProfile(index);
                                     listWidget.reload();
                                 })
                         .pos(movingX, 0)
@@ -231,7 +206,7 @@ public class ProfileSelectList extends OptionsList {
                 setAsMpDefaultButton.setTooltip(Tooltip.create(
                         Component.literal("Set as Multiplayer Default")));
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
-                setAsMpDefaultButton.active = !isDefault;
+                setAsMpDefaultButton.active = !mpDefault;
                 elements.add(setAsMpDefaultButton);
                 movingX += smallButtonWidth + spacing;
 
@@ -258,7 +233,7 @@ public class ProfileSelectList extends OptionsList {
                         .build();
                 deleteButton.setTooltip(Tooltip.create(Component.literal("Delete profile")));
                 deleteButton.setTooltipDelay(Duration.ofMillis(500));
-                deleteButton.active = !isDefault;
+                deleteButton.active = !spDefault && !mpDefault;
                 elements.add(deleteButton);
             }
         }
