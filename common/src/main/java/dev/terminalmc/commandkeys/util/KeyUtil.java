@@ -37,10 +37,10 @@ public class KeyUtil {
 
         boolean cancelClick = false;
         boolean cancelNext = false;
-        if (Minecraft.getInstance().screen == null && profile().COMMANDKEY_MAP.containsKey(key)) {
+        if (Minecraft.getInstance().screen == null && profile().commandKeyMap.containsKey(key)) {
 
             CommandKey cmdKey = null;
-            Set<CommandKey> commandKeys = profile().COMMANDKEY_MAP.get(key);
+            Set<CommandKey> commandKeys = profile().commandKeyMap.get(key);
             for (CommandKey ck1 : commandKeys) {
                 if (!ck1.conflictStrategy.state.equals(QuadState.State.THREE)) {
                     if (ck1.getLimitKey().equals(InputConstants.UNKNOWN)) {

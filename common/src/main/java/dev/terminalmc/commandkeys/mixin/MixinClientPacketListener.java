@@ -5,6 +5,7 @@
 
 package dev.terminalmc.commandkeys.mixin;
 
+import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Config;
 import io.netty.channel.local.LocalAddress;
 import net.minecraft.client.Minecraft;
@@ -27,12 +28,11 @@ public class MixinClientPacketListener {
 
         Config config = Config.get();
         if (address instanceof InetSocketAddress netAddress) {
-            config.activateServerProfile(netAddress.getHostName());
+            String name = netAddress.getHostName();
+            config.activateMpProfile(name);
+            CommandKeys.lastConnection = name;
         }
-        else if (address instanceof LocalAddress) {
-            config.activateProfile(config.spDefault);
-        }
-        else {
+        else if (!(address instanceof LocalAddress)) {
             config.activateProfile(config.mpDefault);
         }
     }

@@ -102,7 +102,7 @@ public class CommandKey {
         this.key = key;
         this.limitKey = limitKey;
         this.messages = messages;
-        profile.COMMANDKEY_MAP.put(key, this);
+        profile.commandKeyMap.put(key, this);
     }
 
     public InputConstants.Key getKey() {
@@ -110,9 +110,9 @@ public class CommandKey {
     }
 
     public void setKey(InputConstants.Key key) {
-        profile.COMMANDKEY_MAP.remove(this.key, this);
+        profile.commandKeyMap.remove(this.key, this);
         this.key = key;
-        profile.COMMANDKEY_MAP.put(this.key, this);
+        profile.commandKeyMap.put(this.key, this);
     }
 
     public InputConstants.Key getLimitKey() {

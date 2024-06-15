@@ -20,6 +20,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.terminalmc.commandkeys.config.Profile.WORLD_PROFILE_MAP;
+
 public class Config {
     public final int version = 2;
     private static final Path DIR_PATH = Path.of("config");
@@ -61,51 +63,56 @@ public class Config {
     }
 
     public void activateProfile(int index) {
-        profiles.addFirst(profiles.remove(index));
-    }
-
-    public Profile getSpDefaultProfile() {
-        return profiles.get(spDefault);
-    }
-
-    public Profile getMpDefaultProfile() {
-        return profiles.get(mpDefault);
+        if (index != 0) {
+            profiles.addFirst(profiles.remove(index));
+            if (index == spDefault) spDefault = 0;
+            else if (index > spDefault) spDefault++;
+            if (index == mpDefault) mpDefault = 0;
+            else if (index > mpDefault) mpDefault++;
+        }
     }
 
     public void setSpDefaultProfile(int index) {
-        if (index != spDefault) {
-            if (spDefault == 0) {
-                activateProfile(index);
-            } else {
-                spDefault = index;
-            }
-        }
+        spDefault = index;
     }
 
     public void setMpDefaultProfile(int index) {
-        if (index != mpDefault) {
-            if (mpDefault == 0) {
-                activateProfile(index);
-            } else {
-                mpDefault = index;
-            }
-        }
+        mpDefault = index;
     }
 
     public void copyProfile(Profile profile) {
         Profile copyProfile = new Profile(profile);
-        copyProfile.name = copyProfile.name + " (Copy)";
+        copyProfile.name = profile.getDisplayName() + " (Copy)";
         profiles.add(copyProfile);
     }
 
-    public void activateServerProfile(String server) {
-        int i = 0;
-        for (Profile profile : profiles) {
-            for (String address : profile.getAddresses()) {
-                if (address.equals(server)) {
-                    activateProfile(i);
-                    return;
+    public void activateSpProfile(String levelId) {
+        if (WORLD_PROFILE_MAP.containsKey(levelId)) {
+            int i = 0;
+            for (Profile profile : profiles) {
+                for (String id : profile.getLinks()) {
+                    if (id.equals(levelId)) {
+                        activateProfile(i);
+                        return;
+                    }
                 }
+                i++;
+            }
+        }
+        activateProfile(spDefault);
+    }
+
+    public void activateMpProfile(String address) {
+        if (WORLD_PROFILE_MAP.containsKey(address)) {
+            int i = 0;
+            for (Profile profile : profiles) {
+                for (String id : profile.getLinks()) {
+                    if (id.equals(address)) {
+                        activateProfile(i);
+                        return;
+                    }
+                }
+                i++;
             }
         }
         activateProfile(mpDefault);

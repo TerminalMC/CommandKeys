@@ -52,7 +52,7 @@ public class ProfileEditList extends OptionsList {
         addEntry(new Entry.GlobalSettingEntry(entryX, entryWidth, entryHeight, this));
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("------------------------ Command Keys \u2139 ------------------------"),
+                Component.literal("Command Keys \u2139"),
                 Tooltip.create(Component.literal("The messages for each key will be sent if you press the " +
                         "corresponding hotkey while in-game (depending on individual settings).\n" +
                         "You can also send the message(s) for any CommandKey with a single bound key by pressing " +
@@ -143,7 +143,7 @@ public class ProfileEditList extends OptionsList {
         }
         else if (key.equals(sendKey)) {
             if (getSelected() == null) {
-                Set<CommandKey> cmdKeys = profile.COMMANDKEY_MAP.get(sendKey);
+                Set<CommandKey> cmdKeys = profile.commandKeyMap.get(sendKey);
                 for (CommandKey cmdKey : cmdKeys) {
                     if (cmdKey.conflictStrategy.state.equals(QuadState.State.THREE)) {
                         screen.onClose();
@@ -274,7 +274,7 @@ public class ProfileEditList extends OptionsList {
                 boolean checkMc = !commandKey.conflictStrategy.state.equals(QuadState.State.THREE);
 
                 if (!commandKey.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                    if (!commandKey.profile.COMMANDKEY_MAP.get(commandKey.getLimitKey()).isEmpty()) {
+                    if (!commandKey.profile.commandKeyMap.get(commandKey.getLimitKey()).isEmpty()) {
                         tooltipComponent.append(commandKey.getLimitKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.GOLD));
                         tooltipComponent.append(" is used for another CommandKey.")
@@ -293,7 +293,7 @@ public class ProfileEditList extends OptionsList {
                     }
                 }
                 if (!commandKey.getKey().equals(InputConstants.UNKNOWN)) {
-                    if (commandKey.profile.COMMANDKEY_MAP.get(commandKey.getKey()).size() != 1) {
+                    if (commandKey.profile.commandKeyMap.get(commandKey.getKey()).size() != 1) {
                         if (mcConflict || internalConflict) tooltipComponent.append("\n");
                         tooltipComponent.append(commandKey.getKey().getDisplayName().copy()
                                 .withStyle(ChatFormatting.GOLD));

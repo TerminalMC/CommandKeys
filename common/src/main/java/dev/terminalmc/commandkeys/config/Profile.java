@@ -15,9 +15,9 @@ import java.util.*;
 public class Profile {
     public final int version = 1;
 
-    public static final Map<String, Profile> PROFILE_MAP = new HashMap<>();
+    public static final Map<String, Profile> WORLD_PROFILE_MAP = new HashMap<>();
 
-    public transient final HashMultimap<InputConstants.Key, CommandKey> COMMANDKEY_MAP = HashMultimap.create();
+    public transient final HashMultimap<InputConstants.Key, CommandKey> commandKeyMap = HashMultimap.create();
 
     public String name;
     private final Set<String> addresses;
@@ -28,7 +28,7 @@ public class Profile {
 
     public Profile() {
         this.name = "";
-        this.addresses = new HashSet<>();
+        this.addresses = new LinkedHashSet<>();
         this.addToHistory = false;
         this.showHudMessage = false;
         this.commandKeys = new LinkedHashSet<>();
@@ -45,8 +45,8 @@ public class Profile {
         Iterator<String> addressIter = this.addresses.iterator();
         while(addressIter.hasNext()) {
             String address = addressIter.next();
-            if (PROFILE_MAP.containsKey(address)) addressIter.remove();
-            else PROFILE_MAP.put(address, this);
+            if (WORLD_PROFILE_MAP.containsKey(address)) addressIter.remove();
+            else WORLD_PROFILE_MAP.put(address, this);
         }
     }
 
@@ -58,25 +58,31 @@ public class Profile {
         this.commandKeys = profile.commandKeys;
     }
 
-    public Set<String> getAddresses() {
+    public String getDisplayName() {
+        String name = this.name;
+        if (name.isBlank()) name = this.getLinks().stream().findFirst().orElse("");
+        if (name.isBlank()) name = "[Unnamed]";
+        return name;
+    }
+
+    public Set<String> getLinks() {
         return Collections.unmodifiableSet(addresses);
     }
 
-    public boolean addAddress(String address) {
-        if (PROFILE_MAP.containsKey(address)) return false;
+    public void addAddress(String address) {
+        if (WORLD_PROFILE_MAP.containsKey(address)) return;
         addresses.add(address);
-        PROFILE_MAP.put(address, this);
-        return true;
+        WORLD_PROFILE_MAP.put(address, this);
     }
 
     public void forceAddAddress(String address) {
-        if (PROFILE_MAP.containsKey(address)) PROFILE_MAP.get(address).removeAddress(address);
+        if (WORLD_PROFILE_MAP.containsKey(address)) WORLD_PROFILE_MAP.get(address).removeAddress(address);
         addAddress(address);
     }
 
     public void removeAddress(String address) {
         addresses.remove(address);
-        PROFILE_MAP.remove(address);
+        WORLD_PROFILE_MAP.remove(address);
     }
 
     public Set<CommandKey> getCmdKeys() {
@@ -89,7 +95,7 @@ public class Profile {
 
     public void removeCmdKey(CommandKey cmdKey) {
         commandKeys.remove(cmdKey);
-        COMMANDKEY_MAP.remove(cmdKey.getKey(), cmdKey);
+        commandKeyMap.remove(cmdKey.getKey(), cmdKey);
     }
 
     // Cleanup and validation
@@ -108,7 +114,7 @@ public class Profile {
             }
             if (cmk.messages.isEmpty()) {
                 cmdKeyIter.remove();
-                COMMANDKEY_MAP.remove(cmk.getKey(), cmk);
+                commandKeyMap.remove(cmk.getKey(), cmk);
             }
         }
     }

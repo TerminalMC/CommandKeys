@@ -36,7 +36,7 @@ public class OptionsScreen extends OptionsSubScreen {
 
     public OptionsScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen, Minecraft.getInstance().options,
-                inGame ? localized("screen", "edit_profile", CommandKeys.profile().name)
+                inGame ? localized("screen", "edit_profile", CommandKeys.profile().getDisplayName())
                         : localized("screen", "select_profile"));
         if (inGame) {
             listWidget = new ProfileEditList(Minecraft.getInstance(), 0, 0, 0,

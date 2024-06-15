@@ -26,6 +26,8 @@ public class CommandKeys {
             translationKey("key", "open_config"), InputConstants.Type.KEYSYM,
             InputConstants.KEY_K, translationKey("key_group"));
 
+    public static String lastConnection = "";
+
     public static List<QueuedCommand> queuedCommands = new ArrayList<>();
 
     public static void init() {
@@ -63,12 +65,9 @@ public class CommandKeys {
         return new OptionsScreen(lastScreen, inGame);
     }
 
-    public static SocketAddress activeAddress() {
+    public static boolean inGame() {
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null && player.connection.getConnection().isConnected()) {
-            return player.connection.getConnection().getRemoteAddress();
-        }
-        return null;
+        return (player != null && player.connection.getConnection().isConnected());
     }
 
     public static class QueuedCommand {

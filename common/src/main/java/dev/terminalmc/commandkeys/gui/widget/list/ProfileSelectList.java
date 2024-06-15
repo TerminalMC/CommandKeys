@@ -16,13 +16,12 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.InetSocketAddress;
 import java.time.Duration;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 public class ProfileSelectList extends OptionsList {
-    Profile editingProfile;
+    @Nullable Profile editingProfile;
 
     public ProfileSelectList(Minecraft minecraft, int width, int height, int y,
                              int itemHeight, int entryRelX, int entryWidth, int entryHeight,
@@ -32,10 +31,15 @@ public class ProfileSelectList extends OptionsList {
         this.editingProfile = editingProfile;
 
 
-        boolean inGame = CommandKeys.activeAddress() != null;
+        boolean inGame = CommandKeys.inGame();
+
 
         addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                Component.literal("Profiles"), null, -1));
+                Component.literal(inGame ? "Active Profile" : "Profiles \u2139"),
+                inGame ? null : Tooltip.create(Component.literal("Profiles are automatically " +
+                        "activated when you join a world/server linked to a profile.\n" +
+                        "The default profiles are used when there is no linked profile.")), 500));
+
 
         Config config = Config.get();
         for (int i = 0; i < config.profiles.size(); i++) {
@@ -44,10 +48,14 @@ public class ProfileSelectList extends OptionsList {
                     profile, i, i == config.spDefault, i == config.mpDefault, inGame));
             if (profile.equals(editingProfile)) {
                 addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, this, profile));
-                for (String address : profile.getAddresses()) {
+                for (String address : profile.getLinks()) {
                     addEntry(new Entry.ServerAddressEntry(entryX, entryWidth, entryHeight, this,
                             profile, address));
                 }
+            }
+            if (i == 0 && inGame) {
+                addEntry(new OptionsList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                        Component.literal("Other Profiles"), null, -1));
             }
         }
 
@@ -63,8 +71,7 @@ public class ProfileSelectList extends OptionsList {
 
 
     @Override
-    public OptionsList resize(int width, int height, int y,
-                                                                  int itemHeight, double scrollAmount) {
+    public OptionsList resize(int width, int height, int y, int itemHeight, double scrollAmount) {
         ProfileSelectList newListWidget = new ProfileSelectList(
                 minecraft, width, height, y, itemHeight, entryRelX,
                 entryWidth, entryHeight, scrollWidth, editingProfile);
@@ -94,8 +101,7 @@ public class ProfileSelectList extends OptionsList {
 
     public void openProfileScreen(Profile profile) {
         minecraft.setScreen(new OptionsScreen(screen,
-                localized("screen", "edit_profile", profile.name)
-                        .append(profile.equals(CommandKeys.profile()) ? " [Active]" : " [Inactive]"),
+                localized("screen", "edit_profile", profile.getDisplayName()),
                 new ProfileEditList(minecraft, screen.width, screen.height, getY(),
                         itemHeight, -200, 400, entryHeight, 420,
                         profile, null)));
@@ -119,40 +125,68 @@ public class ProfileSelectList extends OptionsList {
                 int mainButtonX = x;
 
                 if (inGame) {
-                    Checkbox selectBox = Checkbox.builder(Component.empty(),
-                                    Minecraft.getInstance().font)
-                            .pos(x, 0)
-                            .selected(profile.equals(CommandKeys.profile()))
-                            .onValueChange((checkbox, value) -> {
-                                if (value) {
-                                    if (CommandKeys.activeAddress() instanceof InetSocketAddress netAddress) {
-                                        profile.forceAddAddress(netAddress.getHostName());
-                                    }
-                                    Config.get().activateProfile(index);
-                                    listWidget.reload();
-                                }
-                            })
-                            .build();
-                    selectBox.setTooltip(Tooltip.create(Component.literal("Use this profile")));
-                    selectBox.setTooltipDelay(Duration.ofMillis(500));
-                    elements.add(selectBox);
+                    if (index == 0) {
+                        Button linkButton = Button.builder(Component.literal("\uD83D\uDD17"),
+                                        (button) -> {
+                                            profile.forceAddAddress(CommandKeys.lastConnection);
+                                            listWidget.reload();
+                                        })
+                                .pos(x, 0)
+                                .size(smallButtonWidth, smallButtonWidth)
+                                .build();
+                        if (profile.getLinks().contains(CommandKeys.lastConnection)) {
+                            linkButton.setTooltip(Tooltip.create(Component.literal(
+                                    "Already linked to this world/server")));
+                            linkButton.active = false;
+                        } else {
+                            linkButton.setTooltip(Tooltip.create(Component.literal(
+                                    "Link to this world/server")));
+                        }
+                        linkButton.setTooltipDelay(Duration.ofMillis(500));
+                        elements.add(linkButton);
+                    }
+                    else {
+                        Button activateButton = Button.builder(Component.literal("\u2191"),
+                                        (button) -> {
+                                            if (CommandKeys.inGame()) {
+                                                profile.forceAddAddress(CommandKeys.lastConnection);
+                                            }
+                                            Config.get().activateProfile(index);
+                                            listWidget.reload();
+                                        })
+                                .pos(x, 0)
+                                .size(smallButtonWidth, smallButtonWidth)
+                                .build();
+                        activateButton.setTooltip(Tooltip.create(Component.literal(
+                                "Activate this profile")));
+                        activateButton.setTooltipDelay(Duration.ofMillis(500));
+                        elements.add(activateButton);
+                    }
                     mainButtonWidth -= (smallButtonWidth + spacing);
                     mainButtonX += (smallButtonWidth + spacing);
                 }
 
-                String name = profile.name;
-                if (name.isBlank()) {
-                    name = profile.getAddresses().stream().findFirst().orElse("[No Name]");
-                }
+                String name = profile.getDisplayName();
                 String serverInfo = "";
-                int numAddresses = profile.getAddresses().size();
+                int numAddresses = profile.getLinks().size();
                 if (numAddresses != 0) {
-                    serverInfo = " [" + numAddresses + (numAddresses == 1 ? " server]" : " servers]");
+                    serverInfo = " [" + numAddresses + (numAddresses == 1 ? " Link]" : " Links]");
                 }
 
-                elements.add(Button.builder(Component.literal(name)
-                                        .append(Component.literal(serverInfo)
-                                                .withStyle(ChatFormatting.GRAY)),
+                elements.add(Button.builder(Component.literal(name).append(Component.literal(serverInfo)
+                                        .withStyle(ChatFormatting.GRAY)),
+                        (button) -> listWidget.openProfileScreen(profile))
+                        .tooltip(Tooltip.create(Component.literal("Edit Profile")))
+                        .pos(mainButtonX, 0)
+                        .size(mainButtonWidth, height)
+                        .build());
+
+                // Switch to right-justified
+                int movingX = x + width - smallButtonWidth * 5 - spacing * 4;
+
+                ImageButton configureButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                        new WidgetSprites(CONFIGURE_ICON, CONFIGURE_DISABLED_ICON,
+                                CONFIGURE_HIGHLIGHTED_ICON),
                         (button) -> {
                             if (listWidget.editingProfile == null) {
                                 listWidget.editingProfile = profile;
@@ -164,23 +198,14 @@ public class ProfileSelectList extends OptionsList {
                                 listWidget.editingProfile = null;
                             }
                             listWidget.reload();
-                        })
-                        .pos(mainButtonX, 0)
-                        .size(mainButtonWidth, height)
-                        .build());
-
-                // Switch to right-justified
-                int movingX = x + width - smallButtonWidth * 5 - spacing * 4;
-
-                ImageButton configureButton = new ImageButton(movingX, 0, smallButtonWidth, height,
-                        new WidgetSprites(CONFIGURE_ICON, CONFIGURE_DISABLED_ICON,
-                                CONFIGURE_HIGHLIGHTED_ICON),
-                        (button) -> listWidget.openProfileScreen(profile),
+                        },
                         Component.empty());
+                configureButton.setTooltip(Tooltip.create(Component.literal("Edit Details")));
+                configureButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(configureButton);
                 movingX += smallButtonWidth + spacing;
 
-                Button setAsSpDefaultButton = Button.builder(Component.literal("S+"),
+                Button setAsSpDefaultButton = Button.builder(Component.literal("S"),
                         (button) -> {
                             Config.get().setSpDefaultProfile(index);
                             listWidget.reload();
@@ -188,14 +213,19 @@ public class ProfileSelectList extends OptionsList {
                         .pos(movingX, 0)
                         .size(smallButtonWidth, height)
                         .build();
-                setAsSpDefaultButton.setTooltip(Tooltip.create(
-                        Component.literal("Set as Singleplayer Default")));
+                if (spDefault) {
+                    setAsSpDefaultButton.setTooltip(Tooltip.create(
+                            Component.literal("This is the default profile for singleplayer")));
+                } else {
+                    setAsSpDefaultButton.setTooltip(Tooltip.create(
+                            Component.literal("Set as singleplayer default")));
+                }
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !spDefault;
                 elements.add(setAsSpDefaultButton);
                 movingX += smallButtonWidth + spacing;
 
-                Button setAsMpDefaultButton = Button.builder(Component.literal("M+"),
+                Button setAsMpDefaultButton = Button.builder(Component.literal("M"),
                                 (button) -> {
                                     Config.get().setMpDefaultProfile(index);
                                     listWidget.reload();
@@ -203,8 +233,13 @@ public class ProfileSelectList extends OptionsList {
                         .pos(movingX, 0)
                         .size(smallButtonWidth, height)
                         .build();
-                setAsMpDefaultButton.setTooltip(Tooltip.create(
-                        Component.literal("Set as Multiplayer Default")));
+                if (mpDefault) {
+                    setAsMpDefaultButton.setTooltip(Tooltip.create(Component.literal(
+                            "This is the default profile for multiplayer")));
+                } else {
+                    setAsMpDefaultButton.setTooltip(Tooltip.create(Component.literal(
+                            "Set as multiplayer default")));
+                }
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsMpDefaultButton.active = !mpDefault;
                 elements.add(setAsMpDefaultButton);
@@ -231,9 +266,16 @@ public class ProfileSelectList extends OptionsList {
                         .pos(movingX, 0)
                         .size(smallButtonWidth, height)
                         .build();
-                deleteButton.setTooltip(Tooltip.create(Component.literal("Delete profile")));
+                if (spDefault || mpDefault) {
+                    deleteButton.active = false;
+                    deleteButton.setTooltip(Tooltip.create(Component.literal(
+                            "Can't delete a default profile")));
+                } else {
+                    deleteButton.setTooltip(Tooltip.create(Component.literal(
+                            "Delete profile")));
+                }
                 deleteButton.setTooltipDelay(Duration.ofMillis(500));
-                deleteButton.active = !spDefault && !mpDefault;
+
                 elements.add(deleteButton);
             }
         }
@@ -247,7 +289,7 @@ public class ProfileSelectList extends OptionsList {
                 int labelWidth = 50;
                 int nameBoxWidth = width - labelWidth - smallButtonWidth - spacing;
 
-                Button label = Button.builder(Component.literal("Name:"), (button -> {}))
+                Button label = Button.builder(Component.literal("Name"), (button -> {}))
                         .pos(x, 0)
                         .size(labelWidth, height)
                         .build();
@@ -284,7 +326,7 @@ public class ProfileSelectList extends OptionsList {
                 int labelWidth = 50;
                 int addressBoxWidth = width - labelWidth - smallButtonWidth - spacing;
 
-                Button label = Button.builder(Component.literal("Servers:"), (button -> {}))
+                Button label = Button.builder(Component.literal("Link"), (button -> {}))
                         .pos(x, 0)
                         .size(labelWidth, height)
                         .build();
@@ -292,7 +334,7 @@ public class ProfileSelectList extends OptionsList {
                 elements.add(label);
 
                 EditBox addressBox = new EditBox(Minecraft.getInstance().font, x + labelWidth, 0,
-                        addressBoxWidth, height, Component.literal("Server Address"));
+                        addressBoxWidth, height, Component.empty());
                 addressBox.setMaxLength(64);
                 addressBox.setValue(address);
                 addressBox.active = false;
