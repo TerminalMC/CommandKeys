@@ -1,0 +1,3 @@
+- Add an optional delay between consecutive messages in 'send' mode
+- Support linking profiles to singleplayer worlds
+- Rework profile selection screen
