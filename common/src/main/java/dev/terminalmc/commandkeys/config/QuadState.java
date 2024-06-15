@@ -8,7 +8,7 @@ package dev.terminalmc.commandkeys.config;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a control with three states, arbitrarily ZERO, ONE, TWO, and THREE
+ * Represents a control with three states, arbitrarily ZERO, ONE, TWO, THREE.
  */
 public class QuadState {
 

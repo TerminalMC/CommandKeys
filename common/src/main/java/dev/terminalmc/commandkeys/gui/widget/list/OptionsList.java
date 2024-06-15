@@ -23,17 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@code ConfigListWidget} is tightly coupled to a {@code ConfigScreen}, and
- * is used to avoid the requirement for each different configuration screen
- * to require a unique {@code Screen} implementation.
- * <p>
- * A {@code ConfigListWidget} has a list of {@code ConfigListWidget.Entry}
- * objects, which are drawn onto the screen top-down in the order that they
- * are stored, with standard spacing.
- * <p>
- * <b>Note:</b> If you want multiple components (e.g. buttons, text fields) to
- * appear side-by-side rather than spaced vertically, you must add them all to a
- * single Entry's list of {@code AbstractWidgets}.
+ * <p>Tightly coupled to a {@link OptionsScreen}, used to avoid the requirement
+ * for each different configuration screen to require a unique {@code Screen}
+ * implementation.</p>
+ *
+ * <p>Contains a list of {@link OptionsList.Entry} instances, which are drawn
+ * onto the screen top-down in the order that they are stored, with standard
+ * spacing.</p>
+ *
+ * <p><b>Note:</b> If you want multiple components (e.g. buttons, text fields)
+ * to appear side-by-side rather than spaced vertically, you must add them all
+ * to a single Entry's list of {@link AbstractWidget} instances.</p>
  */
 public abstract class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
 
@@ -68,8 +68,7 @@ public abstract class OptionsList extends ContainerObjectSelectionList<OptionsLi
     }
 
     /**
-     * Must be called when the {@code ConfigListWidget} is added to a
-     * {@code Screen}, else breaks.
+     * <p>Must be called when this is added to a {@link OptionsScreen}.</p>
      */
     public void setScreen(OptionsScreen screen) {
         this.screen = screen;

@@ -8,21 +8,21 @@ package dev.terminalmc.commandkeys.util;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.CommandKey;
+import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.config.QuadState;
 import dev.terminalmc.commandkeys.mixin.KeyMappingAccessor;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
 
+/**
+ * <p>Key-press handling utils.</p>
+ */
 public class KeyUtil {
-
     public static @Nullable KeyMapping getConflict(InputConstants.Key key) {
         for (KeyMapping keyMapping : Minecraft.getInstance().options.keyMappings) {
             if (((KeyMappingAccessor)keyMapping).getKey().equals(key)) {
@@ -31,7 +31,6 @@ public class KeyUtil {
         }
         return null;
     }
-
 
     public static boolean handleKey(InputConstants.Key key) {
 
@@ -83,27 +82,28 @@ public class KeyUtil {
 
                     switch(cmdKey.sendStrategy.state) {
                         case ZERO -> {
+                            Profile profile = CommandKeys.profile();
                             int i = 0;
                             for (String msg : cmdKey.messages) {
-                                CommandKeys.queuedCommands.add(new CommandKeys.QueuedCommand(
-                                        i++ * cmdKey.spaceTicks, msg,
-                                        profile().addToHistory, profile().showHudMessage));
+                                CommandKeys.queue(i++ * cmdKey.spaceTicks, msg,
+                                        profile.addToHistory, profile.showHudMessage);
                             }
                         }
                         case ONE -> {
                             if (!cmdKey.messages.isEmpty()) {
                                 cancelClick = true;
-                                KeyUtil.type(cmdKey.messages.get(0));
+                                CommandKeys.type(cmdKey.messages.get(0));
                             }
                         }
                         case TWO -> {
                             // Strategy to allow spacer blank messages, and multiple
                             // messages per cycling key-press.
+                            Profile profile = CommandKeys.profile();
                             String messages = cmdKey.messages.get(cmdKey.cycleIndex);
                             if (messages != null && !messages.isBlank()) {
                                 for (String msg : messages.split(",,")) {
                                     if (!msg.isBlank()) {
-                                        KeyUtil.send(msg, profile().addToHistory, profile().showHudMessage);
+                                        CommandKeys.send(msg, profile.addToHistory, profile.showHudMessage);
                                     }
                                 }
                             }
@@ -120,25 +120,5 @@ public class KeyUtil {
         }
         if (!cancelClick) KeyMapping.click(key);
         return cancelNext;
-    }
-
-    public static void send(String message, boolean addToHistory, boolean showHudMsg) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (message.startsWith("/")) {
-            minecraft.player.connection.sendCommand(message.substring(1));
-        } else {
-            minecraft.player.connection.sendChat(message);
-        }
-        if (addToHistory) {
-            minecraft.gui.getChat().addRecentChat(message);
-        }
-        if (showHudMsg) {
-            minecraft.gui.setOverlayMessage(Component.literal(message)
-                    .withStyle(ChatFormatting.GRAY), false);
-        }
-    }
-
-    public static void type(String message) {
-        Minecraft.getInstance().setScreen(new ChatScreen(message));
     }
 }

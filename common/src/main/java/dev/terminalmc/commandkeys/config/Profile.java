@@ -12,6 +12,17 @@ import com.mojang.blaze3d.platform.InputConstants;
 import java.lang.reflect.Type;
 import java.util.*;
 
+/**
+ * <p>Contains profile-global behavior options, a list of {@link CommandKey}
+ * instances, and a list of strings identifying worlds and/or servers to which
+ * the profile is linked, simply called 'links'.</p>
+ *
+ * <p>A static map WORLD_PROFILE_MAP is maintained to ensure no overlap of links
+ * across different profiles.</p>
+ *
+ * <p>A transient multimap commandKeyMap is maintained to reduce lookup time on
+ * key-press detection.</p>
+ */
 public class Profile {
     public final int version = 1;
 
@@ -26,6 +37,9 @@ public class Profile {
     public boolean showHudMessage;
     private final Set<CommandKey> commandKeys;
 
+    /**
+     * Creates a default empty instance.
+     */
     public Profile() {
         this.name = "";
         this.addresses = new LinkedHashSet<>();
@@ -34,7 +48,10 @@ public class Profile {
         this.commandKeys = new LinkedHashSet<>();
     }
 
-    public Profile(String name, Set<String> addresses, boolean addToHistory,
+    /**
+     * <p>Not validated, only for use by self-validating deserializer.</p>
+     */
+    private Profile(String name, Set<String> addresses, boolean addToHistory,
                    boolean showHudMessage, Set<CommandKey> commandKeys) {
         this.name = name;
         this.addresses = addresses;
@@ -50,6 +67,9 @@ public class Profile {
         }
     }
 
+    /**
+     * <p>Copy constructor.</p>
+     */
     public Profile(Profile profile) {
         this.name = profile.name;
         this.addresses = new HashSet<>();
@@ -58,6 +78,10 @@ public class Profile {
         this.commandKeys = profile.commandKeys;
     }
 
+    /**
+     * @return the first non-blank of the following: the profile name, the first
+     * link, the string '[Unnamed]'.
+     */
     public String getDisplayName() {
         String name = this.name;
         if (name.isBlank()) name = this.getLinks().stream().findFirst().orElse("");
@@ -69,15 +93,14 @@ public class Profile {
         return Collections.unmodifiableSet(addresses);
     }
 
-    public void addAddress(String address) {
-        if (WORLD_PROFILE_MAP.containsKey(address)) return;
-        addresses.add(address);
-        WORLD_PROFILE_MAP.put(address, this);
-    }
-
-    public void forceAddAddress(String address) {
-        if (WORLD_PROFILE_MAP.containsKey(address)) WORLD_PROFILE_MAP.get(address).removeAddress(address);
-        addAddress(address);
+    /**
+     * <p>Adds the link to this profile, after removing it from any other
+     * profile containing it.</p>
+     */
+    public void forceAddLink(String link) {
+        if (WORLD_PROFILE_MAP.containsKey(link)) WORLD_PROFILE_MAP.get(link).removeAddress(link);
+        addresses.add(link);
+        WORLD_PROFILE_MAP.put(link, this);
     }
 
     public void removeAddress(String address) {

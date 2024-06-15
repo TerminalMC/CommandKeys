@@ -22,6 +22,17 @@ import java.util.List;
 
 import static dev.terminalmc.commandkeys.config.Profile.WORLD_PROFILE_MAP;
 
+/**
+ * <p>Consists of a list of {@link Profile} instances, and two {@code int}s to
+ * keep track of the default profiles for singleplayer and multiplayer.</p>
+ *
+ * <p>When a profile is activated it is automatically moved to the
+ * start of the list, so the list maintains most-recently-used order and the
+ * current active profile can be obtained using {@code getFirst()}.</p>
+ *
+ * <p>The profile list is guaranteed to contain one instance as singleplayer
+ * default and one instance as multiplayer default, which can be the same.</p>
+ */
 public class Config {
     public final int version = 2;
     private static final Path DIR_PATH = Path.of("config");
@@ -39,19 +50,28 @@ public class Config {
     public int spDefault;
     public int mpDefault;
 
+    /**
+     * <p>Creates a profile list with two profiles, one as singleplayer default and
+     * the other as multiplayer default.</p>
+     */
     public Config() {
         this.profiles = new ArrayList<>();
 
         Profile spDefaultProfile = new Profile();
         spDefaultProfile.name = "Singleplayer Default";
         this.profiles.add(spDefaultProfile);
+        this.spDefault = 0;
 
         Profile mpDefaultProfile = new Profile();
-        mpDefaultProfile.name = "Singleplayer Default";
+        mpDefaultProfile.name = "Multiplayer Default";
         this.profiles.add(mpDefaultProfile);
+        this.mpDefault = 1;
     }
 
-    public Config(List<Profile> profiles, int spDefault, int mpDefault) {
+    /**
+     * <p>Not validated, only for use by self-validating deserializer.</p>
+     */
+    private Config(List<Profile> profiles, int spDefault, int mpDefault) {
         this.profiles = profiles;
         this.spDefault = spDefault;
         this.mpDefault = mpDefault;
@@ -72,29 +92,24 @@ public class Config {
         }
     }
 
-    public void setSpDefaultProfile(int index) {
-        spDefault = index;
-    }
-
-    public void setMpDefaultProfile(int index) {
-        mpDefault = index;
-    }
-
     public void copyProfile(Profile profile) {
         Profile copyProfile = new Profile(profile);
         copyProfile.name = profile.getDisplayName() + " (Copy)";
         profiles.add(copyProfile);
     }
 
+    /**
+     * <p>Activates the profile linked to the level ID, if one exists, else
+     * activates the singleplayer default profile.</p>
+     */
     public void activateSpProfile(String levelId) {
-        if (WORLD_PROFILE_MAP.containsKey(levelId)) {
+        Profile profile = WORLD_PROFILE_MAP.getOrDefault(levelId, null);
+        if (profile != null) {
             int i = 0;
-            for (Profile profile : profiles) {
-                for (String id : profile.getLinks()) {
-                    if (id.equals(levelId)) {
-                        activateProfile(i);
-                        return;
-                    }
+            for (Profile p : profiles) {
+                if (p == profile) {
+                    activateProfile(i);
+                    return;
                 }
                 i++;
             }
@@ -102,15 +117,18 @@ public class Config {
         activateProfile(spDefault);
     }
 
+    /**
+     * <p>Activates the profile linked to the address, if one exists, else
+     * activates the multiplayer default profile.</p>
+     */
     public void activateMpProfile(String address) {
-        if (WORLD_PROFILE_MAP.containsKey(address)) {
+        Profile profile = WORLD_PROFILE_MAP.getOrDefault(address, null);
+        if (profile != null) {
             int i = 0;
-            for (Profile profile : profiles) {
-                for (String id : profile.getLinks()) {
-                    if (id.equals(address)) {
-                        activateProfile(i);
-                        return;
-                    }
+            for (Profile p : profiles) {
+                if (p == profile) {
+                    activateProfile(i);
+                    return;
                 }
                 i++;
             }
@@ -146,7 +164,6 @@ public class Config {
         save();
         return instance;
     }
-
 
     // Load and save
 
@@ -216,8 +233,7 @@ public class Config {
                         "Expected 2 or more profiles, got " + profiles.size());
                 spDefault = 0;
                 mpDefault = 1;
-            }
-            else {
+            } else {
                 spDefault = obj.get("spDefault").getAsInt();
                 mpDefault = obj.get("mpDefault").getAsInt();
             }

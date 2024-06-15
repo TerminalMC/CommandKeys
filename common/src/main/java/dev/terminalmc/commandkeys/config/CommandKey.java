@@ -12,59 +12,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-FIXME: This comment is out of date
-
-Vanilla Minecraft keybind handling works roughly like this:
-
-Minecraft.options.keyMappings is a hardcoded final KeyMapping[], initialised on
-game load.
-Only KeyMappings in this Array will be placed on the Minecraft Controls screen.
-Adding a KeyMapping to this Array requires using a loader-specific keybind-
-registration operation, and cannot be done while the game is running.
-
-KeyMapping.ALL is a static final Map<String, KeyMapping>, which maps km.name to
-km, on creation of any KeyMapping 'km'.
-
-KeyMapping.MAP is a static final Map<InputConstants.Key, KeyMapping>, which maps
-km.key to km, on creation of any KeyMapping 'km'.
-
-KeyMapping.MAP is reset using KeyMapping::resetMapping, called by
-KeyBindsList::resetMappingAndUpdateButtons, which is itself called whenever;
-- a KeyBindsList keybind reset button is pressed,
-- a KeyBindsList keybind button is selected,
-- KeyBindsScreen::mouseClicked is called and KeyBindsScreen.selectedKey != null,
-- KeyBindsScreen::keyPressed is called and KeyBindsScreen.selectedKey != null,
-- the KeyBindsScreen full reset button is pressed.
-
-KeyMapping::resetMapping simply iterates through KeyMapping.ALL and, for each
-KeyMapping 'km', maps km.key to km.
-
-Consequently, if KeyMapping.ALL contains two KeyMapping objects 'km1', 'km2'
-such that km1.key.equals(km2.key), and km2 is sequentially later in the
-iteration than km1, the value of KeyMapping.MAP.get(km1.key) will be km2.
-This, combined with the fact that KeyMapping::click and KeyMapping::set both use
-KeyMapping.MAP::get, is why it is not possible to bind a single
-InputConstants.Key to multiple KeyMapping objects.
-
-For detecting a key-press, the options are (essentially);
-
-1. On-tick check of KeyMapping::consumeClick (or isDown but whatever)
-    - Pros: Simple
-    - Cons: Impossible to overlap with bound keys
-
-2. @Inject mixins to the KeyMapping::click call of MouseHandler::onPress and the
-KeyMapping::click call of KeyboardHandler::keyPress
-    - Pros: Allows overlap with bound keys
-    - Cons:
-
-3. On-tick check of InputConstants::isKeyDown
-    - Pros: Allows overlap with bound keys
-    - Cons: Need to track Key state from previous tick to determine when a press
-    is initiated, else would send the message every tick that Key is held.
+/**
+ * <p>Contains behavioral options, a key and modifier key (both of which can be
+ * unbound), and a list of messages.</p>
+ *
+ * <p>Strongly coupled to a {@link Profile}, to allow management of the
+ * profile's Key-CommandKey map.</p>
  */
-
-
 public class CommandKey {
     public final int version = 1;
 
@@ -80,6 +34,9 @@ public class CommandKey {
 
     public final List<String> messages;
 
+    /**
+     * Creates a default empty instance.
+     */
     public CommandKey(Profile profile) {
         this.profile = profile;
         this.conflictStrategy = new QuadState();
@@ -91,7 +48,10 @@ public class CommandKey {
         this.messages = new ArrayList<>();
     }
 
-    public CommandKey(Profile profile, QuadState conflictStrategy,
+    /**
+     * <p>Not validated, only for use by self-validating deserializer.</p>
+     */
+    private CommandKey(Profile profile, QuadState conflictStrategy,
                       TriState sendStrategy, int spaceTicks, InputConstants.Key key,
                       InputConstants.Key limitKey, List<String> messages) {
         this.profile = profile;
@@ -109,6 +69,10 @@ public class CommandKey {
         return key;
     }
 
+    /**
+     * <p>Sets the bound key to the specified value, and updates the coupled
+     * profile's Key-CommandKey map.</p>
+     */
     public void setKey(InputConstants.Key key) {
         profile.commandKeyMap.remove(this.key, this);
         this.key = key;
@@ -125,6 +89,9 @@ public class CommandKey {
 
     // Serialization / Deserialization
 
+    /**
+     * Required due to use of {@link InputConstants.Key} instances.
+     */
     public static class Serializer implements JsonSerializer<CommandKey> {
         @Override
         public JsonElement serialize(CommandKey src, Type typeOfSrc, JsonSerializationContext ctx) {
@@ -178,8 +145,7 @@ public class CommandKey {
 
             if (version == 0) {
                 spaceTicks = 0;
-            }
-            else {
+            } else {
                 spaceTicks = obj.get("spaceTicks").getAsInt();
             }
 

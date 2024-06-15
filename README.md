@@ -20,7 +20,7 @@ Send pre-written chat messages and commands using hotkeys.
 
 ### Features
 
-- 1:N Key:Command binding
+- 1:n key:command binding
 - Cycling mode
 - Type assist mode
 - Configurable conflict handling
@@ -39,52 +39,51 @@ Send pre-written chat messages and commands using hotkeys.
 #### Profiles
 
 - **Access**
-    - View the profile menu by selecting CommandKeys from your mod list ([ModMenu](https://modrinth.com/mod/modmenu/)
-      list on Fabric/Quilt), or by pressing the edit key (default:K) in-game and clicking the "Change Profile" button.
+  - View the profile menu by selecting CommandKeys from your mod list ([ModMenu](https://modrinth.com/mod/modmenu/)
+  list on Fabric/Quilt), or by pressing the edit key (default:K) in-game and clicking the "Change Profile" button.
 
 
-- **Default Profiles**
-    - There are two default profiles; the Singleplayer Default is loaded whenever you join a singleplayer world,
-      and the Multiplayer Default is loaded whenever you connect to a server (unless you have previously selected a
-      different profile on that server, see "Profile Switching" below).
-    - You can set any profile as the default by clicking the "S+" (singleplayer) or "M+" (multiplayer) button.
+- **Automatic Switching**
+  - When you join a world/server, the name/address will be checked against the list of profiles. If there is a profile 
+  linked to that world/server, it will be activated. Otherwise, the corresponding default profile will be used.
+  - You can change the default profiles using the `S` and `M` buttons.
 
 
-- **Profile Switching**
-    - You can select a profile while in-game, by clicking the checkbox to the left of the profile.
-    - If you select a profile while on a server, the server's address will be saved to the profile, and the profile will
-      be automatically selected when you next join the server.
-    - You can edit the name of a profile, and view and remove server addresses by clicking on the profile's main button.
+- **Manual Switching**
+  - In-game, you can activate any profile using the arrow on the left. When you do, the world name or server address
+  will be automatically saved to the profile.
+  - You can change the name of a profile and remove links to worlds/servers using the edit button.
 
 
 #### Command Keys
 
 - **Access**
-    - You can edit a profile by clicking the edit button from the profile selection screen, or by pressing the edit key
-      (default: K) in-game.
+  - You can edit a profile by clicking the main button from the profile selection screen, or by pressing the edit key
+  (default: K) in-game.
 
 
 - **Binding Keys**
-    - You can bind almost any keyboard key or mouse button to a Command Key, similar to Minecraft's own Controls screen. 
-      However, you can also bind any *pair* of keys; just press one while holding the other (e.g. press 'T' while 
-      holding 'Shift').
+  - You can bind almost any keyboard key or mouse button to a Command Key, similar to Minecraft's own Controls screen. 
+  However, you can also bind any *pair* of keys; just press one while holding the other (e.g. press 'T' while holding 
+  'Shift').
 
 
 - **Conflict Strategy**
-    - If a key is already used by Minecraft, you can choose a conflict strategy;
-        - Submit: The Command Key will be ignored, the Minecraft keybind will function normally.
-        - Assert: The Command Key and the Minecraft keybind will both function.
-        - Veto: The Command Key will function, the Minecraft keybind will be cancelled (if possible).
-        - Avoid: The Command Key will only function if its key is pressed while on the profile edit screen.
+  - If a key is already used by Minecraft, you can choose a conflict strategy;
+    - Submit: The Command Key will be ignored, the Minecraft keybind will function normally.
+    - Assert: The Command Key and the Minecraft keybind will both function.
+    - Veto: The Command Key will function, the Minecraft keybind will be cancelled (if possible).
+    - Avoid: The Command Key will only function if its key is pressed while on the profile edit screen.
 
 
 - **Mode**
-    - This allows you to choose what happens when the Command Key is activated;
-        - Send: All messages for the Command Key will be sent.
-        - Type: The first message will be typed into the chat box, but not sent.
-        - Cycle: The messages will be cycled through as you repeatedly press the key, one message per key-press.
-            - If you need to send multiple messages in a single cycling key-press, enter them into a single box, separated by
-              pairs of commas (e.g. /say hi,,/say hello,,/say bye) (doesn't work for any other mode).
+  - This allows you to choose what happens when the Command Key is activated;
+    - Send: All messages for the Command Key will be sent. You can optionally configure the delay between consecutive 
+    messages.
+    - Type: The first message will be typed into the chat box, but not sent.
+    - Cycle: The messages will be cycled through as you repeatedly press the key, one message per key-press.
+      - If you need to send multiple messages in a single cycling key-press, enter them into a single box, separated by
+        pairs of commas (e.g. /say hi,,/say hello,,/say bye) (doesn't work for any other mode).
 
 
 #### Dependencies

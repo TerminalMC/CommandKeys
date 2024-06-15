@@ -4,14 +4,15 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.OptionsScreen;
-import dev.terminalmc.commandkeys.util.KeyUtil;
 import dev.terminalmc.commandkeys.util.ModLogger;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -45,14 +46,14 @@ public class CommandKeys {
         while (iter.hasNext()) {
             QueuedCommand qm = iter.next();
             if (qm.tick()) {
-                KeyUtil.send(qm.message, qm.addToHistory, qm.showHudMsg);
+                send(qm.message, qm.addToHistory, qm.showHudMsg);
                 iter.remove();
             }
         }
     }
 
     public static void onConfigSaved(Config config) {
-        // If you are maintaining caches based on config values, update them here.
+        // Cache update event (not currently used)
     }
 
     public static Profile profile() {
@@ -68,6 +69,30 @@ public class CommandKeys {
     public static boolean inGame() {
         LocalPlayer player = Minecraft.getInstance().player;
         return (player != null && player.connection.getConnection().isConnected());
+    }
+
+    public static void send(String message, boolean addToHistory, boolean showHudMsg) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (message.startsWith("/")) {
+            minecraft.player.connection.sendCommand(message.substring(1));
+        } else {
+            minecraft.player.connection.sendChat(message);
+        }
+        if (addToHistory) {
+            minecraft.gui.getChat().addRecentChat(message);
+        }
+        if (showHudMsg) {
+            minecraft.gui.setOverlayMessage(Component.literal(message)
+                    .withStyle(ChatFormatting.GRAY), false);
+        }
+    }
+
+    public static void queue(int ticks, String message, boolean addToHistory, boolean showHudMsg) {
+        queuedCommands.add(new CommandKeys.QueuedCommand(ticks, message, addToHistory, showHudMsg));
+    }
+
+    public static void type(String message) {
+        Minecraft.getInstance().setScreen(new ChatScreen(message));
     }
 
     public static class QueuedCommand {

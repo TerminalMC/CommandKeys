@@ -33,6 +33,10 @@ import java.util.Set;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
+/**
+ * <p>Contains various widgets for editing options of a {@link Profile},
+ * including adding, editing and removing {@link CommandKey} instances.</p>
+ */
 public class ProfileEditList extends OptionsList {
     Profile profile;
     Set<CommandKey> expandedKeys;
@@ -149,7 +153,8 @@ public class ProfileEditList extends OptionsList {
                         screen.onClose();
                         minecraft.setScreen(null);
                         for (String msg : cmdKey.messages) {
-                            if (!msg.isBlank()) KeyUtil.send(msg, profile.addToHistory, profile.showHudMessage);
+                            if (!msg.isBlank()) CommandKeys.send(msg,
+                                    profile.addToHistory, profile.showHudMessage);
                         }
                         return true;
                     }

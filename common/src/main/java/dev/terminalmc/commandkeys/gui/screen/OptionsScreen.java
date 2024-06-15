@@ -23,8 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
- * A {@code ConfigScreen} contains one tightly-coupled {@code ConfigListWidget},
- * which is used to display all configuration options required for the screen.
+ * Contains one tightly-coupled {@link OptionsList}, which is used to display
+ * all configuration options required for the screen.
  */
 public class OptionsScreen extends OptionsSubScreen {
 
@@ -47,7 +47,6 @@ public class OptionsScreen extends OptionsSubScreen {
             listWidget = new ProfileSelectList(Minecraft.getInstance(), 0, 0, 0,
                     0, -180, 360, 20, 380, null);
         }
-
     }
 
     public OptionsScreen(Screen lastScreen, Component title, OptionsList listWidget) {
@@ -69,9 +68,7 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     @Override
-    protected void addOptions() {
-        // TODO
-    }
+    protected void addOptions() {}
 
     @Override
     public void resize(@NotNull Minecraft mc, int width, int height) {
@@ -123,6 +120,7 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     public void reload() {
-        minecraft.setScreen(new OptionsScreen(lastScreen, title, listWidget));
+        clearWidgets();
+        init();
     }
 }

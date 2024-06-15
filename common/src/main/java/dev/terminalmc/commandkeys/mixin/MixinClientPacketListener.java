@@ -21,9 +21,12 @@ import java.net.SocketAddress;
 
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
+    /**
+     * <p>Automatic profile switching for multiplayer.</p>
+     */
     @Inject(method = "handleLogin", at = @At("TAIL"))
     private void selectProfile(ClientboundLoginPacket packet, CallbackInfo ci) {
-
+        // Player is set non-null by the target method, so this access is safe.
         SocketAddress address = Minecraft.getInstance().player.connection.getConnection().getRemoteAddress();
 
         Config config = Config.get();

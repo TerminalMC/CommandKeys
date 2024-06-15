@@ -20,6 +20,10 @@ import java.time.Duration;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
+/**
+ * <p>Displays the list of {@link Profile} instances, with various widgets for
+ * management.</p>
+ */
 public class ProfileSelectList extends OptionsList {
     @Nullable Profile editingProfile;
 
@@ -128,7 +132,7 @@ public class ProfileSelectList extends OptionsList {
                     if (index == 0) {
                         Button linkButton = Button.builder(Component.literal("\uD83D\uDD17"),
                                         (button) -> {
-                                            profile.forceAddAddress(CommandKeys.lastConnection);
+                                            profile.forceAddLink(CommandKeys.lastConnection);
                                             listWidget.reload();
                                         })
                                 .pos(x, 0)
@@ -149,7 +153,7 @@ public class ProfileSelectList extends OptionsList {
                         Button activateButton = Button.builder(Component.literal("\u2191"),
                                         (button) -> {
                                             if (CommandKeys.inGame()) {
-                                                profile.forceAddAddress(CommandKeys.lastConnection);
+                                                profile.forceAddLink(CommandKeys.lastConnection);
                                             }
                                             Config.get().activateProfile(index);
                                             listWidget.reload();
@@ -207,7 +211,7 @@ public class ProfileSelectList extends OptionsList {
 
                 Button setAsSpDefaultButton = Button.builder(Component.literal("S"),
                         (button) -> {
-                            Config.get().setSpDefaultProfile(index);
+                            Config.get().spDefault = index;
                             listWidget.reload();
                         })
                         .pos(movingX, 0)
@@ -227,7 +231,7 @@ public class ProfileSelectList extends OptionsList {
 
                 Button setAsMpDefaultButton = Button.builder(Component.literal("M"),
                                 (button) -> {
-                                    Config.get().setMpDefaultProfile(index);
+                                    Config.get().mpDefault = index;
                                     listWidget.reload();
                                 })
                         .pos(movingX, 0)
