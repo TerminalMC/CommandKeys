@@ -86,7 +86,7 @@ Send pre-written chat messages and commands using hotkeys.
         pairs of commas (e.g. /say hi,,/say hello,,/say bye) (doesn't work for any other mode).
 
 
-#### Dependencies
+### Dependencies
 
 Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), [ModMenu](https://modrinth.com/mod/mOgUt4GM/) 
 (optional)
