@@ -11,7 +11,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
 
-@Mod(CommandKeys.MOD_ID)
+@Mod(value = CommandKeys.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = CommandKeys.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class CommandKeysNeoForge {
     public CommandKeysNeoForge() {
