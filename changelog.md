@@ -1,0 +1,3 @@
+- Redesign GUI
+- Allow activating multiple CommandKeys with a single keypress
+- Experimental update, please report any issues you find

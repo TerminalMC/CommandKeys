@@ -5,7 +5,8 @@
 
 package dev.terminalmc.commandkeys.config;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 
@@ -13,66 +14,69 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
- * <p>Contains profile-global behavior options, a list of {@link CommandKey}
- * instances, and a list of strings identifying worlds and/or servers to which
- * the profile is linked, simply called 'links'.</p>
+ * Consists of behavioral options, a list of {@link CommandKey} instances, and
+ * a list of strings identifying worlds and/or servers to which the
+ * {@link Profile} is linked, collectively referred to as 'links'.
  *
- * <p>A static map WORLD_PROFILE_MAP is maintained to ensure no overlap of links
- * across different profiles.</p>
+ * <p>A static {@link Map} {@link Profile#LINK_PROFILE_MAP} is maintained to
+ * ensure no overlap of links across different profiles, and to improve link
+ * lookup time.</p>
  *
- * <p>A transient multimap commandKeyMap is maintained to reduce lookup time on
- * key-press detection.</p>
+ * <p>A transient {@link Multimap} {@link Profile#commandKeyMap} is maintained
+ * to improve keybind lookup time.</p>
  */
 public class Profile {
     public final int version = 1;
 
-    public static final Map<String, Profile> WORLD_PROFILE_MAP = new HashMap<>();
+    public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
 
-    public transient final HashMultimap<InputConstants.Key, CommandKey> commandKeyMap = HashMultimap.create();
+    public transient final Multimap<InputConstants.Key, CommandKey> commandKeyMap
+            = LinkedHashMultimap.create();
 
     public String name;
-    private final Set<String> addresses;
+    private final List<String> addresses;
 
     public boolean addToHistory;
     public boolean showHudMessage;
-    private final Set<CommandKey> commandKeys;
+    private final List<CommandKey> commandKeys;
 
     /**
      * Creates a default empty instance.
      */
     public Profile() {
         this.name = "";
-        this.addresses = new LinkedHashSet<>();
+        this.addresses = new ArrayList<>();
         this.addToHistory = false;
         this.showHudMessage = false;
-        this.commandKeys = new LinkedHashSet<>();
+        this.commandKeys = new ArrayList<>();
     }
 
     /**
-     * <p>Not validated, only for use by self-validating deserializer.</p>
+     * Not validated, only for use by self-validating deserializer.
      */
-    private Profile(String name, Set<String> addresses, boolean addToHistory,
-                   boolean showHudMessage, Set<CommandKey> commandKeys) {
+    private Profile(String name, List<String> addresses, boolean addToHistory,
+                   boolean showHudMessage, List<CommandKey> commandKeys) {
         this.name = name;
         this.addresses = addresses;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
         this.commandKeys = commandKeys;
 
-        Iterator<String> addressIter = this.addresses.iterator();
-        while(addressIter.hasNext()) {
-            String address = addressIter.next();
-            if (WORLD_PROFILE_MAP.containsKey(address)) addressIter.remove();
-            else WORLD_PROFILE_MAP.put(address, this);
+        // Add links to map, those that already exist are removed from local
+        Iterator<String> linkIter = this.addresses.iterator();
+        while(linkIter.hasNext()) {
+            String link = linkIter.next();
+            if (LINK_PROFILE_MAP.containsKey(link)) linkIter.remove();
+            else LINK_PROFILE_MAP.put(link, this);
         }
     }
 
     /**
-     * <p>Copy constructor.</p>
+     * Copy constructor.
      */
     public Profile(Profile profile) {
         this.name = profile.name;
-        this.addresses = new HashSet<>();
+        this.addresses = new ArrayList<>();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
         this.commandKeys = profile.commandKeys;
@@ -80,7 +84,7 @@ public class Profile {
 
     /**
      * @return the first non-blank of the following: the profile name, the first
-     * link, the string '[Unnamed]'.
+     * link, the string "[Unnamed]".
      */
     public String getDisplayName() {
         String name = this.name;
@@ -89,36 +93,79 @@ public class Profile {
         return name;
     }
 
-    public Set<String> getLinks() {
-        return Collections.unmodifiableSet(addresses);
+    /**
+     * @return an unmodifiable view of the link list.
+     */
+    public List<String> getLinks() {
+        return Collections.unmodifiableList(addresses);
     }
 
     /**
-     * <p>Adds the link to this profile, after removing it from any other
-     * profile containing it.</p>
+     * Adds the link to this profile and to {@link Profile#LINK_PROFILE_MAP},
+     * after removing it from any other profile.
      */
     public void forceAddLink(String link) {
-        if (WORLD_PROFILE_MAP.containsKey(link)) WORLD_PROFILE_MAP.get(link).removeAddress(link);
+        if (LINK_PROFILE_MAP.containsKey(link)) LINK_PROFILE_MAP.get(link).removeLink(link);
         addresses.add(link);
-        WORLD_PROFILE_MAP.put(link, this);
+        LINK_PROFILE_MAP.put(link, this);
     }
 
-    public void removeAddress(String address) {
-        addresses.remove(address);
-        WORLD_PROFILE_MAP.remove(address);
+    /**
+     * Removes the link from this profile and from
+     * {@link Profile#LINK_PROFILE_MAP}.
+     */
+    public void removeLink(String link) {
+        addresses.remove(link);
+        LINK_PROFILE_MAP.remove(link);
     }
 
-    public Set<CommandKey> getCmdKeys() {
-        return Collections.unmodifiableSet(commandKeys);
+    /**
+     * @return an unmodifiable view of the {@link CommandKey} list.
+     */
+    public List<CommandKey> getCmdKeys() {
+        return Collections.unmodifiableList(commandKeys);
     }
 
+    /**
+     * Adds {@code cmdKey} to the {@link CommandKey} list and to
+     * {@link Profile#commandKeyMap}.
+     */
     public void addCmdKey(CommandKey cmdKey) {
         commandKeys.add(cmdKey);
+        commandKeyMap.put(cmdKey.getKey(), cmdKey);
     }
 
+    /**
+     * Moves the {@link CommandKey} at the source index to the destination
+     * index.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     */
+    public void moveCmdKey(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            commandKeys.add(destIndex, commandKeys.remove(sourceIndex));
+            rebuildCmdKeyMap();
+        }
+    }
+
+    /**
+     * Removes {@code cmdKey} from the {@link CommandKey} list and from
+     * {@link Profile#commandKeyMap}.
+     */
     public void removeCmdKey(CommandKey cmdKey) {
         commandKeys.remove(cmdKey);
         commandKeyMap.remove(cmdKey.getKey(), cmdKey);
+    }
+
+    /**
+     * Clears {@link Profile#commandKeyMap}, then adds each element of the
+     * {@link CommandKey} list, in order.
+     */
+    public void rebuildCmdKeyMap() {
+        commandKeyMap.clear();
+        for (CommandKey cmdKey : commandKeys) {
+            commandKeyMap.put(cmdKey.getKey(), cmdKey);
+        }
     }
 
     // Cleanup and validation
@@ -130,10 +177,10 @@ public class Profile {
             // Allow blank messages for cycling command keys as spacers
             switch(cmk.sendStrategy.state) {
                 case ZERO -> {
-                    cmk.messages.replaceAll(String::stripTrailing);
-                    cmk.messages.removeIf(String::isBlank);
+                    cmk.messages.removeIf((msg) -> msg.string.isBlank());
+                    cmk.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
                 }
-                case TWO -> cmk.messages.replaceAll(String::stripTrailing);
+                case TWO -> cmk.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
             }
             if (cmk.messages.isEmpty()) {
                 cmdKeyIter.remove();
@@ -152,13 +199,13 @@ public class Profile {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
             String name = obj.get("name").getAsString();
-            Set<String> addresses = new HashSet<>();
+            List<String> addresses = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("addresses")) addresses.add(je.getAsString());
             boolean addToHistory = obj.get("addToHistory").getAsBoolean();
             boolean showHudMessage = obj.get("showHudMessage").getAsBoolean();
 
             // Deserialize CommandKey objects with link to deserialized Profile
-            Set<CommandKey> commandKeys = new LinkedHashSet<>();
+            List<CommandKey> commandKeys = new ArrayList<>();
 
             Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
 

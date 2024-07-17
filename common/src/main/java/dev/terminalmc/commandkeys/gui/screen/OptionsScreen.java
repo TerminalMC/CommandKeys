@@ -6,14 +6,17 @@
 package dev.terminalmc.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.gui.widget.list.OptionsList;
-import dev.terminalmc.commandkeys.gui.widget.list.ProfileEditList;
-import dev.terminalmc.commandkeys.gui.widget.list.ProfileSelectList;
+import dev.terminalmc.commandkeys.gui.widget.list.ProfileOptionsList;
+import dev.terminalmc.commandkeys.gui.widget.list.MainOptionsList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
@@ -24,28 +27,30 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
  * Contains one tightly-coupled {@link OptionsList}, which is used to display
- * all configuration options required for the screen.
+ * all option control widgets.
  */
 public class OptionsScreen extends OptionsSubScreen {
+    public static final int TOP_MARGIN = 32;
+    public static final int BOTTOM_MARGIN = 32;
+    public static final int LIST_ENTRY_SPACE = 25;
+    public static final int LIST_ENTRY_HEIGHT = 20;
+    public static final int BASE_ROW_WIDTH = Window.BASE_WIDTH;
+    public static final int BASE_LIST_ENTRY_WIDTH = BASE_ROW_WIDTH - 20;
 
     protected OptionsList listWidget;
 
-    public final int listTop = 32;
-    public final int bottomMargin = 32;
-    public final int listItemHeight = 25;
-
     public OptionsScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen, Minecraft.getInstance().options,
-                inGame ? localized("screen", "edit_profile", CommandKeys.profile().getDisplayName())
-                        : localized("screen", "select_profile"));
+                inGame ? localized("option", "profile", CommandKeys.profile().getDisplayName())
+                        : localized("option", "main"));
         if (inGame) {
-            listWidget = new ProfileEditList(Minecraft.getInstance(), 0, 0, 0,
-                    0, -200, 400, 20, 420,
-                    CommandKeys.profile(), null);
+            listWidget = new ProfileOptionsList(Minecraft.getInstance(), 0, 0, TOP_MARGIN,
+                    LIST_ENTRY_SPACE, BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT,
+                    CommandKeys.profile());
         }
         else {
-            listWidget = new ProfileSelectList(Minecraft.getInstance(), 0, 0, 0,
-                    0, -180, 360, 20, 380, null);
+            listWidget = new MainOptionsList(Minecraft.getInstance(), 0, 0, TOP_MARGIN,
+                    LIST_ENTRY_SPACE, BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, null);
         }
     }
 
@@ -56,19 +61,13 @@ public class OptionsScreen extends OptionsSubScreen {
 
     @Override
     protected void init() {
-        listWidget = listWidget.resize(width, height - listTop - bottomMargin, listTop,
-                listItemHeight, listWidget.getScrollAmount());
-        listWidget.setScreen(this);
-        addRenderableWidget(listWidget);
-        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE,
-                        (button) -> onClose())
-                .pos(width / 2 - 120, height - 27)
-                .size(240, 20)
-                .build());
+        reload();
     }
 
     @Override
-    protected void addOptions() {}
+    protected void addOptions() {
+        // Not currently used
+    }
 
     @Override
     public void resize(@NotNull Minecraft mc, int width, int height) {
@@ -104,12 +103,13 @@ public class OptionsScreen extends OptionsSubScreen {
     @Override
     public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.drawCenteredString(font, title, width / 2, 5, 0xffffff);
     }
 
     @Override
     public void onClose() {
-        if (!(lastScreen instanceof OptionsScreen)) {
+        if (lastScreen instanceof OptionsScreen screen) {
+            screen.reload(width, height);
+        } else {
             Config.save();
         }
         super.onClose();
@@ -120,7 +120,26 @@ public class OptionsScreen extends OptionsSubScreen {
     }
 
     public void reload() {
+        reload(width, height);
+    }
+
+    public void reload(int width, int height) {
         clearWidgets();
-        init();
+        listWidget = listWidget.reload(this, width, height - TOP_MARGIN - BOTTOM_MARGIN,
+                listWidget.getScrollAmount());
+        addRenderableWidget(listWidget);
+
+        // Title text
+        Font font = Minecraft.getInstance().font;
+        addRenderableWidget(new StringWidget(width / 2 - (font.width(title) / 2),
+                Math.max(0, TOP_MARGIN / 2 - font.lineHeight / 2),
+                font.width(title), font.lineHeight, title, font).alignLeft());
+
+        // Done button
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
+                .pos(width / 2 - BASE_LIST_ENTRY_WIDTH / 2, Math.min(height - LIST_ENTRY_HEIGHT,
+                        height - BOTTOM_MARGIN / 2 - LIST_ENTRY_HEIGHT / 2))
+                .size(BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT)
+                .build());
     }
 }

@@ -18,70 +18,89 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static dev.terminalmc.commandkeys.config.Profile.WORLD_PROFILE_MAP;
+import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
 
 /**
- * <p>Consists of a list of {@link Profile} instances, and two {@code int}s to
- * keep track of the default profiles for singleplayer and multiplayer.</p>
+ * Config consists of a list of {@link Profile} instances, and two {@code int}s
+ * to keep track of the default profiles for singleplayer and multiplayer.</p>
  *
- * <p>When a profile is activated it is automatically moved to the
- * start of the list, so the list maintains most-recently-used order and the
- * current active profile can be obtained using {@code getFirst()}.</p>
+ * <p>When a profile is activated it is automatically moved to the start of the
+ * list, so the list maintains most-recently-used order and the current active
+ * profile can be obtained using {@code getFirst()}.</p>
  *
- * <p>The profile list is guaranteed to contain one instance as singleplayer
- * default and one instance as multiplayer default, which can be the same.</p>
+ * <p>The profile list is guaranteed to contain at least one instance at all
+ * times, and at least two if the singleplayer default instance is not also the
+ * multiplayer default instance.</p>
  */
 public class Config {
-    public final int version = 2;
+    public final int version = 3;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new Config.Deserializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
             .registerTypeAdapter(CommandKey.class, new CommandKey.Serializer())
+            .registerTypeAdapter(Message.class, new Message.Deserializer())
             .setPrettyPrinting()
             .create();
 
     // Options
 
-    public final List<Profile> profiles;
+    public final QuadState defaultConflictStrategy;
+    public final TriState defaultSendMode;
+
+    private final List<Profile> profiles;
     public int spDefault;
     public int mpDefault;
 
     /**
-     * <p>Creates a profile list with two profiles, one as singleplayer default and
-     * the other as multiplayer default.</p>
+     * Creates a profile list with two profiles, one as singleplayer default and
+     * the other as multiplayer default.
      */
     public Config() {
+        this.defaultConflictStrategy = new QuadState();
+        this.defaultSendMode = new TriState();
+
         this.profiles = new ArrayList<>();
 
         Profile spDefaultProfile = new Profile();
-        spDefaultProfile.name = "Singleplayer Default";
+        spDefaultProfile.name = "Profile 1";
         this.profiles.add(spDefaultProfile);
         this.spDefault = 0;
 
         Profile mpDefaultProfile = new Profile();
-        mpDefaultProfile.name = "Multiplayer Default";
+        mpDefaultProfile.name = "Profile 2";
         this.profiles.add(mpDefaultProfile);
         this.mpDefault = 1;
     }
 
     /**
-     * <p>Not validated, only for use by self-validating deserializer.</p>
+     * Not validated, only for use by self-validating deserializer.
      */
-    private Config(List<Profile> profiles, int spDefault, int mpDefault) {
+    private Config(QuadState defaultConflictStrategy, TriState defaultSendMode,
+                   List<Profile> profiles, int spDefault, int mpDefault) {
+        this.defaultConflictStrategy = defaultConflictStrategy;
+        this.defaultSendMode = defaultSendMode;
         this.profiles = profiles;
         this.spDefault = spDefault;
         this.mpDefault = mpDefault;
         activateProfile(spDefault);
     }
 
+    /**
+     * @return the most recently activated {@link Profile}.
+     */
     public Profile activeProfile() {
         return profiles.getFirst();
     }
 
+    /**
+     * Activates the {@link Profile} at {@code index}, if it is not already
+     * active.
+     */
     public void activateProfile(int index) {
         if (index != 0) {
             profiles.addFirst(profiles.remove(index));
@@ -92,6 +111,43 @@ public class Config {
         }
     }
 
+    /**
+     * Activates the profile linked to the level ID, if one exists, else
+     * activates the singleplayer default profile.
+     */
+    public void activateSpProfile(String levelId) {
+        Profile profile = LINK_PROFILE_MAP.getOrDefault(levelId, null);
+        if (profile != null) {
+            activateProfile(profiles.indexOf(profile));
+        } else {
+            activateProfile(spDefault);
+        }
+    }
+
+    /**
+     * Activates the profile linked to the address, if one exists, else
+     * activates the multiplayer default profile.
+     */
+    public void activateMpProfile(String address) {
+        Profile profile = LINK_PROFILE_MAP.getOrDefault(address, null);
+        if (profile != null) {
+            activateProfile(profiles.indexOf(profile));
+        } else {
+            activateProfile(mpDefault);
+        }
+    }
+
+    /**
+     * @return an unmodifiable view of the profiles list.
+     */
+    public List<Profile> getProfiles() {
+        return Collections.unmodifiableList(profiles);
+    }
+
+    /**
+     * Creates an exact copy of the {@code profile}, minus links and with
+     * " (Copy)" appended to the name.
+     */
     public void copyProfile(Profile profile) {
         Profile copyProfile = new Profile(profile);
         copyProfile.name = profile.getDisplayName() + " (Copy)";
@@ -99,41 +155,19 @@ public class Config {
     }
 
     /**
-     * <p>Activates the profile linked to the level ID, if one exists, else
-     * activates the singleplayer default profile.</p>
+     * Adds {@code profile} to the {@link Profile} list.
      */
-    public void activateSpProfile(String levelId) {
-        Profile profile = WORLD_PROFILE_MAP.getOrDefault(levelId, null);
-        if (profile != null) {
-            int i = 0;
-            for (Profile p : profiles) {
-                if (p == profile) {
-                    activateProfile(i);
-                    return;
-                }
-                i++;
-            }
-        }
-        activateProfile(spDefault);
+    public void addProfile(Profile profile) {
+        profiles.add(profile);
     }
 
     /**
-     * <p>Activates the profile linked to the address, if one exists, else
-     * activates the multiplayer default profile.</p>
+     * Removes the element at {@code index} in the {@link Profile} list.
      */
-    public void activateMpProfile(String address) {
-        Profile profile = WORLD_PROFILE_MAP.getOrDefault(address, null);
-        if (profile != null) {
-            int i = 0;
-            for (Profile p : profiles) {
-                if (p == profile) {
-                    activateProfile(i);
-                    return;
-                }
-                i++;
-            }
-        }
-        activateProfile(mpDefault);
+    public void removeProfile(int index) {
+        profiles.remove(index);
+        if (index < spDefault) spDefault--;
+        if (index < mpDefault) mpDefault--;
     }
 
     // Cleanup
@@ -219,6 +253,15 @@ public class Config {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
+            QuadState defaultConflictStrategy = version >= 3
+                    ? new QuadState(obj.getAsJsonObject("defaultConflictStrategy")
+                            .get("state").getAsString())
+                    : new QuadState();
+            TriState defaultSendMode = version >= 3
+                    ? new TriState(obj.getAsJsonObject("defaultSendMode")
+                            .get("state").getAsString())
+                    : new TriState();
+
             List<Profile> profiles = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("profiles")) {
                 profiles.add(ctx.deserialize(je, Profile.class));
@@ -242,7 +285,7 @@ public class Config {
             if (spDefault < 0 || spDefault >= profiles.size()) throw new JsonParseException("Config #1");
             if (mpDefault < 0 || mpDefault >= profiles.size()) throw new JsonParseException("Config #2");
 
-            return new Config(profiles, spDefault, mpDefault);
+            return new Config(defaultConflictStrategy, defaultSendMode, profiles, spDefault, mpDefault);
         }
     }
 }

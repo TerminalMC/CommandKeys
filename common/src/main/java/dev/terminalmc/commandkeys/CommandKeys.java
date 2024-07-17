@@ -29,7 +29,7 @@ public class CommandKeys {
 
     public static String lastConnection = "";
 
-    public static List<QueuedCommand> queuedCommands = new ArrayList<>();
+    public static List<QueuedMessage> queuedMessages = new ArrayList<>();
 
     public static void init() {
         Config.getAndSave();
@@ -42,9 +42,9 @@ public class CommandKeys {
         }
 
         // Tick queued commands
-        Iterator<QueuedCommand> iter = queuedCommands.iterator();
+        Iterator<QueuedMessage> iter = queuedMessages.iterator();
         while (iter.hasNext()) {
-            QueuedCommand qm = iter.next();
+            QueuedMessage qm = iter.next();
             if (qm.tick()) {
                 send(qm.message, qm.addToHistory, qm.showHudMsg);
                 iter.remove();
@@ -61,9 +61,7 @@ public class CommandKeys {
     }
 
     public static Screen getConfigScreen(Screen lastScreen) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        boolean inGame = (player != null && player.connection.getConnection().isConnected());
-        return new OptionsScreen(lastScreen, inGame);
+        return new OptionsScreen(lastScreen, inGame());
     }
 
     public static boolean inGame() {
@@ -88,20 +86,20 @@ public class CommandKeys {
     }
 
     public static void queue(int ticks, String message, boolean addToHistory, boolean showHudMsg) {
-        queuedCommands.add(new CommandKeys.QueuedCommand(ticks, message, addToHistory, showHudMsg));
+        queuedMessages.add(new QueuedMessage(ticks, message, addToHistory, showHudMsg));
     }
 
     public static void type(String message) {
         Minecraft.getInstance().setScreen(new ChatScreen(message));
     }
 
-    public static class QueuedCommand {
+    public static class QueuedMessage {
         int ticks;
         String message;
         boolean addToHistory;
         boolean showHudMsg;
 
-        public QueuedCommand(int ticks, String message, boolean addToHistory, boolean showHudMsg) {
+        public QueuedMessage(int ticks, String message, boolean addToHistory, boolean showHudMsg) {
             this.ticks = ticks;
             this.message = message;
             this.addToHistory = addToHistory;

@@ -10,37 +10,44 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>Contains behavioral options, a key and modifier key (both of which can be
- * unbound), and a list of messages.</p>
+ * Consists of behavioral options, a key and modifier key (both of which can be
+ * unbound), and a list of {@link Message} instances.
  *
- * <p>Strongly coupled to a {@link Profile}, to allow management of the
- * profile's Key-CommandKey map.</p>
+ * <p>Tightly coupled to a {@link Profile}, to allow updating the
+ * {@link Profile#commandKeyMap}.</p>
  */
 public class CommandKey {
-    public final int version = 1;
+    public final int version = 2;
 
     public transient final Profile profile;
 
-    public final QuadState conflictStrategy; // Submit, Assert, Veto or Avoid
-    public final TriState sendStrategy; // Send, Type or Cycle
-    public int spaceTicks;
+    /**
+     * ZERO: Submit, ONE: Assert, TWO: Veto, THREE: Avoid
+     */
+    public final QuadState conflictStrategy;
+    /**
+     * ZERO: Send, ONE: Type, TWO: Cycle
+     */
+    public final TriState sendStrategy;
+    public int spaceTicks; // Delay between messages if sending
     public transient int cycleIndex; // Index of next message if cycling
 
     private InputConstants.Key key;
     private InputConstants.Key limitKey;
 
-    public final List<String> messages;
+    final List<Message> messages;
 
     /**
      * Creates a default empty instance.
      */
     public CommandKey(Profile profile) {
         this.profile = profile;
-        this.conflictStrategy = new QuadState();
-        this.sendStrategy = new TriState();
+        this.conflictStrategy = new QuadState(Config.get().defaultConflictStrategy.state);
+        this.sendStrategy = new TriState(Config.get().defaultSendMode.state);
         this.spaceTicks = 0;
         this.cycleIndex = 0;
         this.key = InputConstants.UNKNOWN;
@@ -49,11 +56,11 @@ public class CommandKey {
     }
 
     /**
-     * <p>Not validated, only for use by self-validating deserializer.</p>
+     * Not validated, only for use by self-validating deserializer.
      */
     private CommandKey(Profile profile, QuadState conflictStrategy,
                       TriState sendStrategy, int spaceTicks, InputConstants.Key key,
-                      InputConstants.Key limitKey, List<String> messages) {
+                      InputConstants.Key limitKey, List<Message> messages) {
         this.profile = profile;
         this.conflictStrategy = conflictStrategy;
         this.sendStrategy = sendStrategy;
@@ -70,13 +77,12 @@ public class CommandKey {
     }
 
     /**
-     * <p>Sets the bound key to the specified value, and updates the coupled
-     * profile's Key-CommandKey map.</p>
+     * Sets the bound key to the specified value, and updates the coupled
+     * {@link Profile#commandKeyMap}.
      */
     public void setKey(InputConstants.Key key) {
-        profile.commandKeyMap.remove(this.key, this);
         this.key = key;
-        profile.commandKeyMap.put(this.key, this);
+        profile.rebuildCmdKeyMap();
     }
 
     public InputConstants.Key getLimitKey() {
@@ -85,6 +91,36 @@ public class CommandKey {
 
     public void setLimitKey(InputConstants.Key limitKey) {
         this.limitKey = limitKey;
+    }
+
+    /**
+     * @return an unmodifiable view of the messages list.
+     */
+    public List<Message> getMessages() {
+        return Collections.unmodifiableList(messages);
+    }
+
+    public void addMessage(Message message) {
+        this.messages.add(message);
+    }
+
+    public void setMessage(int index, String str) {
+        this.messages.get(index).string = str;
+    }
+
+    public void removeMessage(int index) {
+        this.messages.remove(index);
+    }
+
+    /**
+     * Moves the message at the source index to the destination index.
+     * @param sourceIndex the index of the element to move.
+     * @param destIndex the desired final index of the element.
+     */
+    public void moveMessage(int sourceIndex, int destIndex) {
+        if (sourceIndex != destIndex) {
+            messages.add(destIndex, messages.remove(sourceIndex));
+        }
     }
 
     // Serialization / Deserialization
@@ -115,7 +151,7 @@ public class CommandKey {
             obj.add("limitKey", limitKeyObj);
 
             JsonArray messagesObj = new JsonArray();
-            for (String message : src.messages) messagesObj.add(message);
+            for (Message message : src.messages) messagesObj.add(ctx.serialize(message));
             obj.add("messages", messagesObj);
 
             return obj;
@@ -140,8 +176,12 @@ public class CommandKey {
             int spaceTicks;
             InputConstants.Key key = InputConstants.getKey(obj.getAsJsonObject("key").get("name").getAsString());
             InputConstants.Key limitKey = InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString());
-            ArrayList<String> messages = new ArrayList<>();
-            for (JsonElement je : obj.getAsJsonArray("messages")) messages.add(je.getAsString());
+            List<Message> messages = new ArrayList<>();
+            for (JsonElement je : obj.getAsJsonArray("messages")) {
+                messages.add(version >= 2
+                        ? ctx.deserialize(je, Message.class)
+                        : new Message(true, je.getAsString(), 0));
+            }
 
             if (version == 0) {
                 spaceTicks = 0;
@@ -150,7 +190,7 @@ public class CommandKey {
             }
 
             // Validate
-            if (spaceTicks < 0) throw new JsonParseException("CommandKey #1");
+            if (spaceTicks < -1) throw new JsonParseException("CommandKey #1");
 
             return new CommandKey(profile, conflictStrategy, sendStrategy, spaceTicks, key, limitKey, messages);
         }
