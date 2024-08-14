@@ -1,4 +1,4 @@
-package dev.terminalmc.commandkeys.mixin;
+package dev.terminalmc.commandkeys.mixin.accessor;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;

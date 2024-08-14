@@ -7,11 +7,11 @@
   "mixins": [
   ],
   "client": [
-    "KeyMappingAccessor",
-    "MixinClientPacketListener",
-    "MixinKeyboardHandler",
-    "MixinMinecraft",
-    "MixinMouseHandler"
+    "accessor.KeyMappingAccessor",
+    "profile.MixinConnectScreen",
+    "macro.MixinKeyboardHandler",
+    "profile.MixinMinecraft",
+    "macro.MixinMouseHandler"
   ],
   "server": [
   ],

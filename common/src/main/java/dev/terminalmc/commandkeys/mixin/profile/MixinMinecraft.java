@@ -1,4 +1,4 @@
-package dev.terminalmc.commandkeys.mixin;
+package dev.terminalmc.commandkeys.mixin.profile;
 
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Config;
@@ -14,14 +14,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
     /**
-     * <p>Automatic profile switching for singleplayer.</p>
+     * Automatic profile switching for singleplayer.
      */
-    @Inject(method = "doWorldLoad", at = @At("HEAD"))
+    @Inject(
+            method = "doWorldLoad",
+            at = @At("HEAD")
+    )
     private void startIntegratedServer(LevelStorageSource.LevelStorageAccess levelStorage,
                                        PackRepository packRepo, WorldStem worldStem,
                                        boolean newWorld, CallbackInfo ci) {
-        String levelId = levelStorage.getLevelId();
-        Config.get().activateSpProfile(levelId);
-        CommandKeys.lastConnection = levelId;
+        String world = worldStem.worldData().getLevelName();
+        Config.get().activateSpProfile(world);
+        CommandKeys.lastConnection = world;
     }
 }

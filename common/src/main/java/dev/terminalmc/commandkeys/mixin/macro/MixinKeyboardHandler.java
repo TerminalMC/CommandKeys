@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.commandkeys.mixin;
+package dev.terminalmc.commandkeys.mixin.macro;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.util.KeyUtil;
+import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.client.KeyboardHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,7 +28,7 @@ public class MixinKeyboardHandler {
             )
     )
     private void onKeyPress(InputConstants.Key key) {
-        commandKeys$cancelCharTyped = KeyUtil.handleKey(key);
+        commandKeys$cancelCharTyped = KeybindUtil.handleKey(key);
     }
 
     @Inject(

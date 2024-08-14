@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
- * Consists of behavioral options, a list of {@link CommandKey} instances, and
+ * Consists of behavioral options, a list of {@link Macro} instances, and
  * a list of strings identifying worlds and/or servers to which the
  * {@link Profile} is linked, collectively referred to as 'links'.
  *
@@ -22,23 +22,30 @@ import java.util.*;
  * ensure no overlap of links across different profiles, and to improve link
  * lookup time.</p>
  *
- * <p>A transient {@link Multimap} {@link Profile#commandKeyMap} is maintained
+ * <p>A transient {@link Multimap} {@link Profile#keyMacroMap} is maintained
  * to improve keybind lookup time.</p>
  */
 public class Profile {
-    public final int version = 1;
+    public final int version = 2;
+
+    public enum Control {
+        ON,
+        OFF,
+        DEFER
+    }
 
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
 
-    public transient final Multimap<InputConstants.Key, CommandKey> commandKeyMap
+    public transient final Multimap<InputConstants.Key, Macro> keyMacroMap
             = LinkedHashMultimap.create();
 
     public String name;
     private final List<String> addresses;
 
-    public boolean addToHistory;
-    public boolean showHudMessage;
-    private final List<CommandKey> commandKeys;
+    public Control addToHistory;
+    public Control showHudMessage;
+
+    private final List<Macro> macros;
 
     /**
      * Creates a default empty instance.
@@ -46,21 +53,21 @@ public class Profile {
     public Profile() {
         this.name = "";
         this.addresses = new ArrayList<>();
-        this.addToHistory = false;
-        this.showHudMessage = false;
-        this.commandKeys = new ArrayList<>();
+        this.addToHistory = Control.OFF;
+        this.showHudMessage = Control.OFF;
+        this.macros = new ArrayList<>();
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Profile(String name, List<String> addresses, boolean addToHistory,
-                   boolean showHudMessage, List<CommandKey> commandKeys) {
+    private Profile(String name, List<String> addresses, Control addToHistory,
+                    Control showHudMessage, List<Macro> macros) {
         this.name = name;
         this.addresses = addresses;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
-        this.commandKeys = commandKeys;
+        this.macros = macros;
 
         // Add links to map, those that already exist are removed from local
         Iterator<String> linkIter = this.addresses.iterator();
@@ -79,7 +86,7 @@ public class Profile {
         this.addresses = new ArrayList<>();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
-        this.commandKeys = profile.commandKeys;
+        this.macros = profile.macros;
     }
 
     /**
@@ -120,71 +127,70 @@ public class Profile {
     }
 
     /**
-     * @return an unmodifiable view of the {@link CommandKey} list.
+     * @return an unmodifiable view of the {@link Macro} list.
      */
-    public List<CommandKey> getCmdKeys() {
-        return Collections.unmodifiableList(commandKeys);
+    public List<Macro> getMacros() {
+        return Collections.unmodifiableList(macros);
     }
 
     /**
-     * Adds {@code cmdKey} to the {@link CommandKey} list and to
-     * {@link Profile#commandKeyMap}.
+     * Adds {@code macro} to the {@link Macro} list and to
+     * {@link Profile#keyMacroMap}.
      */
-    public void addCmdKey(CommandKey cmdKey) {
-        commandKeys.add(cmdKey);
-        commandKeyMap.put(cmdKey.getKey(), cmdKey);
+    public void addMacro(Macro macro) {
+        macros.add(macro);
+        keyMacroMap.put(macro.getKey(), macro);
     }
 
     /**
-     * Moves the {@link CommandKey} at the source index to the destination
+     * Moves the {@link Macro} at the source index to the destination
      * index.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
      */
-    public void moveCmdKey(int sourceIndex, int destIndex) {
+    public void moveMacro(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
-            commandKeys.add(destIndex, commandKeys.remove(sourceIndex));
-            rebuildCmdKeyMap();
+            macros.add(destIndex, macros.remove(sourceIndex));
+            rebuildMacroMap();
         }
     }
 
     /**
-     * Removes {@code cmdKey} from the {@link CommandKey} list and from
-     * {@link Profile#commandKeyMap}.
+     * Removes {@code macro} from the {@link Macro} list and from
+     * {@link Profile#keyMacroMap}.
      */
-    public void removeCmdKey(CommandKey cmdKey) {
-        commandKeys.remove(cmdKey);
-        commandKeyMap.remove(cmdKey.getKey(), cmdKey);
+    public void removeMacro(Macro macro) {
+        macros.remove(macro);
+        keyMacroMap.remove(macro.getKey(), macro);
     }
 
     /**
-     * Clears {@link Profile#commandKeyMap}, then adds each element of the
-     * {@link CommandKey} list, in order.
+     * Clears {@link Profile#keyMacroMap}, then adds each element of the
+     * {@link Macro} list, in order.
      */
-    public void rebuildCmdKeyMap() {
-        commandKeyMap.clear();
-        for (CommandKey cmdKey : commandKeys) {
-            commandKeyMap.put(cmdKey.getKey(), cmdKey);
+    public void rebuildMacroMap() {
+        keyMacroMap.clear();
+        for (Macro macro : macros) {
+            keyMacroMap.put(macro.getKey(), macro);
         }
     }
 
     // Cleanup and validation
 
     public void cleanup() {
-        Iterator<CommandKey> cmdKeyIter = commandKeys.iterator();
-        while (cmdKeyIter.hasNext()) {
-            CommandKey cmk = cmdKeyIter.next();
+        Iterator<Macro> macroIter = macros.iterator();
+        while (macroIter.hasNext()) {
+            Macro macro = macroIter.next();
             // Allow blank messages for cycling command keys as spacers
-            switch(cmk.sendStrategy.state) {
-                case ZERO -> {
-                    cmk.messages.removeIf((msg) -> msg.string.isBlank());
-                    cmk.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
-                }
-                case TWO -> cmk.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
+            if (!macro.getSendMode().equals(Macro.SendMode.TYPE)) {
+                macro.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
             }
-            if (cmk.messages.isEmpty()) {
-                cmdKeyIter.remove();
-                commandKeyMap.remove(cmk.getKey(), cmk);
+            if (!macro.getSendMode().equals(Macro.SendMode.CYCLE)) {
+                macro.messages.removeIf((msg) -> msg.string.isBlank());
+            }
+            if (macro.messages.isEmpty()) {
+                macroIter.remove();
+                keyMacroMap.remove(macro.getKey(), macro);
             }
         }
     }
@@ -201,20 +207,24 @@ public class Profile {
             String name = obj.get("name").getAsString();
             List<String> addresses = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("addresses")) addresses.add(je.getAsString());
-            boolean addToHistory = obj.get("addToHistory").getAsBoolean();
-            boolean showHudMessage = obj.get("showHudMessage").getAsBoolean();
+            Control addToHistory = version >= 2
+                    ? Control.valueOf(obj.get("addToHistory").getAsString())
+                    : Control.OFF;
+            Control showHudMessage = version >= 2
+                    ? Control.valueOf(obj.get("showHudMessage").getAsString())
+                    : Control.OFF;
 
             // Deserialize CommandKey objects with link to deserialized Profile
-            List<CommandKey> commandKeys = new ArrayList<>();
+            List<Macro> macros = new ArrayList<>();
 
-            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, commandKeys);
+            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, macros);
 
-            Gson commandKeyGson = new GsonBuilder()
-                    .registerTypeAdapter(CommandKey.class, new CommandKey.Deserializer(profile))
+            Gson macroGson = new GsonBuilder()
+                    .registerTypeAdapter(Macro.class, new Macro.Deserializer(profile))
                     .create();
 
-            for (JsonElement je : obj.getAsJsonArray("commandKeys"))
-                commandKeys.add(commandKeyGson.fromJson(je, CommandKey.class));
+            for (JsonElement je : obj.getAsJsonArray(version >= 2 ? "macros" : "commandKeys"))
+                macros.add(macroGson.fromJson(je, Macro.class));
 
             // Validate
             if (name == null) throw new JsonParseException("Profile #1");

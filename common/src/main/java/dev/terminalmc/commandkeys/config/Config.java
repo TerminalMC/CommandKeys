@@ -36,21 +36,20 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  * multiplayer default instance.</p>
  */
 public class Config {
-    public final int version = 3;
+    public final int version = 4;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new Config.Deserializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
-            .registerTypeAdapter(CommandKey.class, new CommandKey.Serializer())
             .registerTypeAdapter(Message.class, new Message.Deserializer())
             .setPrettyPrinting()
             .create();
 
     // Options
 
-    public final QuadState defaultConflictStrategy;
-    public final TriState defaultSendMode;
+    public Macro.ConflictStrategy defaultConflictStrategy;
+    public Macro.SendMode defaultSendMode;
 
     private final List<Profile> profiles;
     public int spDefault;
@@ -61,26 +60,22 @@ public class Config {
      * the other as multiplayer default.
      */
     public Config() {
-        this.defaultConflictStrategy = new QuadState();
-        this.defaultSendMode = new TriState();
+        this.defaultConflictStrategy = Macro.ConflictStrategy.SUBMIT;
+        this.defaultSendMode = Macro.SendMode.SEND;
 
         this.profiles = new ArrayList<>();
 
-        Profile spDefaultProfile = new Profile();
-        spDefaultProfile.name = "Profile 1";
-        this.profiles.add(spDefaultProfile);
+        Profile defaultProfile = new Profile();
+        defaultProfile.name = "Default Profile";
+        this.profiles.add(defaultProfile);
         this.spDefault = 0;
-
-        Profile mpDefaultProfile = new Profile();
-        mpDefaultProfile.name = "Profile 2";
-        this.profiles.add(mpDefaultProfile);
-        this.mpDefault = 1;
+        this.mpDefault = 0;
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Config(QuadState defaultConflictStrategy, TriState defaultSendMode,
+    private Config(Macro.ConflictStrategy defaultConflictStrategy, Macro.SendMode defaultSendMode,
                    List<Profile> profiles, int spDefault, int mpDefault) {
         this.defaultConflictStrategy = defaultConflictStrategy;
         this.defaultSendMode = defaultSendMode;
@@ -102,6 +97,7 @@ public class Config {
      * active.
      */
     public void activateProfile(int index) {
+        profiles.getFirst().getMacros().forEach(Macro::stopRepeating);
         if (index != 0) {
             profiles.addFirst(profiles.remove(index));
             if (index == spDefault) spDefault = 0;
@@ -253,14 +249,12 @@ public class Config {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
 
-            QuadState defaultConflictStrategy = version >= 3
-                    ? new QuadState(obj.getAsJsonObject("defaultConflictStrategy")
-                            .get("state").getAsString())
-                    : new QuadState();
-            TriState defaultSendMode = version >= 3
-                    ? new TriState(obj.getAsJsonObject("defaultSendMode")
-                            .get("state").getAsString())
-                    : new TriState();
+            Macro.ConflictStrategy defaultConflictStrategy = version >= 4
+                    ? Macro.ConflictStrategy.valueOf(obj.get("defaultConflictStrategy").getAsString())
+                    : Macro.ConflictStrategy.SUBMIT;
+            Macro.SendMode defaultSendMode = version >= 4
+                    ? Macro.SendMode.valueOf(obj.get("defaultSendMode").getAsString())
+                    : Macro.SendMode.SEND;
 
             List<Profile> profiles = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("profiles")) {

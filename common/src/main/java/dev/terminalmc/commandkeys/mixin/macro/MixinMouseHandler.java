@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.terminalmc.commandkeys.mixin;
+package dev.terminalmc.commandkeys.mixin.macro;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.util.KeyUtil;
+import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,6 +22,6 @@ public class MixinMouseHandler {
             )
     )
     private void onButtonPress(InputConstants.Key key) {
-        KeyUtil.handleKey(key);
+        KeybindUtil.handleKey(key);
     }
 }

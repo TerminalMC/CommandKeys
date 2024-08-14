@@ -1,3 +1,4 @@
-- Redesign GUI
-- Allow activating multiple CommandKeys with a single keypress
-- Experimental update, please report any issues you find
+- Allow trailing whitespace on 'type' mode macros
+- Add 'repeat' send mode
+- Allow multi-send from profile screen
+- Various GUI adjustments and fixes
