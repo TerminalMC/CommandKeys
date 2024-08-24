@@ -93,6 +93,10 @@ Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), [ModMenu](h
 
 NeoForge: None
 
+### Compatibility
+
+If you encounter issues, please report on Discord or GitHub.
+
 ### License
 
 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0)
