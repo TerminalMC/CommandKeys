@@ -1,4 +1,1 @@
-- Allow trailing whitespace on 'type' mode macros
-- Add 'repeat' send mode
-- Allow multi-send from profile screen
-- Various GUI adjustments and fixes
+- Add German translation (Lucanoria)
