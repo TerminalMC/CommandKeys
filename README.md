@@ -83,6 +83,7 @@ A powerful command macro mod.
     - `Cycle`: The commands will be cycled through, with one command sent each time you press the key.
       - Note: In `Cycle` mode, if you need more than one command to be sent for a single key-press, enter those commands
       into a single box, separated by pairs of commas (e.g. `/tick freeze,,/say Stopped`).
+    - `Repeat`: Like `Send`, but the macro will be repeated (delay is configurable) until you press the key again.
 
 
 ### Dependencies
