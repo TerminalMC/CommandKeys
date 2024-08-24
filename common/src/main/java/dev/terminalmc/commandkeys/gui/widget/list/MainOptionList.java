@@ -72,11 +72,16 @@ public class MainOptionList extends OptionList {
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    Config.get().addProfile(new Profile());
+                    Profile newProfile = new Profile();
+                    Config.get().addProfile(newProfile);
+                    setEditingProfile(newProfile);
                     reload();
                 }));
     }
 
+    private void setEditingProfile(@Nullable Profile profile) {
+        editingProfile = profile;
+    }
 
     @Override
     public MainOptionList reload(int width, int height, double scrollAmount) {
