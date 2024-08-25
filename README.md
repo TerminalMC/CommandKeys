@@ -88,8 +88,8 @@ A powerful command macro mod.
 
 ### Dependencies
 
-Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), [ModMenu](https://modrinth.com/mod/mOgUt4GM/) 
-(optional)
+Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), 
+[ModMenu](https://modrinth.com/mod/mOgUt4GM/) (optional)
 
 NeoForge: None
 
