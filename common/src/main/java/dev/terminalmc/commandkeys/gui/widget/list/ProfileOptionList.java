@@ -275,11 +275,11 @@ public class ProfileOptionList extends MacroBindList {
                 if (modeButtonWidth != 0) {
                     // Conflict strategy button
                     CycleButton<Macro.ConflictStrategy> conflictButton = CycleButton.builder(
-                                    KeybindUtil::localizeConflictStrategy)
+                                    KeybindUtil::localizeStrat)
                             .displayOnlyValue()
                             .withValues(Macro.ConflictStrategy.values())
                             .withInitialValue(macro.getConflictStrategy())
-                            .withTooltip((status) -> Tooltip.create(KeybindUtil.localizeConflictStrategyTooltip(status)))
+                            .withTooltip((status) -> Tooltip.create(KeybindUtil.localizeStratTooltip(status)))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
                                         macro.setConflictStrategy(status);
@@ -290,12 +290,12 @@ public class ProfileOptionList extends MacroBindList {
 
                     // Send mode button
                     CycleButton<Macro.SendMode> modeButton = CycleButton.builder(
-                            KeybindUtil::localizeSendMode)
+                            KeybindUtil::localizeMode)
                             .displayOnlyValue()
                             .withValues(Macro.SendMode.values())
                             .withInitialValue(macro.getSendMode())
                             .withTooltip((status) -> Tooltip.create(
-                                    KeybindUtil.localizeSendModeTooltip(status)))
+                                    KeybindUtil.localizeModeTooltip(status)))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
                                         macro.setSendMode(status);

@@ -125,22 +125,22 @@ public class MainOptionList extends OptionList {
                 int buttonWidth = (width - SPACING) / 2;
 
                 // Conflict strategy button
-                elements.add(CycleButton.builder(KeybindUtil::localizeConflictStrategy)
+                elements.add(CycleButton.builder(KeybindUtil::localizeStrat)
                         .withValues(Macro.ConflictStrategy.values())
                         .withInitialValue(Config.get().defaultConflictStrategy)
                         .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeConflictStrategyTooltip(status)))
+                                KeybindUtil.localizeStratTooltip(status)))
                         .create(x, 0, buttonWidth, height,
                                 localized("option", "main.default.conflict_strategy"),
                                 (button, status) ->
                                         Config.get().defaultConflictStrategy = status));
 
                 // Send mode button
-                elements.add(CycleButton.builder(KeybindUtil::localizeSendMode)
+                elements.add(CycleButton.builder(KeybindUtil::localizeMode)
                         .withValues(Macro.SendMode.values())
                         .withInitialValue(Config.get().defaultSendMode)
                         .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeSendModeTooltip(status)))
+                                KeybindUtil.localizeModeTooltip(status)))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "main.default.send_mode"),
                                 (button, status) ->

@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 public class Message {
     public final int version = 1;
 
-    public boolean enabled;
+    private boolean enabled; // v1 parity
     public String string;
     public int delayTicks;
 

@@ -1,2 +1,1 @@
-- Add German translation (Lucanoria)
-- Add Simplified Chinese translation (Andypsl8)
+

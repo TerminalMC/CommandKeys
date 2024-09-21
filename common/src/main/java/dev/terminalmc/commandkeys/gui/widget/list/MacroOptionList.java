@@ -225,7 +225,7 @@ public class MacroOptionList extends MacroBindList {
                 int stopButtonWidth = font.width("Stop") + 8;
                 int modeButtonWidth = switch(macro.getSendMode()) {
                     case SEND -> buttonWidth - minDelayFieldWidth;
-                    case TYPE -> buttonWidth;
+                    case TYPE, RANDOM -> buttonWidth;
                     case CYCLE -> buttonWidth - list.smallButtonWidth;
                     case REPEAT -> buttonWidth -
                             (macro.hasRepeating() ? stopButtonWidth : minDelayFieldWidth);
@@ -233,12 +233,13 @@ public class MacroOptionList extends MacroBindList {
 
                 // Conflict strategy button
                 CycleButton<Macro.ConflictStrategy> conflictButton = CycleButton.builder(
-                        KeybindUtil::localizeConflictStrategy)
+                        KeybindUtil::localizeStrat)
                         .withValues(Macro.ConflictStrategy.values())
                         .withInitialValue(macro.getConflictStrategy())
                         .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeConflictStrategyTooltip(status)))
-                        .create(x, 0, buttonWidth, height, localized("option", "key.conflict"),
+                                KeybindUtil.localizeStratTooltip(status)))
+                        .create(x, 0, buttonWidth, height,
+                                localized("option", "key.conflict"),
                                 (button, status) -> {
                                     macro.setConflictStrategy(status);
                                     list.reload();
@@ -247,11 +248,11 @@ public class MacroOptionList extends MacroBindList {
 
                 // Send mode button
                 CycleButton<Macro.SendMode> modeButton = CycleButton.builder(
-                        KeybindUtil::localizeSendMode)
+                        KeybindUtil::localizeMode)
                         .withValues(Macro.SendMode.values())
                         .withInitialValue(macro.getSendMode())
                         .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeSendModeTooltip(status)))
+                                KeybindUtil.localizeModeTooltip(status)))
                         .create(x + width - buttonWidth, 0, modeButtonWidth, height,
                                 localized("option", "key.mode"),
                                 (button, status) -> {
@@ -307,7 +308,8 @@ public class MacroOptionList extends MacroBindList {
                                 macro.stopRepeating();
                                 list.reload();
                             })
-                            .tooltip(Tooltip.create(localized("option", "key.repeat.stop.tooltip")))
+                            .tooltip(Tooltip.create(
+                                    localized("option", "key.repeat.stop.tooltip")))
                             .pos(x + width - stopButtonWidth, 0)
                             .size(stopButtonWidth, height)
                             .build());
@@ -334,6 +336,9 @@ public class MacroOptionList extends MacroBindList {
             void focusDelayField() {
                 delayField.setFocused(true);
                 this.setFocused(delayField);
+                int pos = delayField.getValue().length();
+                delayField.setCursorPosition(pos);
+                delayField.setHighlightPos(pos);
             }
         }
 
@@ -374,7 +379,8 @@ public class MacroOptionList extends MacroBindList {
                             x + list.smallButtonWidth + msgFieldWidth + SPACING * 2, 0,
                             minDelayFieldWidth, height, Component.empty());
                     delayField.setTooltip(Tooltip.create(
-                            localized("option", "key.delay.individual.tooltip")));
+                            localized("option", "key.delay.individual.tooltip"
+                                    + (index == 0 ? ".first" : ".subsequent"))));
                     delayField.setTooltipDelay(Duration.ofMillis(500));
                     delayField.setMaxLength(8);
                     delayField.setResponder((val) -> {

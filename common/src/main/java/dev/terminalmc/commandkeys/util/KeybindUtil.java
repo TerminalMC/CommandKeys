@@ -18,73 +18,79 @@ import java.util.Locale;
 
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
+import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 public class KeybindUtil {
-    public static boolean handleKey(InputConstants.Key key) {
-        boolean cancel = false;
-        boolean cancelNext = false;
 
-        // Check that we can send, and whether there's any matching CommandKey
+    /**
+     * @return the number of operations to cancel.
+     * 0 -> None.
+     * 1 -> KeyboardHandler#charTyped.
+     * 2 -> KeyboardHandler#charTyped and KeyMapping#click.
+     */
+    public static int handleKey(InputConstants.Key key) {
+        int cancel = 0;
+
         if (Minecraft.getInstance().screen == null && profile().keyMacroMap.containsKey(key)) {
-            // Get all keys matching the pressed key
-
             long window = Minecraft.getInstance().getWindow().getWindow();
-            boolean onlyLimit = false;
+            boolean canActivateLimited = false;
 
-            Collection<Macro> allKeys = profile().keyMacroMap.get(key);
+            // Get all macros matching the pressed key
+            Collection<Macro> allMacros = profile().keyMacroMap.get(key);
 
-            // If any matching CommandKey has a pressed limit key, don't send
-            // messages of any CommandKeys without limit keys.
-
-            for (Macro macro : allKeys) {
-                if (!macro.getConflictStrategy().equals(AVOID)) {
-                    if (!macro.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                        if (InputConstants.isKeyDown(window, macro.getLimitKey().getValue())) {
-                            onlyLimit = true;
-                            break;
-                        }
-                    }
+            // Preference limited macros, so check if any can be activated
+            for (Macro macro : allMacros) {
+                if (
+                        !macro.getConflictStrategy().equals(AVOID)
+                        && !macro.getLimitKey().equals(InputConstants.UNKNOWN)
+                        && InputConstants.isKeyDown(window, macro.getLimitKey().getValue())
+                ) {
+                    canActivateLimited = true;
+                    break;
                 }
             }
 
-            List<Macro> sendKeys = new ArrayList<>();
-            if (onlyLimit) {
-                // Only send for limit-capable CommandKeys with limit key pressed
-                for (Macro macro : allKeys) {
-                    if (!macro.getConflictStrategy().equals(AVOID)) {
-                        if (!macro.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                            if (InputConstants.isKeyDown(window, macro.getLimitKey().getValue())) {
-                                sendKeys.add(macro);
-                            }
-                        }
+            List<Macro> activeMacros = new ArrayList<>();
+            if (canActivateLimited) {
+                // Only activate limited macros
+                for (Macro macro : allMacros) {
+                    if (
+                            !macro.getConflictStrategy().equals(AVOID)
+                            && !macro.getLimitKey().equals(InputConstants.UNKNOWN)
+                            && InputConstants.isKeyDown(window, macro.getLimitKey().getValue())
+                    ) {
+                        activeMacros.add(macro);
                     }
                 }
             }
             else {
-                // Only send for non-limit-capable CommandKeys
-                for (Macro macro : allKeys) {
-                    if (!macro.getConflictStrategy().equals(AVOID)) {
-                        if (macro.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                            sendKeys.add(macro);
-                        }
+                // Only activate non-limited macros
+                for (Macro macro : allMacros) {
+                    if (
+                            !macro.getConflictStrategy().equals(AVOID)
+                            && macro.getLimitKey().equals(InputConstants.UNKNOWN)
+                    ) {
+
+                        activeMacros.add(macro);
                     }
                 }
             }
 
-            boolean override = false;
-            for (Macro macro : sendKeys) {
+            for (Macro macro : activeMacros) {
                 boolean send = true;
                 switch(macro.getConflictStrategy()) {
                     case SUBMIT -> send = getConflict(key) == null;
-                    case VETO -> override = true;
+                    case VETO -> cancel = 2;
                 }
-                if (send) cancelNext = macro.trigger();
+                if (send) {
+                    macro.trigger();
+                    if (cancel == 0 && macro.getSendMode().equals(TYPE)) cancel = 1;
+                }
             }
-            if (override) cancel = true;
         }
-        if (!cancel) KeyMapping.click(key);
-        return cancelNext;
+
+        return cancel;
     }
 
     public static @Nullable KeyMapping getConflict(InputConstants.Key key) {
@@ -126,7 +132,7 @@ public class KeybindUtil {
                     .append(" ]").withStyle(ChatFormatting.RED);
             tooltip.append("\n");
             tooltip.append(localized("option", "key.bind.tooltip.conflict_strategy",
-                    localizeConflictStrategy(macro.getConflictStrategy())));
+                    localizeStrat(macro.getConflictStrategy())));
         }
         else if (conflict[0]) {
             // There is a conflict with another macro, so apply orange brackets
@@ -172,8 +178,9 @@ public class KeybindUtil {
         }
     }
 
-    public static Component localizeConflictStrategy(Macro.ConflictStrategy strategy) {
-        return localized("option", "key.conflict." + strategy.toString().toLowerCase(Locale.ROOT))
+    public static Component localizeStrat(Macro.ConflictStrategy strategy) {
+        return localized("option", "key.conflict."
+                + strategy.toString().toLowerCase(Locale.ROOT))
                 .withStyle(switch(strategy) {
                     case SUBMIT -> ChatFormatting.GREEN;
                     case ASSERT -> ChatFormatting.GOLD;
@@ -182,22 +189,24 @@ public class KeybindUtil {
                 });
     }
 
-    public static Component localizeConflictStrategyTooltip(Macro.ConflictStrategy strategy) {
+    public static Component localizeStratTooltip(Macro.ConflictStrategy strategy) {
         return localized("option", "key.conflict."
                 + strategy.toString().toLowerCase(Locale.ROOT) + ".tooltip");
     }
 
-    public static Component localizeSendMode(Macro.SendMode mode) {
-        return localized("option", "key.mode." + mode.toString().toLowerCase(Locale.ROOT))
+    public static Component localizeMode(Macro.SendMode mode) {
+        return localized("option", "key.mode."
+                + mode.toString().toLowerCase(Locale.ROOT))
                 .withStyle(switch(mode) {
                     case SEND -> ChatFormatting.GREEN;
                     case TYPE -> ChatFormatting.GOLD;
                     case CYCLE -> ChatFormatting.DARK_AQUA;
-                    case REPEAT -> ChatFormatting.LIGHT_PURPLE;
+                    case RANDOM -> ChatFormatting.LIGHT_PURPLE;
+                    case REPEAT -> ChatFormatting.RED;
                 });
     }
 
-    public static Component localizeSendModeTooltip(Macro.SendMode mode) {
+    public static Component localizeModeTooltip(Macro.SendMode mode) {
         return localized("option", "key.mode."
                 + mode.toString().toLowerCase(Locale.ROOT) + ".tooltip");
     }

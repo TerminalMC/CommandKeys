@@ -56,8 +56,8 @@ public class Config {
     public int mpDefault;
 
     /**
-     * Creates a profile list with two profiles, one as singleplayer default and
-     * the other as multiplayer default.
+     * Creates a profile list with a single profile, set as both singleplayer
+     * and multiplayer default.
      */
     public Config() {
         this.defaultConflictStrategy = Macro.ConflictStrategy.SUBMIT;

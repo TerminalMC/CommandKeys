@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Consists of behavioral options, a key and modifier key (both of which can be
@@ -35,8 +36,11 @@ public class Macro {
         SEND,
         TYPE,
         CYCLE,
-        REPEAT
+        RANDOM,
+        REPEAT,
     }
+
+    public static final Random RANDOM = new Random();
 
     public transient final Profile profile;
 
@@ -184,12 +188,12 @@ public class Macro {
 
     // Activation
 
-    public boolean trigger() {
+    public void trigger() {
         if (hasRepeating()) {
             stopRepeating();
-            return false;
+            return;
         }
-        boolean cancel = false;
+
         switch(sendMode) {
             case SEND -> {
                 // If using standard delay, doesn't apply to first
@@ -202,7 +206,6 @@ public class Macro {
             }
             case TYPE -> {
                 if (!messages.isEmpty()) {
-                    cancel = true;
                     CommandKeys.type(messages.getFirst().string);
                 }
             }
@@ -215,6 +218,14 @@ public class Macro {
                 }
                 if (++cycleIndex >= messages.size()) cycleIndex = 0;
             }
+            case RANDOM -> {
+                if (!messages.isEmpty()) {
+                    Message msg = messages.get(RANDOM.nextInt(messages.size()));
+                    if (!msg.string.isBlank()) {
+                        CommandKeys.send(msg.string, addToHistory(), showHudMessage());
+                    }
+                }
+            }
             case REPEAT -> {
                 int cumulativeDelay = 0;
                 for (Message msg : messages) {
@@ -224,7 +235,6 @@ public class Macro {
                 }
             }
         }
-        return cancel;
     }
 
     // Scheduling
