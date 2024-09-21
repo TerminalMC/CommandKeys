@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(jarJar("io.github.llamalad7:mixinextras-neoforge:${mixinextras_version}"))
 }
 
 neoForge {
