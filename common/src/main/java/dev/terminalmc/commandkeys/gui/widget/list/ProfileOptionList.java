@@ -6,6 +6,7 @@
 package dev.terminalmc.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.*;
 import dev.terminalmc.commandkeys.gui.screen.OptionsScreen;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -52,7 +54,7 @@ public class ProfileOptionList extends MacroBindList {
             // least one message, so we add an empty one. Removed in cleanup.
             List<Message> messages = macro.getMessages();
             if (messages.isEmpty()) macro.addMessage(new Message());
-            addEntry(new Entry.CommandKeyEntry(dynEntryX, dynEntryWidth, entryHeight, this, macro));
+            addEntry(new Entry.MacroEntry(dynEntryX, dynEntryWidth, entryHeight, this, macro));
         }
         addEntry(new OptionList.Entry.ActionButtonEntry(dynEntryX, dynEntryWidth, entryHeight,
                 Component.literal("+"), null, -1,
@@ -100,7 +102,7 @@ public class ProfileOptionList extends MacroBindList {
         int hoveredSlot = children().indexOf(hoveredEntry);
         int offset = macroListOffset();
         // Check whether the drop location is valid
-        if (hoveredEntry instanceof Entry.CommandKeyEntry || hoveredSlot == offset - 1) {
+        if (hoveredEntry instanceof Entry.MacroEntry || hoveredSlot == offset - 1) {
             // Check whether the move operation would actually change anything
             if (hoveredSlot > dragSourceSlot || hoveredSlot < dragSourceSlot - 1) {
                 // Account for the list not starting at slot 0
@@ -117,13 +119,13 @@ public class ProfileOptionList extends MacroBindList {
     }
 
     /**
-     * @return The index of the first {@link Entry.CommandKeyEntry} in the
+     * @return The index of the first {@link Entry.MacroEntry} in the
      * {@link OptionList}.
      */
     private int macroListOffset() {
         int i = 0;
         for (OptionList.Entry entry : children()) {
-            if (entry instanceof Entry.CommandKeyEntry) return i;
+            if (entry instanceof Entry.MacroEntry) return i;
             i++;
         }
         throw new IllegalStateException("CommandKey list not found");
@@ -205,14 +207,16 @@ public class ProfileOptionList extends MacroBindList {
             }
         }
 
-        private static class CommandKeyEntry extends Entry {
-            CommandKeyEntry(int x, int width, int height, ProfileOptionList list, Macro macro) {
+        private static class MacroEntry extends Entry {
+            MacroEntry(int x, int width, int height, ProfileOptionList list, Macro macro) {
                 super();
                 List<Message> messages = macro.getMessages();
                 boolean editableField = messages.size() == 1;
-                int keyButtonWidth = Math.max(110, Math.min(150, width / 5));
+                int keyButtonWidth = editableField
+                        ? Mth.clamp(width / 5, 90, 150)
+                        : Mth.clamp(width / 3, 90, 150);
                 int messageFieldWidth = width - keyButtonWidth
-                        - (3 * list.smallButtonWidth + 4 * SPACING);
+                        - (4 * list.smallButtonWidth + 5 * SPACING);
                 int modeButtonWidth = 0;
                 if (messageFieldWidth > 300) {
                     modeButtonWidth = 40;
@@ -259,6 +263,21 @@ public class ProfileOptionList extends MacroBindList {
                         : (val) -> list.openCommandKeyOptionsScreen(macro));
                 elements.add(messageField);
                 movingX += messageFieldWidth + SPACING;
+
+                // Send button
+                Button sendButton = new ImageButton(movingX, 0,
+                        list.smallButtonWidth, height, SEND_SPRITES,
+                        (button) -> {
+                            list.screen.onClose();
+                            Minecraft.getInstance().setScreen(null);
+                            macro.trigger();
+                        });
+                sendButton.setTooltip(Tooltip.create(
+                        localized("option", "profile.send.tooltip")));
+                sendButton.setTooltipDelay(Duration.ofMillis(500));
+                sendButton.active = CommandKeys.inGame();
+                elements.add(sendButton);
+                movingX += list.smallButtonWidth + SPACING;
 
                 // Edit button
                 ImageButton editButton = new ImageButton(movingX, 0,

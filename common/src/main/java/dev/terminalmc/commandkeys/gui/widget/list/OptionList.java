@@ -112,6 +112,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_disabled"),
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_highlighted"));
+        public static final WidgetSprites SEND_SPRITES = new WidgetSprites(
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button"),
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_disabled"),
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_highlighted"));
 
         public final List<AbstractWidget> elements;
 
@@ -211,7 +215,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             @Override
             public boolean mouseDragged(double mouseX, double mouseY, int button,
                                         double deltaX, double deltaY) {
-                return entry.mouseDragged(mouseX, mouseY, button, deltaY, deltaX);
+                return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
             }
 
             public void setFocused(GuiEventListener listener) {
