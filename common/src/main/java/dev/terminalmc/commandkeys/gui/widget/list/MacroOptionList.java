@@ -296,7 +296,7 @@ public class MacroOptionList extends MacroBindList {
                     delayField.setCursorPosition(0);
                     delayField.setHighlightPos(0);
                     delayField.setTooltip(Tooltip.create(localized("option",
-                            "key.delay.tooltip" + (macro.getSendMode().equals(REPEAT) ? "repeat" : ""))));
+                            "key.delay.tooltip" + (macro.getSendMode().equals(REPEAT) ? ".repeat" : ""))));
 
                     elements.add(delayField);
                 }
