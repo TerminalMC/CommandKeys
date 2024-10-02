@@ -1,2 +1,1 @@
-- Add 'Repeat' send mode
-- Add button to manually trigger macros from options screen
+- Added %placeholders%, check description for more info.

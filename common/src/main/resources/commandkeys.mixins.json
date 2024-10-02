@@ -7,11 +7,12 @@
   "mixins": [
   ],
   "client": [
+    "accessor.ChatComponentAccessor",
     "accessor.KeyMappingAccessor",
-    "profile.MixinConnectScreen",
     "macro.MixinKeyboardHandler",
-    "profile.MixinMinecraft",
-    "macro.MixinMouseHandler"
+    "macro.MixinMouseHandler",
+    "profile.MixinConnectScreen",
+    "profile.MixinMinecraft"
   ],
   "server": [
   ],

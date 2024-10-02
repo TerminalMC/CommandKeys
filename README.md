@@ -23,29 +23,26 @@ A powerful command macro mod.
 - Multiple macros per keybind
 - Optional delay timing between commands
 - Efficient keybind conflict management with modifier key support
-- Four modes:
+- Five modes:
   1. Send all commands when the key is pressed
   2. Cycle through commands, one per keypress
   3. Repeat on a configurable interval
-  4. Type the command in chat, but don't send it
+  4. Select a random message and send
+  5. Type the command in chat, but don't send it
 - Profiles with automatic switching based on server address or world name
 - Fully custom GUI for easy configuration
 
 <table style="width:100%;">
   <tr>
-    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/showcase/config_01.png" style="width:100%;"></td>
-    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/showcase/config_02.png" style="width:100%;"></td>
-    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/showcase/config_03.png" style="width:100%;"></td>
+    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/config_01.png" style="width:100%;"></td>
+    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/config_02.png" style="width:100%;"></td>
+    <td style="width:33%;"><img src="https://raw.githubusercontent.com/TerminalMC/CommandKeys/HEAD/assets/images/config_03.png" style="width:100%;"></td>
   </tr>
 </table>
 
 ### Usage
 
 #### Profiles
-
-- **Access**
-  - View the profile menu by selecting CommandKeys from your mod list ([ModMenu](https://modrinth.com/mod/mOgUt4GM)
-  list on Fabric), or by pressing the edit key (default: `K`) in-game and clicking the `Switch Profile` button.
 
 - **Automatic Switching**
   - When you join a world/server, the name/address will be checked against the list of profiles. If there is a profile 
@@ -82,8 +79,25 @@ A powerful command macro mod.
     - `Cycle`: The commands will be cycled through, with one command sent each time you press the key.
       - Note: In `Cycle` mode, if you need more than one command to be sent for a single key-press, enter those commands
       into a single box, separated by pairs of commas (e.g. `/tick freeze,,/say Stopped`).
+    - `Random`: A message will be chosen at random and sent each time the key is pressed.
     - `Repeat`: Like `Send`, but the macro will be repeated (delay is configurable) until you press the key again.
 
+- **Placeholders**
+  - Simple Placeholders
+    - `%clipboard%`: The contents of the clipboard, if any.
+    - `%myname%`: Minecraft username.
+    - `%pmsender%`: The name of the sender of the most recently-received private message, if any. (Searches max of 50).
+    - `%pos%`: The integer coordinates of the player (`x y z`).
+    - `%x%`: The integer X coordinate of the player. Also available for Y and Z.
+
+  - Regex Placeholders
+      - `%clipboard#(.*)%`: The contents of the clipboard, if any, verified to match a regex pattern following the 
+      `#`. This can be used to prevent unintentional exposure of clipboard contents. E.g. use 
+      `%clipboard#^-?\d+ -?\d+ -?\d+$%` to only send the clipboard contents if it's formatted like a set of coordinates.
+      - `%pos([FBLR])(\d+)%`: `%pos%` but offset some number of blocks in a direction relative to the cardinal direction
+      that the player is nearest to facing. E.g. use `%posL20%` to get the coordinates 20 blocks to the player's left.
+      - `%x([+-]\d+)%`: `%x%` but offset some number of blocks. E.g. use `%x-10%` to get the X coordinate 10 blocks to
+      the player's West. Also available for Y and Z.
 
 ### Dependencies
 

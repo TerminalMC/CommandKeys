@@ -6,6 +6,7 @@ import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.OptionsScreen;
 import dev.terminalmc.commandkeys.util.ModLogger;
+import dev.terminalmc.commandkeys.util.PlaceholderUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -59,6 +60,7 @@ public class CommandKeys {
     public static void send(String message, boolean addToHistory, boolean showHudMsg) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        message = PlaceholderUtil.replace(message);
         // new ChatScreen("").handleChatInput(message, addToHistory)
         // could be slightly better for compat but costs performance.
         if (message.startsWith("/")) {
@@ -72,6 +74,6 @@ public class CommandKeys {
     }
 
     public static void type(String message) {
-        Minecraft.getInstance().setScreen(new ChatScreen(message));
+        Minecraft.getInstance().setScreen(new ChatScreen(PlaceholderUtil.replace(message)));
     }
 }
