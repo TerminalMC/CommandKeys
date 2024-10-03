@@ -15,7 +15,6 @@
   "option.commandkeys.key.conflict.veto": "Veto",
   "option.commandkeys.key.conflict.veto.tooltip": "Wenn die Taste bereits von Minecraft verwendet wird, wird deren Bindung aufgehoben.\nHinweis: Einige Tastatureingaben (z.B. Bewegungstasten W A S D) können nicht aufgehoben werden.",
   "option.commandkeys.key.cycle.index.tooltip": "Der Index der nächsten Nachricht, die gesendet werden soll.",
-  "option.commandkeys.key.delay.individual.tooltip": "Zeit in Ticks, die vor dem Senden gewartet werden soll (nach der vorherigen Nachricht, falls vorhanden).",
   "option.commandkeys.key.delay.individual.tooltip.first": "Zeit in Ticks, die nach der Tastatureingabe gewartet wird, bis sie gesendet wird.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Zeit in Ticks, die nach der letzten Nachricht gewartet wird, bevor sie gesendet wird.",
   "option.commandkeys.key.delay.tooltip": "Verzögerung in Ticks vor jeder Nachricht nach der ersten.\nSetzen Sie den Wert 0, um eine Verzögerungen pro Nachricht zu verwenden.",
@@ -64,10 +63,10 @@
   "option.commandkeys.main.links.one": "[1 Verbindung]",
   "option.commandkeys.main.name": "Name",
   "option.commandkeys.main.other_profiles": "Andere Profile %s",
-  "option.commandkeys.main.profiles": "Profile %s",
+  "option.commandkeys.main.profiles": "Profil %s",
   "option.commandkeys.main.profiles.tooltip": "Profile werden automatisch aktiviert, wenn Sie einer Welt/einem Server beitreten, die/der mit einem Profil verknüpft ist.\nDie Standardprofile werden verwendet, wenn kein verknüpftes Profil vorhanden ist.",
   "option.commandkeys.main.remove_link.tooltip": "Verbindung entfernen",
-  "option.commandkeys.profile": "Profile: %s",
+  "option.commandkeys.profile": "Profil: %s",
   "option.commandkeys.profile.control.defer": "Aufschieben",
   "option.commandkeys.profile.controls": "Minecraft-Steuerungen",
   "option.commandkeys.profile.history.tooltip": "Gesendete Nachrichten/Befehle zum Chat-Verlauf hinzufügen.\nSetzen Sie die Option „Aufschieben“, um die Konfiguration pro Makro vorzunehmen.",
@@ -75,5 +74,6 @@
   "option.commandkeys.profile.key.edit": "Bearbeiten",
   "option.commandkeys.profile.keys": "Makros %s",
   "option.commandkeys.profile.keys.tooltip": "Aktivieren Sie ein Makro, indem Sie die entsprechende Taste im Spiel drücken.\nMakros mit einer einzigen gebundenen Taste können auch auf diesem Bildschirm aktiviert werden, wenn nichts ausgewählt ist.",
+  "option.commandkeys.profile.send.tooltip": "Diesen Makro auslösen",
   "option.commandkeys.profile.switch": "Profil wechseln"
 }
