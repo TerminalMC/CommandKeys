@@ -1,1 +1,1 @@
-- Added %placeholders%, check description for more info.
+- Added %lastsent%, %lastcmd% and %#(.*)%

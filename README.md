@@ -84,6 +84,8 @@ A powerful command macro mod.
 
 - **Placeholders**
   - Simple Placeholders
+    - `%lastsent%`: The most recently-sent message or command in history, if any.
+    - `%lastcmd%`: The most recently-sent command in history, if any.
     - `%clipboard%`: The contents of the clipboard, if any.
     - `%myname%`: Minecraft username.
     - `%pmsender%`: The name of the sender of the most recently-received private message, if any. (Searches max of 50).
@@ -91,13 +93,15 @@ A powerful command macro mod.
     - `%x%`: The integer X coordinate of the player. Also available for Y and Z.
 
   - Regex Placeholders
-      - `%clipboard#(.*)%`: The contents of the clipboard, if any, verified to match a regex pattern following the 
-      `#`. This can be used to prevent unintentional exposure of clipboard contents. E.g. use 
-      `%clipboard#^-?\d+ -?\d+ -?\d+$%` to only send the clipboard contents if it's formatted like a set of coordinates.
-      - `%pos([FBLR])(\d+)%`: `%pos%` but offset some number of blocks in a direction relative to the cardinal direction
-      that the player is nearest to facing. E.g. use `%posL20%` to get the coordinates 20 blocks to the player's left.
-      - `%x([+-]\d+)%`: `%x%` but offset some number of blocks. E.g. use `%x-10%` to get the X coordinate 10 blocks to
-      the player's West. Also available for Y and Z.
+    - `%#(.*)%`: Regex Group 1 from the most recently-received message matching the regex following the `#`,
+    if any. Note: regex pattern must have at least 1 capturing group.
+    - `%clipboard#(.*)%`: The contents of the clipboard, if any, verified to match a regex pattern following the 
+    `#`. This can be used to prevent unintentional exposure of clipboard contents. E.g. use 
+    `%clipboard#^-?\d+ -?\d+ -?\d+$%` to only send the clipboard contents if it's formatted like a set of coordinates.
+    - `%pos([FBLR])(\d+)%`: `%pos%` but offset some number of blocks in a direction relative to the cardinal direction
+    that the player is nearest to facing. E.g. use `%posL20%` to get the coordinates 20 blocks to the player's left.
+    - `%x([+-]\d+)%`: `%x%` but offset some number of blocks. E.g. use `%x-10%` to get the X coordinate 10 blocks to
+    the player's West. Also available for Y and Z.
 
 ### Dependencies
 

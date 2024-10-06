@@ -8,8 +8,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.ArrayListDeque;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -28,6 +30,8 @@ public class PlaceholderUtil {
     private static @Nullable String pmSenderName;
 
     private static final SimplePlaceholder[] SIMPLE_PLACEHOLDERS = {
+            new SimplePlaceholder("%lastsent%", PlaceholderUtil::getLastMessage),
+            new SimplePlaceholder("%lastcmd%", PlaceholderUtil::getLastCommand),
             new SimplePlaceholder("%clipboard%", () -> getClipboard(null)),
             new SimplePlaceholder("%myname%", PlaceholderUtil::getPlayerName),
             new SimplePlaceholder("%pmsender%", PlaceholderUtil::getPmSenderName),
@@ -38,6 +42,7 @@ public class PlaceholderUtil {
     };
 
     private static final Placeholder[] REGEX_PLACEHOLDERS = {
+            new Placeholder(Pattern.compile("%#(.*)%"), 1, PlaceholderUtil::getRecentChat),
             new Placeholder(Pattern.compile("%clipboard#(.*)%"), 1, PlaceholderUtil::getClipboard),
             new Placeholder(Pattern.compile("%pos([FBLR])(\\d+)%"), 2, PlaceholderUtil::getPlayerBlockPos),
             new Placeholder(Pattern.compile("%x([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockX),
@@ -62,6 +67,7 @@ public class PlaceholderUtil {
         playerBlockPos = null;
         playerLookingAngle = null;
         pmSenderName = null;
+
     }
 
     private record SimplePlaceholder(String string, Supplier<String> supplier) {
@@ -84,6 +90,36 @@ public class PlaceholderUtil {
         }
     }
 
+    // Incoming message
+
+    private static String getRecentChat(@NotNull String[] pattern) {
+        try {
+            Pattern regex = Pattern.compile(pattern[0]);
+
+            int i = 0;
+            for (GuiMessage guiMsg : ((ChatComponentAccessor)
+                    Minecraft.getInstance().gui.getChat()).getAllMessages()) {
+                if (++i > 50) break;
+
+                Matcher matcher = regex.matcher(guiMsg.content().getString());
+                if (matcher.find()) {
+                    try {
+                        return matcher.group(1);
+                    } catch (IndexOutOfBoundsException e) {
+                        CommandKeys.LOG.error("Recent chat placeholder failed: Group 1 not available: " + e);
+                        return "?";
+                    }
+                }
+            }
+
+            CommandKeys.LOG.warn("Recent chat placeholder failed: No message found: Checked " + i);
+        } catch (PatternSyntaxException e) {
+            CommandKeys.LOG.error("Recent chat placeholder failed: Invalid regex: " + e);
+        }
+
+        return "?";
+    }
+
     // Clipboard
 
     private static String getClipboard(@Nullable String[] pattern) {
@@ -104,6 +140,24 @@ public class PlaceholderUtil {
             }
         }
         return clipboard;
+    }
+
+    // Message history
+
+    private static String getLastMessage() {
+        String lastMsg = Minecraft.getInstance().gui.getChat().getRecentChat().peekLast();
+        if (lastMsg == null) return "?";
+        return lastMsg;
+    }
+
+    private static String getLastCommand() {
+        if (Minecraft.getInstance().commandHistory().history() instanceof ArrayListDeque<String> deque) {
+            String lastCmd = deque.peekLast();
+            if (lastCmd != null) return lastCmd;
+        } else {
+            CommandKeys.LOG.error("Command history not ArrayListDeque");
+        }
+        return "?";
     }
 
     // Player name
