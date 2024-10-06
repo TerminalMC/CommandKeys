@@ -42,6 +42,10 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+        name = "Shedaniel"
+        url = "https://maven.shedaniel.me/"
+    }
 }
 
 // Declare capabilities on the outgoing configurations.
@@ -108,16 +112,11 @@ processResources {
             // Java
             "java_version": java_version,
             "java_versions_fabric_list": asJsonList(java_versions_fabric),
-            "java_versions_neoforge": java_versions_neoforge,
             // Minecraft
             "minecraft_versions_fabric_list": asJsonList(minecraft_versions_fabric),
-            "minecraft_versions_neoforge": minecraft_versions_neoforge,
             // Fabric
             "fabric_loader_versions_list": asJsonList(fabric_loader_versions),
             "fabric_api_versions_list": asJsonList(fabric_api_versions),
-            // NeoForge
-            "neoforge_loader_versions": neoforge_loader_versions,
-            "neoforge_versions": neoforge_versions,
             // Dependencies
             "modmenu_versions_fabric_list": asJsonList(modmenu_versions),
     ]

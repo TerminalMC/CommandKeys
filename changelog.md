@@ -1,1 +1,1 @@
-- Added %lastsent%, %lastcmd% and %#(.*)%
+- Backport to mc1.20.1

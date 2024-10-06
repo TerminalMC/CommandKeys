@@ -53,7 +53,7 @@
   "custom": {
     "modmenu": {
       "links": {
-          "Contact": "${contact_url}"
+        "Contact": "${contact_url}"
       }
     },
     "formatSpec": {
