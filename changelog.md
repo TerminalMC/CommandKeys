@@ -1,1 +1,0 @@
-- Always save config in UTF-8 (lvxnull2)
