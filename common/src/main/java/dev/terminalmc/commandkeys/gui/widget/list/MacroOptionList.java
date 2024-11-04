@@ -41,10 +41,10 @@ public class MacroOptionList extends MacroBindList {
     private final Macro macro;
     private int dragSourceSlot = -1;
 
-    public MacroOptionList(Minecraft mc, int width, int height, int y,
+    public MacroOptionList(Minecraft mc, int width, int height, int top, int bottom,
                            int itemHeight, int entryWidth, int entryHeight,
                            Macro macro) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+        super(mc, width, height, top, bottom, itemHeight, entryWidth, entryHeight);
         this.profile = macro.profile;
         this.macro = macro;
 
@@ -76,9 +76,9 @@ public class MacroOptionList extends MacroBindList {
     }
 
     @Override
-    protected OptionList reload(int width, int height, double scrollAmount) {
+    protected OptionList reload(int width, int height, int top, int bottom, double scrollAmount) {
         MacroOptionList newListWidget = new MacroOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, macro);
+                top, bottom, itemHeight, entryWidth, entryHeight, macro);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
@@ -98,8 +98,8 @@ public class MacroOptionList extends MacroBindList {
     // Message dragging
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
             super.renderItem(graphics, mouseX, mouseY, delta, dragSourceSlot,
                     mouseX, mouseY, entryWidth, entryHeight);
@@ -183,7 +183,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(x, 0, buttonWidth, height,
                                 localized("option", "macro.hud"),
                                 (button, status) -> macro.showHudMessage = status);
-                hudButton.setTooltipDelay(Duration.ofMillis(500));
+                hudButton.setTooltipDelay(500);
                 if (!profile.showHudMessage.equals(Profile.Control.DEFER)) hudButton.active = false;
                 elements.add(hudButton);
 
@@ -196,7 +196,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "macro.history"),
                                 (button, status) -> macro.addToHistory = status);
-                historyButton.setTooltipDelay(Duration.ofMillis(500));
+                historyButton.setTooltipDelay(500);
                 if (!profile.addToHistory.equals(Profile.Control.DEFER)) historyButton.active = false;
                 elements.add(historyButton);
             }
@@ -335,7 +335,7 @@ public class MacroOptionList extends MacroBindList {
                     List<Integer> values = new ArrayList<>();
                     for (int i = 0; i < macro.getMessages().size(); i++) values.add(i);
                     if (values.isEmpty()) values.add(0);
-                    if (macro.cycleIndex > values.getLast()) macro.cycleIndex = 0;
+                    if (macro.cycleIndex > values.get(values.size()-1)) macro.cycleIndex = 0;
                     elements.add(CycleButton.<Integer>builder(
                                     (status) -> Component.literal(status.toString()))
                             .withValues(values)
@@ -397,7 +397,7 @@ public class MacroOptionList extends MacroBindList {
                     delayField.setTooltip(Tooltip.create(
                             localized("option", "key.delay.individual.tooltip"
                                     + (index == 0 ? ".first" : ".subsequent"))));
-                    delayField.setTooltipDelay(Duration.ofMillis(500));
+                    delayField.setTooltipDelay(500);
                     delayField.setMaxLength(8);
                     delayField.setResponder((val) -> {
                         // Resize

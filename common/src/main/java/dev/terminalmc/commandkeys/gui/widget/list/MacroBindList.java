@@ -21,7 +21,7 @@ import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.*;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 
 import java.util.Collection;
 
@@ -31,9 +31,9 @@ public abstract class MacroBindList extends OptionList {
     protected InputConstants.Key heldKey;
     protected InputConstants.Key sendKey;
 
-    public MacroBindList(Minecraft mc, int width, int height, int y,
+    public MacroBindList(Minecraft mc, int width, int height, int top, int bottom,
                          int itemHeight, int entryWidth, int entryHeight) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+        super(mc, width, height, top, bottom, itemHeight, entryWidth, entryHeight);
     }
 
     @Override
