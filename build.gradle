@@ -40,7 +40,7 @@ subprojects {
                 projectId = modrinth_id
                 versionNumber = mod_version
                 versionType = release_type
-                versionName = "v${mod_version}-${capsLoader(name)}-${minecraft_version}"
+                versionName = "v${mod_version}-${capsLoader(name)}"
                 changelog = rootProject.file("changelog.md").text
                 uploadFile = name == "fabric" ? remapJar : jar
                 loaders = project.property("release_mod_loaders_${name}").split(",") as List
@@ -76,7 +76,7 @@ subprojects {
                 String module = project.name
 
                 def file = upload(curseforge_id, module == "fabric" ? remapJar : jar)
-                file.displayName = "v${mod_version}-${capsLoader(module)}-${minecraft_version}"
+                file.displayName = "v${mod_version}-${capsLoader(module)}"
                 file.releaseType = release_type
                 file.changelog = rootProject.file("changelog.md").text
                 file.changelogType = "markdown"
@@ -112,7 +112,7 @@ subprojects {
                 repo = github_repo
                 tagName = "v${mod_version}"
                 prerelease = release_type == "alpha" || release_type == "beta"
-                releaseName = "v${mod_version} for ${minecraft_version}"
+                releaseName = "v${mod_version} (${release_game_versions_fabric})"
                 body = rootProject.file("changelog.md").text
                 targetCommitish = grgitService.service.get().grgit.branch.current().name
                 overwrite = false
