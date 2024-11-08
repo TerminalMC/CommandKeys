@@ -44,45 +44,66 @@ A powerful command macro mod.
 
 #### Profiles
 
-- **Automatic Switching**
+<details>
+<summary><b>Automatic Switching</b></summary>
+
   - When you join a world/server, the name/address will be checked against the list of profiles. If there is a profile 
   linked to that world/server, it will be activated. Otherwise, the default profile will be used.
   - Use the `S` and `M` buttons to make a profile the default for singleplayer or multiplayer.
+</details>
 
-- **Manual Switching**
+<details>
+<summary><b>Manual Switching</b></summary>
+
   - To activate a profile manually, click the up-arrow button on the left.
   - Click the link button to link the profile to the world/server for future automatic activation.
   - Click the settings button to rename the profile or remove links.
+</details>
+
 
 #### Macros
 
-- **Access**
-  - Edit a profile by clicking the large button on the profile selection screen, or by pressing the edit key 
+<details>
+<summary><b>Access</b></summary>
+
+  - Edit a profile by clicking the large button on the profile selection screen, or by pressing the edit key
   (default: `K`) in-game.
+</details>
 
-- **Binding Keys**
-  - You can bind almost any keyboard key or mouse button to a macro, similar to Minecraft's own Controls. 
-  However, you can also bind any *pair* of keys; just press one while holding the other (e.g. press 'T' while holding 
+<details>
+<summary><b>Binding Keys</b></summary>
+
+  - You can bind almost any keyboard key or mouse button to a macro, similar to Minecraft's own Controls.
+  However, you can also bind any *pair* of keys; just press one while holding the other (e.g. press 'T' while holding
   'Shift').
+</details>
 
-- **Conflict Strategy**
+<details>
+<summary><b>Conflict Strategy</b></summary>
+
   - If a key is already in use by Minecraft, you can choose a conflict strategy;
     - `Submit`: The macro will be ignored, the Minecraft keybind will function normally.
     - `Assert`: The macro and the Minecraft keybind will both function.
     - `Veto`: The macro will function, the Minecraft keybind will be cancelled (if possible).
     - `Avoid`: The macro will not work in-game, but you can still activate it by pressing the key while on the edit
     screen (with nothing selected). For example, if you have a macro bound to `W`, press `K` then `W` to activate it.
+</details>
 
-- **Send Mode**
-    - `Send`: All commands for the macro will be sent. You can configure delays between commands.
-    - `Type`: The first command will be typed into the chat box, but not sent.
-    - `Cycle`: The commands will be cycled through, with one command sent each time you press the key.
-      - Note: In `Cycle` mode, if you need more than one command to be sent for a single key-press, enter those commands
-      into a single box, separated by pairs of commas (e.g. `/tick freeze,,/say Stopped`).
-    - `Random`: A message will be chosen at random and sent each time the key is pressed.
-    - `Repeat`: Like `Send`, but the macro will be repeated (delay is configurable) until you press the key again.
+<details>
+<summary><b>Send Mode</b></summary>
 
-- **Placeholders**
+  - `Send`: All commands for the macro will be sent. You can configure delays between commands.
+  - `Type`: The first command will be typed into the chat box, but not sent.
+  - `Cycle`: The commands will be cycled through, with one command sent each time you press the key.
+  - Note: In `Cycle` mode, if you need more than one command to be sent for a single key-press, enter those commands
+  into a single box, separated by pairs of commas (e.g. `/tick freeze,,/say Stopped`).
+  - `Random`: A message will be chosen at random and sent each time the key is pressed.
+  - `Repeat`: Like `Send`, but the macro will be repeated (delay is configurable) until you press the key again.
+</details>
+
+<details>
+<summary><b>Placeholders</b></summary>
+
   - Simple Placeholders
     - `%lastsent%`: The most recently-sent message or command in history, if any.
     - `%lastcmd%`: The most recently-sent command in history, if any.
@@ -102,11 +123,11 @@ A powerful command macro mod.
     that the player is nearest to facing. E.g. use `%posL20%` to get the coordinates 20 blocks to the player's left.
     - `%x([+-]\d+)%`: `%x%` but offset some number of blocks. E.g. use `%x-10%` to get the X coordinate 10 blocks to
     the player's West. Also available for Y and Z.
+</details>
 
 ### Dependencies
 
-Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH/) (required), 
-[ModMenu](https://modrinth.com/mod/mOgUt4GM/) (optional)
+Fabric: [Fabric API](https://modrinth.com/mod/P7dR8mSH), [ModMenu](https://modrinth.com/mod/mOgUt4GM)
 
 NeoForge: None
 
