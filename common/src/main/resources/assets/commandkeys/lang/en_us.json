@@ -1,6 +1,7 @@
 {
   "key.commandkeys.main": "CommandKeys",
   "key.commandkeys.main.edit": "Edit Active Profile",
+  "message.commandkeys.sendBlocked": "Anti-spam allows %s messages in %s ticks.\n Blocked message: %s",
   "option.commandkeys.key": "Macro Options",
   "option.commandkeys.key.bind.tooltip.conflict.external": "%s is also used for: %s",
   "option.commandkeys.key.bind.tooltip.conflict.internal": "%s is used for another Macro.",

@@ -60,6 +60,8 @@ public class Config {
     // Default options used by new macro instances
     public Macro.ConflictStrategy defaultConflictStrategy;
     public Macro.SendMode defaultSendMode;
+    public int spamAllowedCount = 4;
+    public int spamAllowedTicks = 20;
 
     // Profile list
     private final List<Profile> profiles;

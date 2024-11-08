@@ -31,6 +31,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static dev.terminalmc.commandkeys.util.Localization.localized;
 import static dev.terminalmc.commandkeys.util.Localization.translationKey;
 
 public class CommandKeys {
@@ -40,7 +44,21 @@ public class CommandKeys {
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
             translationKey("key", "main.edit"), InputConstants.Type.KEYSYM,
             InputConstants.KEY_K, translationKey("key", "main"));
+    public static final Component PREFIX = Component.empty()
+            .append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
+            .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.GOLD))
+            .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
+            .withStyle(ChatFormatting.GRAY);
+    
     public static String lastConnection = "";
+    
+    private static final List<TickCounter> spamTracker = new ArrayList<>();
+    private static class TickCounter {
+        int time = 0;
+        int tick() {
+            return time++;
+        }
+    }
 
     public static void init() {
         Config.getAndSave();
@@ -51,6 +69,8 @@ public class CommandKeys {
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new OptionsScreen(mc.screen, true));
         }
+        // Tick history
+        spamTracker.removeIf((tc) -> tc.tick() > Config.get().spamAllowedTicks);
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
@@ -78,6 +98,17 @@ public class CommandKeys {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         message = PlaceholderUtil.replace(message);
+        
+        // Anti-spam
+        if (spamTracker.size() >= Config.get().spamAllowedCount) {
+            mc.gui.getChat().addMessage(PREFIX.copy().append(localized("message", "sendBlocked", 
+                    Component.literal(String.valueOf(Config.get().spamAllowedCount)).withStyle(ChatFormatting.GRAY), 
+                    Component.literal(String.valueOf(Config.get().spamAllowedTicks)).withStyle(ChatFormatting.GRAY), 
+                    Component.literal(message).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.RED)));
+            return;
+        }
+        spamTracker.add(new TickCounter());
+        
         // new ChatScreen("").handleChatInput(message, addToHistory)
         // could be slightly better for compat but costs performance.
         if (message.startsWith("/")) {
