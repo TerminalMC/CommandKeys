@@ -52,7 +52,7 @@ public class CommandKeys {
     
     public static String lastConnection = "";
     
-    private static final List<TickCounter> spamTracker = new ArrayList<>();
+    private static final List<TickCounter> rateLimiter = new ArrayList<>();
     private static class TickCounter {
         int time = 0;
         int tick() {
@@ -69,8 +69,8 @@ public class CommandKeys {
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new OptionsScreen(mc.screen, true));
         }
-        // Tick history
-        spamTracker.removeIf((tc) -> tc.tick() > Config.get().spamAllowedTicks);
+        // Tick ratelimiter
+        rateLimiter.removeIf((tc) -> tc.tick() > Config.get().ratelimitTicks);
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
@@ -93,22 +93,28 @@ public class CommandKeys {
         LocalPlayer player = Minecraft.getInstance().player;
         return (player != null && player.connection.getConnection().isConnected());
     }
+    
+    public static boolean canTrigger(InputConstants.Key key) {
+        if (rateLimiter.size() >= Config.get().ratelimitCount) {
+            Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
+                    localized("message", "sendBlocked",
+                            key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
+                            Component.literal(String.valueOf(Config.get().ratelimitCount))
+                                    .withStyle(ChatFormatting.GRAY), 
+                            Component.literal(String.valueOf(Config.get().ratelimitTicks))
+                                    .withStyle(ChatFormatting.GRAY))
+                            .withStyle(ChatFormatting.RED)));
+            if (Config.getAndSave().ratelimitHard) rateLimiter.add(new TickCounter());
+            return false;
+        }
+        rateLimiter.add(new TickCounter());
+        return true;
+    }
 
     public static void send(String message, boolean addToHistory, boolean showHudMsg) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         message = PlaceholderUtil.replace(message);
-        
-        // Anti-spam
-        if (spamTracker.size() >= Config.get().spamAllowedCount) {
-            mc.gui.getChat().addMessage(PREFIX.copy().append(localized("message", "sendBlocked", 
-                    Component.literal(String.valueOf(Config.get().spamAllowedCount)).withStyle(ChatFormatting.GRAY), 
-                    Component.literal(String.valueOf(Config.get().spamAllowedTicks)).withStyle(ChatFormatting.GRAY), 
-                    Component.literal(message).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.RED)));
-            return;
-        }
-        spamTracker.add(new TickCounter());
-        
         // new ChatScreen("").handleChatInput(message, addToHistory)
         // could be slightly better for compat but costs performance.
         if (message.startsWith("/")) {

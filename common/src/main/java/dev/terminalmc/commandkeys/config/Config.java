@@ -47,7 +47,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  * multiplayer default instance.</p>
  */
 public class Config {
-    public final int version = 4;
+    public final int version = 5;
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
@@ -57,45 +57,54 @@ public class Config {
             .setPrettyPrinting()
             .create();
 
-    // Default options used by new macro instances
-    public Macro.ConflictStrategy defaultConflictStrategy;
-    public Macro.SendMode defaultSendMode;
-    public int spamAllowedCount = 4;
-    public int spamAllowedTicks = 20;
-
     // Profile list
     private final List<Profile> profiles;
     public int spDefault;
     public int mpDefault;
+
+    // Default options used by new macro instances
+    public Macro.ConflictStrategy defaultConflictStrategy;
+    public Macro.SendMode defaultSendMode;
+
+    // Rate limit options
+    public int ratelimitCount;
+    public int ratelimitTicks;
+    public boolean ratelimitHard;
 
     /**
      * Creates a profile list with a single profile, set as both singleplayer
      * and multiplayer default.
      */
     public Config() {
-        this.defaultConflictStrategy = Macro.ConflictStrategy.SUBMIT;
-        this.defaultSendMode = Macro.SendMode.SEND;
-
         this.profiles = new ArrayList<>();
-
         Profile defaultProfile = new Profile();
         defaultProfile.name = "Default Profile";
         this.profiles.add(defaultProfile);
         this.spDefault = 0;
         this.mpDefault = 0;
+        
+        this.defaultConflictStrategy = Macro.ConflictStrategy.SUBMIT;
+        this.defaultSendMode = Macro.SendMode.SEND;
+        this.ratelimitCount = 4;
+        this.ratelimitTicks = 20;
+        this.ratelimitHard = false;
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Config(Macro.ConflictStrategy defaultConflictStrategy, Macro.SendMode defaultSendMode,
-                   List<Profile> profiles, int spDefault, int mpDefault) {
-        this.defaultConflictStrategy = defaultConflictStrategy;
-        this.defaultSendMode = defaultSendMode;
+    private Config(List<Profile> profiles, int spDefault, int mpDefault, 
+                   Macro.ConflictStrategy defaultConflictStrategy, Macro.SendMode defaultSendMode,
+                   int ratelimitCount, int ratelimitTicks, boolean ratelimitHard) {
         this.profiles = profiles;
         this.spDefault = spDefault;
         this.mpDefault = mpDefault;
         activateProfile(spDefault);
+        this.defaultConflictStrategy = defaultConflictStrategy;
+        this.defaultSendMode = defaultSendMode;
+        this.ratelimitCount = ratelimitCount;
+        this.ratelimitTicks = ratelimitTicks;
+        this.ratelimitHard = ratelimitHard;
     }
 
     /**
@@ -269,6 +278,16 @@ public class Config {
                     ? Macro.SendMode.valueOf(obj.get("defaultSendMode").getAsString())
                     : Macro.SendMode.SEND;
 
+            int ratelimitCount = version >= 5
+                    ? obj.get("ratelimitCount").getAsInt()
+                    : 4;
+            int ratelimitTicks = version >= 5
+                    ? obj.get("ratelimitTicks").getAsInt()
+                    : 20;
+            boolean ratelimitHard = version >= 5
+                    ? obj.get("ratelimitHard").getAsBoolean()
+                    : false;
+
             List<Profile> profiles = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("profiles")) {
                 profiles.add(ctx.deserialize(je, Profile.class));
@@ -292,8 +311,12 @@ public class Config {
             if (profiles.isEmpty()) throw new JsonParseException("Config Error: profiles.isEmpty()");
             if (spDefault < 0 || spDefault >= profiles.size()) spDefault = 0;
             if (mpDefault < 0 || mpDefault >= profiles.size()) mpDefault = 0;
+            if (ratelimitCount < 1) ratelimitCount = 4;
+            if (ratelimitTicks < 1) ratelimitTicks = 20;
 
-            return new Config(defaultConflictStrategy, defaultSendMode, profiles, spDefault, mpDefault);
+            return new Config(profiles, spDefault, mpDefault, 
+                    defaultConflictStrategy, defaultSendMode, 
+                    ratelimitCount, ratelimitTicks, ratelimitHard);
         }
     }
 }

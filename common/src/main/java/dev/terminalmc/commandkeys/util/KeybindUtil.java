@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
@@ -92,9 +93,17 @@ public class KeybindUtil {
                     }
                 }
             }
+            
+            boolean ratelimited = true;
+            if (!activeMacros.isEmpty()) {
+                if (canTrigger(key)) ratelimited = false;
+            }
 
             for (Macro macro : activeMacros) {
                 boolean send = true;
+                // Ratelimit
+                if (ratelimited && !macro.hasRepeating()) continue; // Always allow repeat-stop
+                
                 switch(macro.getConflictStrategy()) {
                     case SUBMIT -> send = getConflict(key) == null;
                     case VETO -> cancel = 2;

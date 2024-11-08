@@ -26,6 +26,7 @@ import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -48,12 +49,6 @@ public class MainOptionList extends OptionList {
         this.editingProfile = editingProfile;
 
         boolean inGame = CommandKeys.inGame();
-
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                localized("option", "main.default", "\u2139"),
-                Tooltip.create(localized("option", "main.default.tooltip")), 500));
-
-        addEntry(new Entry.DefaultOptionsEntry(entryX, entryWidth, entryHeight));
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 inGame ? localized("option", "main.active_profile")
@@ -88,6 +83,16 @@ public class MainOptionList extends OptionList {
                     setEditingProfile(newProfile);
                     reload();
                 }));
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "main.default", "\u2139"),
+                Tooltip.create(localized("option", "main.default.tooltip")), 500));
+        addEntry(new Entry.DefaultOptionsEntry(entryX, entryWidth, entryHeight));
+
+        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+                localized("option", "main.ratelimit", "\u2139"),
+                Tooltip.create(localized("option", "main.ratelimit.tooltip")), 500));
+        addEntry(new Entry.RatelimitEntry(entryX, entryWidth, entryHeight));
     }
 
     private void setEditingProfile(@Nullable Profile profile) {
@@ -129,35 +134,6 @@ public class MainOptionList extends OptionList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
-
-        private static class DefaultOptionsEntry extends Entry {
-            DefaultOptionsEntry(int x, int width, int height) {
-                super();
-                int buttonWidth = (width - SPACING) / 2;
-
-                // Conflict strategy button
-                elements.add(CycleButton.builder(KeybindUtil::localizeStrat)
-                        .withValues(Macro.ConflictStrategy.values())
-                        .withInitialValue(Config.get().defaultConflictStrategy)
-                        .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeStratTooltip(status)))
-                        .create(x, 0, buttonWidth, height,
-                                localized("option", "main.default.conflict_strategy"),
-                                (button, status) ->
-                                        Config.get().defaultConflictStrategy = status));
-
-                // Send mode button
-                elements.add(CycleButton.builder(KeybindUtil::localizeMode)
-                        .withValues(Macro.SendMode.values())
-                        .withInitialValue(Config.get().defaultSendMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeModeTooltip(status)))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "main.default.send_mode"),
-                                (button, status) ->
-                                        Config.get().defaultSendMode = status));
-            }
-        }
 
         private static class ProfileEntry extends Entry {
             MainOptionList list;
@@ -404,6 +380,92 @@ public class MainOptionList extends OptionList {
                         localized("option", "main.remove_link.tooltip")));
                 removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
+            }
+        }
+
+        private static class DefaultOptionsEntry extends Entry {
+            DefaultOptionsEntry(int x, int width, int height) {
+                super();
+                int buttonWidth = (width - SPACING) / 2;
+
+                // Conflict strategy button
+                elements.add(CycleButton.builder(KeybindUtil::localizeStrat)
+                        .withValues(Macro.ConflictStrategy.values())
+                        .withInitialValue(Config.get().defaultConflictStrategy)
+                        .withTooltip((status) -> Tooltip.create(
+                                KeybindUtil.localizeStratTooltip(status)))
+                        .create(x, 0, buttonWidth, height,
+                                localized("option", "main.default.conflict_strategy"),
+                                (button, status) ->
+                                        Config.get().defaultConflictStrategy = status));
+
+                // Send mode button
+                elements.add(CycleButton.builder(KeybindUtil::localizeMode)
+                        .withValues(Macro.SendMode.values())
+                        .withInitialValue(Config.get().defaultSendMode)
+                        .withTooltip((status) -> Tooltip.create(
+                                KeybindUtil.localizeModeTooltip(status)))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "main.default.send_mode"),
+                                (button, status) ->
+                                        Config.get().defaultSendMode = status));
+            }
+        }
+
+        private static class RatelimitEntry extends Entry {
+            RatelimitEntry(int x, int width, int height) {
+                super();
+                int buttonWidth = (width - SPACING * 2) / 3;
+
+                // Message count field
+                EditBox countField = new EditBox(Minecraft.getInstance().font,
+                        x, 0, buttonWidth, height, Component.empty());
+                countField.setMaxLength(8);
+                countField.setResponder((val) -> {
+                    try {
+                        int space = Integer.parseInt(val.strip());
+                        if (space < 1) throw new NumberFormatException();
+                        Config.get().ratelimitCount = space;
+                        countField.setTextColor(16777215);
+                    } catch (NumberFormatException ignored) {
+                        countField.setTextColor(16711680);
+                    }
+                });
+                countField.setValue(String.valueOf(Config.get().ratelimitCount));
+                countField.setTooltip(Tooltip.create(
+                        localized("option", "main.ratelimit.count.tooltip")));
+                elements.add(countField);
+
+                // Time window field
+                EditBox ticksField = new EditBox(Minecraft.getInstance().font,
+                        x + buttonWidth + SPACING, 0, buttonWidth, height, Component.empty());
+                ticksField.setMaxLength(8);
+                ticksField.setResponder((val) -> {
+                    try {
+                        int space = Integer.parseInt(val.strip());
+                        if (space < 1) throw new NumberFormatException();
+                        Config.get().ratelimitTicks = space;
+                        ticksField.setTextColor(16777215);
+                    } catch (NumberFormatException ignored) {
+                        ticksField.setTextColor(16711680);
+                    }
+                });
+                ticksField.setValue(String.valueOf(Config.get().ratelimitTicks));
+                ticksField.setTooltip(Tooltip.create(
+                        localized("option", "main.ratelimit.ticks.tooltip")));
+                elements.add(ticksField);
+
+                CycleButton<Boolean> limitButton = CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(Config.get().ratelimitHard)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "main.ratelimit.hard.tooltip")))
+                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "main.ratelimit.hard"),
+                                (button, status) -> Config.get().ratelimitHard = status);
+                limitButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(limitButton);
             }
         }
     }
