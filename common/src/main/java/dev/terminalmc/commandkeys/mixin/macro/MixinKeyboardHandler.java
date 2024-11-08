@@ -31,6 +31,11 @@ public class MixinKeyboardHandler {
     @Unique
     private static boolean commandKeys$cancelCharTyped;
 
+    /**
+     * Passes keypress to {@link KeybindUtil#handleKey} and allows it to be
+     * cancelled before being passed to the Minecraft callback.
+     * See also {@link MixinMouseHandler#wrapClick}
+     */
     @WrapOperation(
             method = "keyPress",
             at = @At(
@@ -44,8 +49,13 @@ public class MixinKeyboardHandler {
         if (cancel != 2) original.call(keymapping);
     }
 
+    /**
+     * Allows cancellation of the call to {@link KeyboardHandler#charTyped}
+     * corresponding to call cancelled in {@link KeyboardHandler#keyPress}.
+     */
     @WrapMethod(method = "charTyped")
-    private void wrapCharTyped(long windowPointer, int codePoint, int modifiers, Operation<Void> original) {
+    private void wrapCharTyped(long windowPointer, int codePoint, int modifiers, 
+                               Operation<Void> original) {
         if (commandKeys$cancelCharTyped) commandKeys$cancelCharTyped = false;
         else original.call(windowPointer, codePoint, modifiers);
     }

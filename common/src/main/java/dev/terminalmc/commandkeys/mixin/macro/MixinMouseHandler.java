@@ -26,6 +26,11 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(MouseHandler.class)
 public class MixinMouseHandler {
+    /**
+     * Passes mouse button press to {@link KeybindUtil#handleKey} and allows it
+     * to be cancelled before being passed to the Minecraft callback.
+     * See also {@link MixinKeyboardHandler#wrapClick}
+     */
     @WrapOperation(
             method = "onPress",
             at = @At(

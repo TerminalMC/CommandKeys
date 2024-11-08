@@ -47,10 +47,11 @@ public class CommandKeys {
     }
 
     public static void onEndTick(Minecraft mc) {
-        // Open config screen
+        // Open config screen via keybind
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new OptionsScreen(mc.screen, true));
         }
+        // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
         }

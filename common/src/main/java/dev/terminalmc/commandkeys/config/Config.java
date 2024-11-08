@@ -34,8 +34,9 @@ import java.util.List;
 import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
 
 /**
- * Config consists of a list of {@link Profile} instances, and two {@code int}s
- * to keep track of the default profiles for singleplayer and multiplayer.</p>
+ * Config consists of a list of {@link Profile} instances, two {@code int}s to 
+ * keep track of the default profiles for singleplayer and multiplayer, and one
+ * or more default options for new {@link Profile} or {@link Macro} instances.
  *
  * <p>When a profile is activated it is automatically moved to the start of the
  * list, so the list maintains most-recently-used order and the current active
@@ -56,11 +57,11 @@ public class Config {
             .setPrettyPrinting()
             .create();
 
-    // Options
-
+    // Default options used by new macro instances
     public Macro.ConflictStrategy defaultConflictStrategy;
     public Macro.SendMode defaultSendMode;
 
+    // Profile list
     private final List<Profile> profiles;
     public int spDefault;
     public int mpDefault;
@@ -270,9 +271,9 @@ public class Config {
             for (JsonElement je : obj.getAsJsonArray("profiles")) {
                 profiles.add(ctx.deserialize(je, Profile.class));
             }
+            
             int spDefault;
             int mpDefault;
-
             if (version == 1) {
                 profiles.addFirst(ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class));
                 profiles.addFirst(ctx.deserialize(obj.get("spDefaultProfile"), Profile.class));
@@ -286,8 +287,9 @@ public class Config {
             }
 
             // Validate
-            if (spDefault < 0 || spDefault >= profiles.size()) throw new JsonParseException("Config #1");
-            if (mpDefault < 0 || mpDefault >= profiles.size()) throw new JsonParseException("Config #2");
+            if (profiles.isEmpty()) throw new JsonParseException("Config Error: profiles.isEmpty()");
+            if (spDefault < 0 || spDefault >= profiles.size()) spDefault = 0;
+            if (mpDefault < 0 || mpDefault >= profiles.size()) mpDefault = 0;
 
             return new Config(defaultConflictStrategy, defaultSendMode, profiles, spDefault, mpDefault);
         }

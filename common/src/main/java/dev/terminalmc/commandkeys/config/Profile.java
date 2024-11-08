@@ -45,17 +45,20 @@ public class Profile {
         DEFER
     }
 
+    // Lookup maps
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
-
     public transient final Multimap<InputConstants.Key, Macro> keyMacroMap
             = LinkedHashMultimap.create();
 
+    // Profile details
     public String name;
     private final List<String> addresses;
 
+    // Profile controls
     public Control addToHistory;
     public Control showHudMessage;
 
+    // Macro list
     private final List<Macro> macros;
 
     /**
@@ -154,8 +157,7 @@ public class Profile {
     }
 
     /**
-     * Moves the {@link Macro} at the source index to the destination
-     * index.
+     * Moves the {@link Macro} at the source index to the destination index.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
      */
@@ -238,7 +240,7 @@ public class Profile {
                 macros.add(macroGson.fromJson(je, Macro.class));
 
             // Validate
-            if (name == null) throw new JsonParseException("Profile #1");
+            if (name == null) throw new JsonParseException("Profile Error: name == null");
 
             return profile;
         }

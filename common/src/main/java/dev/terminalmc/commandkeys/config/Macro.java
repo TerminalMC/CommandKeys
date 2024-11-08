@@ -344,7 +344,7 @@ public class Macro {
             }
 
             // Validate
-            if (spaceTicks < 0) throw new JsonParseException("Macro #1");
+            if (spaceTicks < 0) throw new JsonParseException("Macro Error: spaceTicks < 0");
 
             return new Macro(profile, addToHistory, showHudMessage, conflictStrategy,
                     sendMode, spaceTicks, key, limitKey, messages);
@@ -356,7 +356,7 @@ public class Macro {
                 case "ONE" -> ConflictStrategy.ASSERT;
                 case "TWO" -> ConflictStrategy.VETO;
                 case "THREE" -> ConflictStrategy.AVOID;
-                default -> throw new JsonParseException("Macro #2");
+                default -> throw new JsonParseException("Macro Error: ConflictStrategy " + str);
             };
         }
 
@@ -365,7 +365,7 @@ public class Macro {
                 case "ZERO" -> SendMode.SEND;
                 case "ONE" -> SendMode.TYPE;
                 case "TWO" -> SendMode.CYCLE;
-                default -> throw new JsonParseException("Macro #3");
+                default -> throw new JsonParseException("Macro Error: SendMode " + str);
             };
         }
     }

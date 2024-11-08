@@ -59,7 +59,7 @@ public class Message {
                 int delayTicks = obj.get("delayTicks").getAsInt();
 
                 // Validation
-                if (delayTicks < 0) throw new JsonParseException("ResponseMessage #1");
+                if (delayTicks < 0) throw new JsonParseException("ResponseMessage Error: delayTicks < 0");
 
                 return new Message(enabled, string, delayTicks);
             }

@@ -25,6 +25,10 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 
 import java.util.Collection;
 
+/**
+ * An extension of {@link OptionList} allowing handling of key presses and 
+ * mouse button clicks for setting keybinds and triggering macros.
+ */
 public abstract class MacroBindList extends OptionList {
     protected Profile profile;
     protected Macro selectedMacro;
@@ -104,6 +108,6 @@ public abstract class MacroBindList extends OptionList {
     }
 
     public void openMinecraftControlsScreen() {
-        minecraft.setScreen(new KeyBindsScreen(screen, Minecraft.getInstance().options));
+        minecraft.setScreen(new KeyBindsScreen(screen, minecraft.options));
     }
 }
