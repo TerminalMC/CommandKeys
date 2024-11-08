@@ -19,6 +19,7 @@ package dev.terminalmc.commandkeys.config;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
+import net.minecraft.client.Minecraft;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import java.util.Random;
  * {@link Profile#keyMacroMap}.</p>
  */
 public class Macro {
-    public final int version = 3;
+    public final int version = 4;
 
     public enum ConflictStrategy {
         SUBMIT,
@@ -66,6 +67,8 @@ public class Macro {
     private String keyName;
     private transient InputConstants.Key limitKey;
     private String limitKeyName;
+    private transient InputConstants.Key altKey;
+    private String altKeyName;
 
     final List<Message> messages;
 
@@ -84,6 +87,8 @@ public class Macro {
         this.keyName = key.getName();
         this.limitKey = InputConstants.UNKNOWN;
         this.limitKeyName = limitKey.getName();
+        this.altKey = InputConstants.UNKNOWN;
+        this.altKeyName = limitKey.getName();
         this.messages = new ArrayList<>();
     }
 
@@ -92,7 +97,8 @@ public class Macro {
      */
     private Macro(Profile profile, boolean addToHistory, boolean showHudMessage,
                   ConflictStrategy conflictStrategy, SendMode sendMode, int spaceTicks,
-                  InputConstants.Key key, InputConstants.Key limitKey, List<Message> messages) {
+                  InputConstants.Key key, InputConstants.Key limitKey, InputConstants.Key altKey,
+                  List<Message> messages) {
         this.profile = profile;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
@@ -104,6 +110,8 @@ public class Macro {
         this.keyName = key.getName();
         this.limitKey = limitKey;
         this.limitKeyName = limitKey.getName();
+        this.altKey = altKey;
+        this.altKeyName = altKey.getName();
         this.messages = messages;
         profile.keyMacroMap.put(key, this);
     }
@@ -167,6 +175,16 @@ public class Macro {
         this.limitKeyName = limitKey.getName();
     }
 
+    public InputConstants.Key getAltKey() {
+        return altKey;
+    }
+
+    public void setAltKey(InputConstants.Key altKey) {
+        stopRepeating();
+        this.altKey = altKey;
+        this.altKeyName = altKey.getName();
+    }
+
     /**
      * @return an unmodifiable view of the messages list.
      */
@@ -221,13 +239,19 @@ public class Macro {
                 }
             }
             case CYCLE -> {
+                if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 
+                        altKey.getValue())) {
+                    if (cycleIndex == 0) cycleIndex = messages.size() - 1;
+                    else cycleIndex--;
+                } else {
+                    if (++cycleIndex >= messages.size()) cycleIndex = 0;
+                }
                 // Allow spacer blank messages, and multiple messages per press.
                 for (String msg : messages.get(cycleIndex).string.split(",,")) {
                     if (!msg.isBlank()) {
                         CommandKeys.send(msg, addToHistory(), showHudMessage());
                     }
                 }
-                if (++cycleIndex >= messages.size()) cycleIndex = 0;
             }
             case RANDOM -> {
                 if (!messages.isEmpty()) {
@@ -336,6 +360,9 @@ public class Macro {
             InputConstants.Key limitKey = version >= 3
                     ? InputConstants.getKey(obj.get("limitKeyName").getAsString())
                     : InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString());
+            InputConstants.Key altKey = version >= 4
+                    ? InputConstants.getKey(obj.get("altKeyName").getAsString())
+                    : InputConstants.UNKNOWN;
             List<Message> messages = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("messages")) {
                 messages.add(version >= 2
@@ -347,7 +374,7 @@ public class Macro {
             if (spaceTicks < 0) throw new JsonParseException("Macro Error: spaceTicks < 0");
 
             return new Macro(profile, addToHistory, showHudMessage, conflictStrategy,
-                    sendMode, spaceTicks, key, limitKey, messages);
+                    sendMode, spaceTicks, key, limitKey, altKey, messages);
         }
 
         public static ConflictStrategy getConflictStrategy(String str) {

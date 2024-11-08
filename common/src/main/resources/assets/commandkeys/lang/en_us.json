@@ -32,6 +32,7 @@
   "option.commandkeys.key.mode.send.tooltip": "All messages will be sent.",
   "option.commandkeys.key.mode.type": "Type",
   "option.commandkeys.key.mode.type.tooltip": "The first message will be typed in chat, but not sent.",
+  "option.commandkeys.key.alt.tooltip": "This key, if pressed when the macro is activated, will reverse the cycle order.",
   "option.commandkeys.key.profile": "Back to Profile",
   "option.commandkeys.key.repeat.stop": "Stop",
   "option.commandkeys.key.repeat.stop.tooltip": "This macro is actively repeating. Click here to stop it.",

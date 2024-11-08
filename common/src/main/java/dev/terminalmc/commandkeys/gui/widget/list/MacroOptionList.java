@@ -222,11 +222,28 @@ public class MacroOptionList extends MacroBindList {
                         .size(buttonWidth, height)
                         .build());
 
-                elements.add(Button.builder(localized("option", "profile.controls"),
-                                (button) -> list.openMinecraftControlsScreen())
-                        .pos(x + width - buttonWidth, 0)
-                        .size(buttonWidth, height)
-                        .build());
+                if (macro.getSendMode().equals(CYCLE)) {
+                    MutableComponent name = macro.getAltKey().getDisplayName().copy();
+                    elements.add(Button.builder(name, 
+                                    (button) -> {
+                                        list.selectedMacro = macro;
+                                        list.altKeySelected = true;
+                                        button.setMessage(Component.literal("> ")
+                                                .append(name.withStyle(ChatFormatting.WHITE)
+                                                        .withStyle(ChatFormatting.UNDERLINE))
+                                                .append(" <").withStyle(ChatFormatting.YELLOW));
+                                    })
+                            .tooltip(Tooltip.create(localized("option", "key.alt.tooltip")))
+                            .pos(x + width - buttonWidth, 0)
+                            .size(buttonWidth, height)
+                            .build());
+                } else {
+                    elements.add(Button.builder(localized("option", "profile.controls"),
+                                    (button) -> list.openMinecraftControlsScreen())
+                            .pos(x + width - buttonWidth, 0)
+                            .size(buttonWidth, height)
+                            .build());
+                }
             }
         }
 

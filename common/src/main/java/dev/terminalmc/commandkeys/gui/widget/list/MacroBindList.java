@@ -32,6 +32,7 @@ import java.util.Collection;
 public abstract class MacroBindList extends OptionList {
     protected Profile profile;
     protected Macro selectedMacro;
+    protected boolean altKeySelected;
     protected InputConstants.Key heldKey;
     protected InputConstants.Key sendKey;
 
@@ -44,8 +45,12 @@ public abstract class MacroBindList extends OptionList {
     public boolean keyPressed(InputConstants.Key key) {
         if (selectedMacro != null) {
             if (key.getValue() == InputConstants.KEY_ESCAPE) {
-                selectedMacro.setKey(InputConstants.UNKNOWN);
-                selectedMacro.setLimitKey(InputConstants.UNKNOWN);
+                if (altKeySelected) {
+                    selectedMacro.setAltKey(InputConstants.UNKNOWN);
+                } else {
+                    selectedMacro.setKey(InputConstants.UNKNOWN);
+                    selectedMacro.setLimitKey(InputConstants.UNKNOWN);
+                }
                 reload();
             }
             else {
@@ -53,7 +58,7 @@ public abstract class MacroBindList extends OptionList {
                     heldKey = key;
                 }
                 else {
-                    if (key != heldKey) {
+                    if (key != heldKey && !altKeySelected) {
                         selectedMacro.setLimitKey(heldKey);
                         selectedMacro.setKey(key);
                         reload();
@@ -76,8 +81,12 @@ public abstract class MacroBindList extends OptionList {
     public boolean keyReleased(InputConstants.Key key) {
         if (selectedMacro != null) {
             if (heldKey == key) {
-                selectedMacro.setKey(key);
-                selectedMacro.setLimitKey(InputConstants.UNKNOWN);
+                if (altKeySelected) {
+                    selectedMacro.setAltKey(key);
+                } else {
+                    selectedMacro.setKey(key);
+                    selectedMacro.setLimitKey(InputConstants.UNKNOWN);
+                }
                 reload();
                 return true;
             }
