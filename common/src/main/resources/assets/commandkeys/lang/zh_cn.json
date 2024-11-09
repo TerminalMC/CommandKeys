@@ -1,7 +1,7 @@
 {
   "key.commandkeys.main": "命令按键（CommandKeys）",
   "key.commandkeys.main.edit": "编辑活动配置文件",
-  "message.commandkeys.sendBlocked": "Blocked key %s. Ratelimit allows %s in %s ticks.",
+  "message.commandkeys.sendBlocked": "Ratelimit exceeded by key %s. Ratelimit is set to %s activations in %s ticks.",
   "option.commandkeys.key": "宏选项",
   "option.commandkeys.key.alt.tooltip": "This key, if pressed when the macro is activated, will reverse the cycle order.",
   "option.commandkeys.key.bind.tooltip.conflict.external": "%s也用于：%s",

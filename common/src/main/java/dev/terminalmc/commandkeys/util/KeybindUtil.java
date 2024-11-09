@@ -17,6 +17,7 @@
 package dev.terminalmc.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.config.Keybind;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
@@ -27,9 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 
 import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
@@ -49,68 +48,56 @@ public class KeybindUtil {
     public static int handleKey(InputConstants.Key key) {
         int cancel = 0;
 
-        if (Minecraft.getInstance().screen == null && profile().keyMacroMap.containsKey(key)) {
-            long window = Minecraft.getInstance().getWindow().getWindow();
-            boolean canActivateLimited = false;
-
-            // Get all macros matching the pressed key
-            Collection<Macro> allMacros = profile().keyMacroMap.get(key);
-
-            // Preference limited macros, so check if any can be activated
-            for (Macro macro : allMacros) {
-                if (
-                        !macro.getConflictStrategy().equals(AVOID)
-                        && !macro.getLimitKey().equals(InputConstants.UNKNOWN)
-                        && InputConstants.isKeyDown(window, macro.getLimitKey().getValue())
-                ) {
-                    canActivateLimited = true;
-                    break;
+        if (Minecraft.getInstance().screen == null && profile().keybindMap.containsKey(key)) {
+            // Get all keybinds matching the pressed key
+            Collection<Keybind> keybinds = profile().keybindMap.get(key);
+            Keybind triggerKb = null;
+            Keybind otherKb = null;
+            
+            Collection<Macro> activeMacros = null;
+            for (Keybind kb : keybinds) {
+                if (kb.isLimitKeyDown()) {
+                    // Preference limited keybinds
+                    triggerKb = kb;
+                    activeMacros = profile().macroMap.get(triggerKb).stream()
+                            .filter((macro) -> !macro.getStrategy().equals(AVOID))
+                            .toList();
+                    if (!activeMacros.isEmpty()) break;
+                } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                    // Save for use if no limited keybinds found
+                    otherKb = kb;
                 }
             }
-
-            List<Macro> activeMacros = new ArrayList<>();
-            if (canActivateLimited) {
-                // Only activate limited macros
-                for (Macro macro : allMacros) {
-                    if (
-                            !macro.getConflictStrategy().equals(AVOID)
-                            && !macro.getLimitKey().equals(InputConstants.UNKNOWN)
-                            && InputConstants.isKeyDown(window, macro.getLimitKey().getValue())
-                    ) {
-                        activeMacros.add(macro);
-                    }
-                }
-            }
-            else {
-                // Only activate non-limited macros
-                for (Macro macro : allMacros) {
-                    if (
-                            !macro.getConflictStrategy().equals(AVOID)
-                            && macro.getLimitKey().equals(InputConstants.UNKNOWN)
-                    ) {
-
-                        activeMacros.add(macro);
-                    }
-                }
+            if (activeMacros == null || activeMacros.isEmpty()) {
+                triggerKb = otherKb;
+                if (triggerKb == null) return cancel;
+                activeMacros = profile().macroMap.get(triggerKb).stream()
+                        .filter((macro) -> !macro.getStrategy().equals(AVOID))
+                        .toList();
+                if (activeMacros.isEmpty()) return cancel;
             }
             
-            boolean ratelimited = true;
-            if (!activeMacros.isEmpty()) {
-                if (canTrigger(key)) ratelimited = false;
-            }
-
+            boolean first = true;
+            boolean ratelimited = false;
+            
             for (Macro macro : activeMacros) {
                 boolean send = true;
-                // Ratelimit
-                if (ratelimited && !macro.hasRepeating()) continue; // Always allow repeat-stop
                 
-                switch(macro.getConflictStrategy()) {
+                switch(macro.getStrategy()) {
                     case SUBMIT -> send = getConflict(key) == null;
                     case VETO -> cancel = 2;
                 }
+                
                 if (send) {
-                    macro.trigger();
-                    if (cancel == 0 && macro.getSendMode().equals(TYPE)) cancel = 1;
+                    if (first) {
+                        ratelimited = !canTrigger(key);
+                        first = false;
+                    }
+                    // Always allow repeat-stop
+                    if (ratelimited && !macro.hasRepeating()) continue;
+                    
+                    macro.trigger(triggerKb);
+                    if (cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
                 }
             }
         }
@@ -126,84 +113,89 @@ public class KeybindUtil {
         }
         return null;
     }
-
-    /**
-     * @return an array of three {@link MutableComponent} instances, where the
-     * first is a basic label with only the names of the bound keys, the second
-     * is the same label but with colored brackets depending on conflict levels,
-     * and the third is a tooltip with conflict info (if any).
-     */
-    public static MutableComponent[] getKeybindInfo(Macro macro) {
-        MutableComponent conflictLabel;
-        MutableComponent tooltip = Component.empty();
-        boolean[] conflict = new boolean[]{false, false}; // Internal, Minecraft
-        boolean checkMcKeys = !macro.getConflictStrategy().equals(AVOID);
-
-        // Check conflicts and add info (if any) to tooltip
-        checkConflict(macro.getLimitKey(), macro.profile, conflict, tooltip, checkMcKeys);
-        checkConflict(macro.getKey(), macro.profile, conflict, tooltip, checkMcKeys);
-
-        // Get the keybind names for the basic label
-        MutableComponent label = macro.getLimitKey().equals(InputConstants.UNKNOWN)
-                ? macro.getKey().getDisplayName().copy()
-                : macro.getLimitKey().getDisplayName().copy().append(" + ")
-                        .append(macro.getKey().getDisplayName());
-
-        if (conflict[1]) {
-            // There is a conflict with a Minecraft keybind, so apply red
-            // brackets and add the current conflict strategy to the tooltip
-            conflictLabel = Component.literal("[ ")
-                    .append(label.withStyle(ChatFormatting.WHITE))
-                    .append(" ]").withStyle(ChatFormatting.RED);
-            tooltip.append("\n");
-            tooltip.append(localized("option", "key.bind.tooltip.conflict_strategy",
-                    localizeStrat(macro.getConflictStrategy())));
-        }
-        else if (conflict[0]) {
-            // There is a conflict with another macro, so apply orange brackets
-            conflictLabel = Component.literal("[ ")
-                    .append(label.withStyle(ChatFormatting.WHITE))
-                    .append(" ]").withStyle(ChatFormatting.GOLD);
-        }
-        else {
-            // No conflict, so we use the plain label
-            conflictLabel = label;
+    
+    public static class KeybindInfo {
+        private final Profile profile;
+        private final Macro macro;
+        public MutableComponent label;
+        public MutableComponent conflictLabel;
+        public MutableComponent tooltip = Component.empty();
+        private boolean internalConflict = false;
+        private boolean mcConflict = false;
+        
+        public KeybindInfo(Profile profile, Macro macro, Keybind keybind) {
+            this.profile = profile;
+            this.macro = macro;
+            this.label = keybind.getLimitKey().equals(InputConstants.UNKNOWN) 
+                    ? keybind.getKey().getDisplayName().copy()
+                    : keybind.getLimitKey().getDisplayName().copy().append(" + ")
+                            .append(keybind.getKey().getDisplayName());
+            checkConflict(keybind.getLimitKey(), null);
+            checkConflict(keybind.getKey(), keybind);
+            createConflictLabel();
         }
 
-        return new MutableComponent[]{label, conflictLabel, tooltip};
-    }
-
-    /**
-     * Checks {@code key} against the keys used by other {@link Macro}
-     * instances, and optionally against Minecraft keybinds, updating
-     * {@code conflict} and {@code tooltip} accordingly.
-     */
-    public static void checkConflict(InputConstants.Key key, Profile profile,
-                                     boolean[] conflict, MutableComponent tooltip,
-                                     boolean checkMcKeys) {
-        if (!key.equals(InputConstants.UNKNOWN)) {
-            if (profile.keyMacroMap.get(key).size() > 1) {
+        /**
+         * Checks {@code key} against the keys used by other {@link Macro}
+         * instances, and optionally against Minecraft keybinds, updating
+         * {@link KeybindInfo#internalConflict}, {@link KeybindInfo#mcConflict} 
+         * and {@code KeybindInfo#tooltip} accordingly.
+         */
+        private void checkConflict(InputConstants.Key key, Keybind keybind) {
+            if (key.equals(InputConstants.UNKNOWN)) return;
+            // Check internal conflict
+            if (profile.keybindMap.get(key).size() > 1) {
+                if (internalConflict || mcConflict) tooltip.append("\n");
                 tooltip.append(localized("option", "key.bind.tooltip.conflict.internal",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
                         .withStyle(ChatFormatting.WHITE);
-                conflict[0] = true;
+                internalConflict = true;
+            } else if (keybind != null && profile.macroMap.get(keybind).size() > 1) {
+                if (internalConflict || mcConflict) tooltip.append("\n");
+                tooltip.append(localized("option", "key.bind.tooltip.conflict.internal",
+                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
+                        .withStyle(ChatFormatting.WHITE);
+                internalConflict = true;
             }
-            if (checkMcKeys) {
-                KeyMapping conflictingMcKey = KeybindUtil.getConflict(key);
-                if (conflictingMcKey != null) {
-                    if (conflict[0] || conflict[1]) tooltip.append("\n");
-                    tooltip.append(localized("option", "key.bind.tooltip.conflict.external",
-                                    key.getDisplayName().copy().withStyle(ChatFormatting.RED),
-                                    Component.translatable(conflictingMcKey.getName())
+            if (!macro.getStrategy().equals(AVOID)) {
+                // Check MC conflict
+                KeyMapping keyMapping = getConflict(key);
+                if (keyMapping != null) {
+                    if (internalConflict || mcConflict) tooltip.append("\n");
+                    tooltip.append(localized("option", "key.bind.tooltip.conflict.external", 
+                                    key.getDisplayName().copy().withStyle(ChatFormatting.RED), 
+                                    Component.translatable(keyMapping.getName())
                                             .withStyle(ChatFormatting.GRAY)))
                             .withStyle(ChatFormatting.WHITE);
-                    conflict[1] = true;
+                    mcConflict = true;
                 }
+            }
+        }
+        
+        public void createConflictLabel() {
+            if (mcConflict) {
+                // Apply red brackets and add conflict strategy to the tooltip
+                conflictLabel = Component.literal("[ ")
+                        .append(label.withStyle(ChatFormatting.WHITE))
+                        .append(" ]").withStyle(ChatFormatting.RED);
+                tooltip.append("\n");
+                tooltip.append(localized("option", "key.bind.tooltip.conflict_strategy",
+                        localizeStrategy(macro.getStrategy())));
+            }
+            else if (internalConflict) {
+                // Apply orange brackets
+                conflictLabel = Component.literal("[ ")
+                        .append(label.withStyle(ChatFormatting.WHITE))
+                        .append(" ]").withStyle(ChatFormatting.GOLD);
+            }
+            else {
+                // No conflict, so we use the plain label
+                conflictLabel = label;
             }
         }
     }
 
-    public static Component localizeStrat(Macro.ConflictStrategy strategy) {
+    public static Component localizeStrategy(Macro.ConflictStrategy strategy) {
         return localized("option", "key.conflict."
                 + strategy.toString().toLowerCase(Locale.ROOT))
                 .withStyle(switch(strategy) {
@@ -214,7 +206,7 @@ public class KeybindUtil {
                 });
     }
 
-    public static Component localizeStratTooltip(Macro.ConflictStrategy strategy) {
+    public static Component localizeStrategyTooltip(Macro.ConflictStrategy strategy) {
         return localized("option", "key.conflict."
                 + strategy.toString().toLowerCase(Locale.ROOT) + ".tooltip");
     }

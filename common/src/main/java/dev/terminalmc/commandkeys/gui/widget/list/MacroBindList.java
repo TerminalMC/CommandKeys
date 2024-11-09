@@ -22,6 +22,8 @@ import dev.terminalmc.commandkeys.config.*;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -30,27 +32,34 @@ import java.util.Collection;
  * mouse button clicks for setting keybinds and triggering macros.
  */
 public abstract class MacroBindList extends OptionList {
-    protected Profile profile;
-    protected Macro selectedMacro;
-    protected boolean altKeySelected;
-    protected InputConstants.Key heldKey;
-    protected InputConstants.Key sendKey;
+    protected @NotNull Profile profile;
+    private @Nullable Macro macro;
+    private @Nullable Keybind keybind;
+    private InputConstants.Key heldKey;
+    private InputConstants.Key sendKey;
 
     public MacroBindList(Minecraft mc, int width, int height, int y,
-                         int itemHeight, int entryWidth, int entryHeight) {
+                         int itemHeight, int entryWidth, int entryHeight, 
+                         @NotNull Profile profile) {
         super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+        this.profile = profile;
+    }
+    
+    protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
+        if (!profile.getMacros().contains(macro)) throw new IllegalArgumentException(
+                "Specified macro does not exist in profile.");
+        if (!macro.usesKeybind(keybind)) throw new IllegalArgumentException(
+                "Specified keybind not used by specified macro.");
+        this.macro = macro;
+        this.keybind = keybind;
     }
 
     @Override
     public boolean keyPressed(InputConstants.Key key) {
-        if (selectedMacro != null) {
+        if (macro != null && keybind != null) {
             if (key.getValue() == InputConstants.KEY_ESCAPE) {
-                if (altKeySelected) {
-                    selectedMacro.setAltKey(InputConstants.UNKNOWN);
-                } else {
-                    selectedMacro.setKey(InputConstants.UNKNOWN);
-                    selectedMacro.setLimitKey(InputConstants.UNKNOWN);
-                }
+                profile.setKey(macro, keybind, InputConstants.UNKNOWN);
+                profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
                 reload();
             }
             else {
@@ -58,9 +67,9 @@ public abstract class MacroBindList extends OptionList {
                     heldKey = key;
                 }
                 else {
-                    if (key != heldKey && !altKeySelected) {
-                        selectedMacro.setLimitKey(heldKey);
-                        selectedMacro.setKey(key);
+                    if (key != heldKey) {
+                        profile.setKey(macro, keybind, key);
+                        profile.setLimitKey(macro, keybind, heldKey);
                         reload();
                     }
                     else {
@@ -79,30 +88,40 @@ public abstract class MacroBindList extends OptionList {
 
     @Override
     public boolean keyReleased(InputConstants.Key key) {
-        if (selectedMacro != null) {
+        if (macro != null && keybind != null) {
             if (heldKey == key) {
-                if (altKeySelected) {
-                    selectedMacro.setAltKey(key);
-                } else {
-                    selectedMacro.setKey(key);
-                    selectedMacro.setLimitKey(InputConstants.UNKNOWN);
-                }
+                profile.setKey(macro, keybind, key);
+                profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
                 reload();
                 return true;
             }
         }
         else if (key.equals(sendKey)) {
             if (getSelected() == null && CommandKeys.inGame()) {
-                Collection<Macro> macros = profile.keyMacroMap.get(sendKey);
+                Collection<Keybind> keybinds = profile.keybindMap.get(key);
+                Keybind active1 = null;
+                Keybind active2 = null;
+                for (Keybind kb : keybinds) {
+                    if (kb.isLimitKeyDown()) {
+                        active1 = kb;
+                        break;
+                    } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                        active2 = kb;
+                    }
+                }
+                if (active1 == null) active1 = active2;
+                Collection<Macro> macros = profile.macroMap.get(active1);
                 if (!macros.isEmpty()) {
                     screen.onClose();
                     minecraft.setScreen(null);
-                    macros.forEach(Macro::trigger);
+                    Keybind trigger = active1;
+                    macros.forEach((macro) -> macro.trigger(trigger));
                     return true;
                 }
             }
             sendKey = null;
         }
+        // TODO null keys?
         return false;
     }
 

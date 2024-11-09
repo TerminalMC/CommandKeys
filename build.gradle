@@ -112,8 +112,16 @@ subprojects {
                 repo = github_repo
                 tagName = "v${mod_version}"
                 prerelease = release_type == "alpha" || release_type == "beta"
-                releaseName = "v${mod_version} (${release_game_versions_fabric})"
-                body = rootProject.file("changelog.md").text
+                releaseName = "v${mod_version}"
+                
+                String changelog = rootProject.file("changelog.md").text
+                String versions = "MC versions\n"
+                if (project.hasProperty(release_game_versions_fabric)) 
+                    versions = versions + "- Fabric: ${release_game_versions_fabric}\n"
+                if (project.hasProperty(release_game_versions_neoforge))
+                    versions = versions + "- NeoForge: ${release_game_versions_neoforge}\n"
+                body = versions + changelog
+                
                 targetCommitish = grgitService.service.get().grgit.branch.current().name
                 overwrite = false
                 allowUploadToExisting = true

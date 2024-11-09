@@ -52,8 +52,9 @@ public class Message {
         public @Nullable Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
-
             try {
+                int version = obj.get("version").getAsInt();
+                
                 boolean enabled = obj.get("enabled").getAsBoolean();
                 String string = obj.get("string").getAsString();
                 int delayTicks = obj.get("delayTicks").getAsInt();

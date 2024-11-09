@@ -35,8 +35,9 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
 
 /**
  * Config consists of a list of {@link Profile} instances, two {@code int}s to 
- * keep track of the default profiles for singleplayer and multiplayer, and one
- * or more default options for new {@link Profile} or {@link Macro} instances.
+ * keep track of the default profiles for singleplayer and multiplayer, default 
+ * options for new {@link Profile} or {@link Macro} instances, and global
+ * mod options.
  *
  * <p>When a profile is activated it is automatically moved to the start of the
  * list, so the list maintains most-recently-used order and the current active
@@ -53,22 +54,25 @@ public class Config {
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Config.class, new Config.Deserializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
+            .registerTypeAdapter(Macro.class, new Macro.Deserializer())
+            .registerTypeAdapter(Keybind.class, new Keybind.Deserializer())
             .registerTypeAdapter(Message.class, new Message.Deserializer())
             .setPrettyPrinting()
             .create();
 
     // Profile list
     private final List<Profile> profiles;
-    public int spDefault;
-    public int mpDefault;
+
+    private int spDefault;
+    private int mpDefault;
 
     // Default options used by new macro instances
     public Macro.ConflictStrategy defaultConflictStrategy;
     public Macro.SendMode defaultSendMode;
 
-    // Rate limit options
-    public int ratelimitCount;
-    public int ratelimitTicks;
+    // Ratelimit options
+    private int ratelimitCount;
+    private int ratelimitTicks;
     public boolean ratelimitHard;
 
     /**
@@ -106,6 +110,46 @@ public class Config {
         this.ratelimitTicks = ratelimitTicks;
         this.ratelimitHard = ratelimitHard;
     }
+
+    public int getSpDefault() {
+        return spDefault;
+    }
+
+    public void setSpDefault(int index) {
+        if (index < 0 || index >= profiles.size()) 
+            throw new IndexOutOfBoundsException(index);
+        this.spDefault = index;
+    }
+
+    public int getMpDefault() {
+        return mpDefault;
+    }
+
+    public void setMpDefault(int index) {
+        if (spDefault < 0 || spDefault >= profiles.size())
+            throw new IndexOutOfBoundsException(index);
+        this.mpDefault = index;
+    }
+
+    public int getRatelimitCount() {
+        return ratelimitCount;
+    }
+
+    public void setRatelimitCount(int count) {
+        if (count < 1) throw new IllegalArgumentException();
+        this.ratelimitCount = count;
+    }
+
+    public int getRatelimitTicks() {
+        return ratelimitTicks;
+    }
+
+    public void setRatelimitTicks(int ticks) {
+        if (ticks < 1) throw new IllegalArgumentException();
+        this.ratelimitTicks = ticks;
+    }
+    
+    // Profile activation handling
 
     /**
      * @return the most recently activated {@link Profile}.
@@ -154,6 +198,8 @@ public class Config {
             activateProfile(mpDefault);
         }
     }
+    
+    // Profile handling
 
     /**
      * @return an unmodifiable view of the profiles list.

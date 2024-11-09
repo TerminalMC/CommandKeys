@@ -20,6 +20,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.CommandKeys;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -33,30 +34,32 @@ import java.util.*;
  * ensure no overlap of links across different profiles, and to improve link
  * lookup time.</p>
  *
- * <p>A transient {@link Multimap} {@link Profile#keyMacroMap} is maintained
- * to improve keybind lookup time.</p>
+ * <p>A pair of transient {@link Multimap} instances ({@link Profile#keybindMap}
+ * and {@link Profile#macroMap}) are maintained to improve macro lookup time.
+ * </p>
  */
 public class Profile {
-    public final int version = 2;
+    public final int version = 3;
+    
+    public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
+    
+    public transient final Multimap<InputConstants.Key, Keybind> keybindMap 
+            = LinkedHashMultimap.create();
+    public transient final Multimap<Keybind, Macro> macroMap 
+            = LinkedHashMultimap.create();
 
+    // Profile details
+    public String name;
+    private final List<String> links;
+
+    // Behavior controls
+    public Control addToHistory;
+    public Control showHudMessage;
     public enum Control {
         ON,
         OFF,
         DEFER
     }
-
-    // Lookup maps
-    public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
-    public transient final Multimap<InputConstants.Key, Macro> keyMacroMap
-            = LinkedHashMultimap.create();
-
-    // Profile details
-    public String name;
-    private final List<String> addresses;
-
-    // Profile controls
-    public Control addToHistory;
-    public Control showHudMessage;
 
     // Macro list
     private final List<Macro> macros;
@@ -66,7 +69,7 @@ public class Profile {
      */
     public Profile() {
         this.name = "";
-        this.addresses = new ArrayList<>();
+        this.links = new ArrayList<>();
         this.addToHistory = Control.OFF;
         this.showHudMessage = Control.OFF;
         this.macros = new ArrayList<>();
@@ -75,29 +78,23 @@ public class Profile {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Profile(String name, List<String> addresses, Control addToHistory,
+    private Profile(String name, List<String> links, Control addToHistory, 
                     Control showHudMessage, List<Macro> macros) {
         this.name = name;
-        this.addresses = addresses;
+        this.links = links;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
         this.macros = macros;
-
-        // Add links to map, those that already exist are removed from local
-        Iterator<String> linkIter = this.addresses.iterator();
-        while(linkIter.hasNext()) {
-            String link = linkIter.next();
-            if (LINK_PROFILE_MAP.containsKey(link)) linkIter.remove();
-            else LINK_PROFILE_MAP.put(link, this);
-        }
+        // Add missing links to map
+        this.links.removeIf((link) -> LINK_PROFILE_MAP.putIfAbsent(link, this) != null);
     }
 
     /**
      * Copy constructor.
      */
-    public Profile(Profile profile) {
+    Profile(Profile profile) {
         this.name = profile.name;
-        this.addresses = new ArrayList<>();
+        this.links = new ArrayList<>();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
         this.macros = profile.macros;
@@ -113,12 +110,14 @@ public class Profile {
         if (name.isBlank()) name = "[Unnamed]";
         return name;
     }
+    
+    // Link management
 
     /**
      * @return an unmodifiable view of the link list.
      */
     public List<String> getLinks() {
-        return Collections.unmodifiableList(addresses);
+        return Collections.unmodifiableList(links);
     }
 
     /**
@@ -127,7 +126,7 @@ public class Profile {
      */
     public void forceAddLink(String link) {
         if (LINK_PROFILE_MAP.containsKey(link)) LINK_PROFILE_MAP.get(link).removeLink(link);
-        addresses.add(link);
+        links.add(link);
         LINK_PROFILE_MAP.put(link, this);
     }
 
@@ -136,9 +135,11 @@ public class Profile {
      * {@link Profile#LINK_PROFILE_MAP}.
      */
     public void removeLink(String link) {
-        addresses.remove(link);
+        links.remove(link);
         LINK_PROFILE_MAP.remove(link);
     }
+    
+    // Macro management
 
     /**
      * @return an unmodifiable view of the {@link Macro} list.
@@ -146,14 +147,10 @@ public class Profile {
     public List<Macro> getMacros() {
         return Collections.unmodifiableList(macros);
     }
-
-    /**
-     * Adds {@code macro} to the {@link Macro} list and to
-     * {@link Profile#keyMacroMap}.
-     */
+    
     public void addMacro(Macro macro) {
         macros.add(macro);
-        keyMacroMap.put(macro.getKey(), macro);
+        addToMaps(macro);
     }
 
     /**
@@ -164,48 +161,127 @@ public class Profile {
     public void moveMacro(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             macros.add(destIndex, macros.remove(sourceIndex));
-            rebuildMacroMap();
+            rebuildMaps();
         }
     }
-
-    /**
-     * Removes {@code macro} from the {@link Macro} list and from
-     * {@link Profile#keyMacroMap}.
-     */
+    
     public void removeMacro(Macro macro) {
         macros.remove(macro);
-        keyMacroMap.remove(macro.getKey(), macro);
+        removeFromMaps(macro);
+    }
+    
+    // Macro map management
+
+    /**
+     * Adds the keybind key and, if appropriate, the alternate keybind key of 
+     * {@code macro} to {@link Profile#keybindMap}, and adds the macro to
+     * {@link Profile#macroMap}. 
+     */
+    public void addToMaps(Macro macro) {
+        keybindMap.put(macro.keybind.getKey(), macro.keybind);
+        macroMap.put(macro.keybind, macro);
+        if (macro.usesAltKeybind()) {
+            keybindMap.put(macro.altKeybind.getKey(), macro.altKeybind);
+            macroMap.put(macro.altKeybind, macro);
+        }
     }
 
     /**
-     * Clears {@link Profile#keyMacroMap}, then adds each element of the
-     * {@link Macro} list, in order.
+     * Removes the keybind key and, if appropriate, the alternate keybind key of 
+     * {@code macro} from {@link Profile#keybindMap}, and removes the macro from
+     * {@link Profile#macroMap}. 
      */
-    public void rebuildMacroMap() {
-        keyMacroMap.clear();
-        for (Macro macro : macros) {
-            keyMacroMap.put(macro.getKey(), macro);
+    public void removeFromMaps(Macro macro) {
+        keybindMap.remove(macro.keybind.getKey(), macro.keybind);
+        macroMap.remove(macro.keybind, macro);
+        if (macro.usesAltKeybind()) {
+            keybindMap.remove(macro.altKeybind.getKey(), macro.altKeybind);
+            macroMap.remove(macro.altKeybind, macro);
         }
+    }
+
+    /**
+     * Clears and repopulates {@link Profile#keybindMap} and 
+     * {@link Profile#macroMap}.
+     */
+    public void rebuildMaps() {
+        CommandKeys.LOG.error("rebuild maps");
+        keybindMap.clear();
+        macroMap.clear();
+        for (Macro macro : macros) {
+            addToMaps(macro);
+        }
+    }
+    
+    // Macro editing
+    
+    public void setSendMode(Macro macro, Macro.SendMode sendMode) {
+        if (sendMode.equals(macro.sendMode)) return;
+        macro.clearScheduled();
+        macro.sendMode = sendMode;
+        rebuildMaps();
+    }
+    
+    public void setConflictStrategy(Macro macro, Macro.ConflictStrategy conflictStrategy) {
+        if (conflictStrategy.equals(macro.conflictStrategy)) return;
+        macro.clearScheduled();
+        macro.conflictStrategy = conflictStrategy;
+    }
+    
+    public void setKey(Macro macro, Keybind keybind, InputConstants.Key key) {
+        if (key.equals(keybind.getKey())) return;
+        if (keybind == macro.keybind || keybind == macro.altKeybind) {
+            macro.clearScheduled();
+            keybind.setKey(key);
+            rebuildMaps();
+        }
+    }
+
+    public void setLimitKey(Macro macro, Keybind keybind, InputConstants.Key key) {
+        if (key.equals(keybind.getLimitKey())) return;
+        if (keybind == macro.keybind || keybind == macro.altKeybind) {
+            macro.clearScheduled();
+            keybind.setLimitKey(key);
+            rebuildMaps();
+        }
+    }
+    
+    public void setAddToHistory(Macro macro, boolean value) {
+        macro.addToHistory = value;
+        macro.historyEnabled = switch(this.addToHistory) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.addToHistory;
+        };
+    }
+
+    public void setShowHudMessage(Macro macro, boolean value) {
+        macro.showHudMessage = value;
+        macro.hudMessageEnabled = switch(this.showHudMessage) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.showHudMessage;
+        };
     }
 
     // Cleanup and validation
 
     public void cleanup() {
-        Iterator<Macro> macroIter = macros.iterator();
-        while (macroIter.hasNext()) {
-            Macro macro = macroIter.next();
-            // Allow blank messages for cycling command keys as spacers
-            if (!macro.getSendMode().equals(Macro.SendMode.TYPE)) {
+        macros.removeIf((macro) -> {
+            // Allow trailing whitespace only for TYPE mode
+            if (!macro.sendMode.equals(Macro.SendMode.TYPE)) {
                 macro.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
             }
-            if (!macro.getSendMode().equals(Macro.SendMode.CYCLE)) {
+            // Allow blank messages for CYCLE mode as spacers
+            if (!macro.sendMode.equals(Macro.SendMode.CYCLE)) {
                 macro.messages.removeIf((msg) -> msg.string.isBlank());
             }
             if (macro.messages.isEmpty()) {
-                macroIter.remove();
-                keyMacroMap.remove(macro.getKey(), macro);
+                removeFromMaps(macro);
+                return true;
             }
-        }
+            return false;
+        });
     }
 
     // Deserialization
@@ -219,7 +295,9 @@ public class Profile {
 
             String name = obj.get("name").getAsString();
             List<String> addresses = new ArrayList<>();
-            for (JsonElement je : obj.getAsJsonArray("addresses")) addresses.add(je.getAsString());
+            for (JsonElement je : obj.getAsJsonArray(version >= 3 ? "links" : "addresses")) {
+                addresses.add(je.getAsString());
+            }
             Control addToHistory = version >= 2
                     ? Control.valueOf(obj.get("addToHistory").getAsString())
                     : Control.OFF;
@@ -231,13 +309,10 @@ public class Profile {
             List<Macro> macros = new ArrayList<>();
 
             Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, macros);
-
-            Gson macroGson = new GsonBuilder()
-                    .registerTypeAdapter(Macro.class, new Macro.Deserializer(profile))
-                    .create();
-
-            for (JsonElement je : obj.getAsJsonArray(version >= 2 ? "macros" : "commandKeys"))
-                macros.add(macroGson.fromJson(je, Macro.class));
+            for (JsonElement je : obj.getAsJsonArray(version >= 2 ? "macros" : "commandKeys")) {
+                macros.add(ctx.deserialize(je, Macro.class));
+            }
+            profile.rebuildMaps();
 
             // Validate
             if (name == null) throw new JsonParseException("Profile Error: name == null");

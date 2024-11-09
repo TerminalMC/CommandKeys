@@ -59,7 +59,7 @@ public class MainOptionList extends OptionList {
         int i = 0;
         for (Profile profile : config.getProfiles()) {
             addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
-                    profile, i, i == config.spDefault, i == config.mpDefault, inGame));
+                    profile, i, i == config.getSpDefault(), i == config.getMpDefault(), inGame));
             if (profile.equals(editingProfile)) {
                 addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, profile));
                 for (String address : profile.getLinks()) {
@@ -239,7 +239,7 @@ public class MainOptionList extends OptionList {
                 Button setAsSpDefaultButton = Button.builder(
                         localized("option", "main.default_singleplayer.set"),
                         (button) -> {
-                            Config.get().spDefault = index;
+                            Config.get().setSpDefault(index);
                             list.reload();
                         })
                         .pos(movingX, 0)
@@ -263,7 +263,7 @@ public class MainOptionList extends OptionList {
                 Button setAsMpDefaultButton = Button.builder(
                         localized("option", "main.default_multiplayer.set"),
                                 (button) -> {
-                                    Config.get().mpDefault = index;
+                                    Config.get().setMpDefault(index);
                                     list.reload();
                                 })
                         .pos(movingX, 0)
@@ -389,11 +389,11 @@ public class MainOptionList extends OptionList {
                 int buttonWidth = (width - SPACING) / 2;
 
                 // Conflict strategy button
-                elements.add(CycleButton.builder(KeybindUtil::localizeStrat)
+                elements.add(CycleButton.builder(KeybindUtil::localizeStrategy)
                         .withValues(Macro.ConflictStrategy.values())
                         .withInitialValue(Config.get().defaultConflictStrategy)
                         .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeStratTooltip(status)))
+                                KeybindUtil.localizeStrategyTooltip(status)))
                         .create(x, 0, buttonWidth, height,
                                 localized("option", "main.default.conflict_strategy"),
                                 (button, status) ->
@@ -425,13 +425,13 @@ public class MainOptionList extends OptionList {
                     try {
                         int space = Integer.parseInt(val.strip());
                         if (space < 1) throw new NumberFormatException();
-                        Config.get().ratelimitCount = space;
+                        Config.get().setRatelimitCount(space);
                         countField.setTextColor(16777215);
                     } catch (NumberFormatException ignored) {
                         countField.setTextColor(16711680);
                     }
                 });
-                countField.setValue(String.valueOf(Config.get().ratelimitCount));
+                countField.setValue(String.valueOf(Config.get().getRatelimitCount()));
                 countField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.count.tooltip")));
                 elements.add(countField);
@@ -444,13 +444,13 @@ public class MainOptionList extends OptionList {
                     try {
                         int space = Integer.parseInt(val.strip());
                         if (space < 1) throw new NumberFormatException();
-                        Config.get().ratelimitTicks = space;
+                        Config.get().setRatelimitTicks(space);
                         ticksField.setTextColor(16777215);
                     } catch (NumberFormatException ignored) {
                         ticksField.setTextColor(16711680);
                     }
                 });
-                ticksField.setValue(String.valueOf(Config.get().ratelimitTicks));
+                ticksField.setValue(String.valueOf(Config.get().getRatelimitTicks()));
                 ticksField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.ticks.tooltip")));
                 elements.add(ticksField);

@@ -29,7 +29,6 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,8 +48,7 @@ public class ProfileOptionList extends MacroBindList {
     public ProfileOptionList(Minecraft mc, int width, int height, int y,
                              int itemHeight, int entryWidth, int entryHeight,
                              @NotNull Profile profile) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
-        this.profile = profile;
+        super(mc, width, height, y, itemHeight, entryWidth, entryHeight, profile);
 
         addEntry(new Entry.ScreenSwitchEntry(entryX, entryWidth, entryHeight, this));
 
@@ -65,12 +63,12 @@ public class ProfileOptionList extends MacroBindList {
             // least one message, so we add an empty one. Removed in cleanup.
             List<Message> messages = macro.getMessages();
             if (messages.isEmpty()) macro.addMessage(new Message());
-            addEntry(new Entry.MacroEntry(dynEntryX, dynEntryWidth, entryHeight, this, macro));
+            addEntry(new Entry.MacroEntry(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
         }
         addEntry(new OptionList.Entry.ActionButtonEntry(dynEntryX, dynEntryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    profile.addMacro(new Macro(profile));
+                    profile.addMacro(new Macro());
                     reload();
                 }));
     }
@@ -156,7 +154,7 @@ public class ProfileOptionList extends MacroBindList {
     public void openCommandKeyOptionsScreen(Macro macro) {
         minecraft.setScreen(new OptionsScreen(minecraft.screen, localized("option", "key"),
                 new MacroOptionList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryWidth, entryHeight, macro)));
+                        itemHeight, entryWidth, entryHeight, profile, macro)));
     }
 
     private abstract static class Entry extends OptionList.Entry {
@@ -219,7 +217,8 @@ public class ProfileOptionList extends MacroBindList {
         }
 
         private static class MacroEntry extends Entry {
-            MacroEntry(int x, int width, int height, ProfileOptionList list, Macro macro) {
+            MacroEntry(int x, int width, int height, ProfileOptionList list, 
+                       Profile profile, Macro macro) {
                 super();
                 List<Message> messages = macro.getMessages();
                 boolean editableField = messages.size() == 1;
@@ -247,16 +246,17 @@ public class ProfileOptionList extends MacroBindList {
                 movingX += list.smallButtonWidth + SPACING;
 
                 // Keybind button
-                MutableComponent[] keybindInfo = KeybindUtil.getKeybindInfo(macro);
-                elements.add(Button.builder(keybindInfo[1],
+                KeybindUtil.KeybindInfo info =
+                        new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
+                elements.add(Button.builder(info.conflictLabel,
                                 (button) -> {
-                                    list.selectedMacro = macro;
+                                    list.setSelected(macro, macro.getKeybind());
                                     button.setMessage(Component.literal("> ")
-                                            .append(keybindInfo[0].withStyle(ChatFormatting.WHITE)
+                                            .append(info.label.withStyle(ChatFormatting.WHITE)
                                                     .withStyle(ChatFormatting.UNDERLINE))
                                             .append(" <").withStyle(ChatFormatting.YELLOW));
                                 })
-                        .tooltip(Tooltip.create(keybindInfo[2]))
+                        .tooltip(Tooltip.create(info.tooltip))
                         .pos(movingX, 0)
                         .size(keyButtonWidth, height)
                         .build());
@@ -281,7 +281,7 @@ public class ProfileOptionList extends MacroBindList {
                         (button) -> {
                             list.screen.onClose();
                             Minecraft.getInstance().setScreen(null);
-                            macro.trigger();
+                            macro.trigger(null);
                         });
                 sendButton.setTooltip(Tooltip.create(
                         localized("option", "profile.send.tooltip")));
@@ -305,14 +305,14 @@ public class ProfileOptionList extends MacroBindList {
                 if (modeButtonWidth != 0) {
                     // Conflict strategy button
                     CycleButton<Macro.ConflictStrategy> conflictButton = CycleButton.builder(
-                                    KeybindUtil::localizeStrat)
+                                    KeybindUtil::localizeStrategy)
                             .displayOnlyValue()
                             .withValues(Macro.ConflictStrategy.values())
-                            .withInitialValue(macro.getConflictStrategy())
-                            .withTooltip((status) -> Tooltip.create(KeybindUtil.localizeStratTooltip(status)))
+                            .withInitialValue(macro.getStrategy())
+                            .withTooltip((status) -> Tooltip.create(KeybindUtil.localizeStrategyTooltip(status)))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
-                                        macro.setConflictStrategy(status);
+                                        profile.setConflictStrategy(macro, status);
                                         list.reload();
                                     });
                     elements.add(conflictButton);
@@ -323,12 +323,12 @@ public class ProfileOptionList extends MacroBindList {
                             KeybindUtil::localizeMode)
                             .displayOnlyValue()
                             .withValues(Macro.SendMode.values())
-                            .withInitialValue(macro.getSendMode())
+                            .withInitialValue(macro.getMode())
                             .withTooltip((status) -> Tooltip.create(
                                     KeybindUtil.localizeModeTooltip(status)))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
-                                        macro.setSendMode(status);
+                                        profile.setSendMode(macro, status);
                                         list.reload();
                                     });
                     elements.add(modeButton);

@@ -19,7 +19,7 @@ package dev.terminalmc.commandkeys.config;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
-import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -28,22 +28,28 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Consists of behavioral options, a key and modifier key (both of which can be
- * unbound), and a list of {@link Message} instances.
- *
- * <p>Tightly coupled to a {@link Profile}, to allow updating the
- * {@link Profile#keyMacroMap}.</p>
+ * Consists of behavioral options, a primary and alternate {@link Keybind}, and 
+ * a list of {@link Message} instances.
  */
 public class Macro {
     public final int version = 4;
 
+    public static final Random RANDOM = new Random();
+
+    boolean addToHistory;
+    public transient boolean historyEnabled;
+    boolean showHudMessage;
+    public transient boolean hudMessageEnabled;
+
+    ConflictStrategy conflictStrategy;
     public enum ConflictStrategy {
         SUBMIT,
         ASSERT,
         VETO,
-        AVOID
+        AVOID,
     }
-
+    
+    SendMode sendMode;
     public enum SendMode {
         SEND,
         TYPE,
@@ -52,137 +58,90 @@ public class Macro {
         REPEAT,
     }
 
-    public static final Random RANDOM = new Random();
+    /**
+     * Standard delay between messages when sending.
+     */
+    public int spaceTicks;
+    /**
+     * Index of next message forwards when cycling.
+     */
+    public transient int cycleIndex;
 
-    public transient final Profile profile;
-
-    public boolean addToHistory;
-    public boolean showHudMessage;
-    private ConflictStrategy conflictStrategy;
-    private SendMode sendMode;
-    public int spaceTicks; // Delay between messages if sending
-    public transient int cycleIndex; // Index of next message if cycling
-
-    private transient InputConstants.Key key;
-    private String keyName;
-    private transient InputConstants.Key limitKey;
-    private String limitKeyName;
-    private transient InputConstants.Key altKey;
-    private String altKeyName;
+    Keybind keybind;
+    Keybind altKeybind;
 
     final List<Message> messages;
 
     /**
      * Creates a default empty instance.
      */
-    public Macro(Profile profile) {
+    public Macro() {
         this.addToHistory = false;
         this.showHudMessage = false;
-        this.profile = profile;
         this.conflictStrategy = Config.get().defaultConflictStrategy;
         this.sendMode = Config.get().defaultSendMode;
         this.spaceTicks = 0;
         this.cycleIndex = 0;
-        this.key = InputConstants.UNKNOWN;
-        this.keyName = key.getName();
-        this.limitKey = InputConstants.UNKNOWN;
-        this.limitKeyName = limitKey.getName();
-        this.altKey = InputConstants.UNKNOWN;
-        this.altKeyName = limitKey.getName();
+        this.keybind = new Keybind();
+        this.altKeybind = new Keybind();
         this.messages = new ArrayList<>();
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Macro(Profile profile, boolean addToHistory, boolean showHudMessage,
+    private Macro(boolean addToHistory, boolean showHudMessage,
                   ConflictStrategy conflictStrategy, SendMode sendMode, int spaceTicks,
-                  InputConstants.Key key, InputConstants.Key limitKey, InputConstants.Key altKey,
-                  List<Message> messages) {
-        this.profile = profile;
+                  Keybind keybind, Keybind altKeybind, List<Message> messages) {
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
         this.conflictStrategy = conflictStrategy;
         this.sendMode = sendMode;
         this.spaceTicks = spaceTicks;
         this.cycleIndex = 0;
-        this.key = key;
-        this.keyName = key.getName();
-        this.limitKey = limitKey;
-        this.limitKeyName = limitKey.getName();
-        this.altKey = altKey;
-        this.altKeyName = altKey.getName();
+        this.keybind = keybind;
+        this.altKeybind = altKeybind;
         this.messages = messages;
-        profile.keyMacroMap.put(key, this);
     }
 
-    public boolean addToHistory() {
-        return switch(profile.addToHistory) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> addToHistory;
-        };
+    public boolean getAddToHistory() {
+        return addToHistory;
     }
 
-    public boolean showHudMessage() {
-        return switch(profile.showHudMessage) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> showHudMessage;
-        };
+    public boolean getShowHudMessage() {
+        return showHudMessage;
     }
 
-    public ConflictStrategy getConflictStrategy() {
+    public ConflictStrategy getStrategy() {
         return conflictStrategy;
     }
 
-    public void setConflictStrategy(ConflictStrategy conflictStrategy) {
-        stopRepeating();
-        this.conflictStrategy = conflictStrategy;
-    }
-
-    public SendMode getSendMode() {
+    public SendMode getMode() {
         return sendMode;
     }
 
-    public void setSendMode(SendMode sendMode) {
-        stopRepeating();
-        this.sendMode = sendMode;
+    public Keybind getKeybind() {
+        return keybind;
     }
 
-    public InputConstants.Key getKey() {
-        return key;
+    public Keybind getAltKeybind() {
+        return altKeybind;
     }
 
     /**
-     * Sets the bound key to the specified value, and updates the coupled
-     * {@link Profile#keyMacroMap}.
+     * @return {@code true} if {@code keybind} belongs to and is in active use
+     * by this macro, {@code false} otherwise.
      */
-    public void setKey(InputConstants.Key key) {
-        stopRepeating();
-        this.key = key;
-        this.keyName = key.getName();
-        profile.rebuildMacroMap();
+    public boolean usesKeybind(Keybind keybind) {
+        return (keybind == this.keybind) || (usesAltKeybind() && keybind == this.altKeybind);
     }
 
-    public InputConstants.Key getLimitKey() {
-        return limitKey;
-    }
-
-    public void setLimitKey(InputConstants.Key limitKey) {
-        stopRepeating();
-        this.limitKey = limitKey;
-        this.limitKeyName = limitKey.getName();
-    }
-
-    public InputConstants.Key getAltKey() {
-        return altKey;
-    }
-
-    public void setAltKey(InputConstants.Key altKey) {
-        stopRepeating();
-        this.altKey = altKey;
-        this.altKeyName = altKey.getName();
+    /**
+     * @return {@code true} if this macro is using its alternate keybind, 
+     * {@code false} otherwise.
+     */
+    public boolean usesAltKeybind() {
+        return sendMode.equals(SendMode.CYCLE);
     }
 
     /**
@@ -217,7 +176,7 @@ public class Macro {
 
     // Activation
 
-    public void trigger() {
+    public void trigger(@Nullable Keybind trigger) {
         if (hasRepeating()) {
             stopRepeating();
             return;
@@ -230,7 +189,8 @@ public class Macro {
                 int cumulativeDelay = standardDelay ? -spaceTicks : 0;
                 for (Message msg : messages) {
                     cumulativeDelay += standardDelay ? spaceTicks : msg.delayTicks;
-                    schedule(cumulativeDelay, -1, msg.string, addToHistory(), showHudMessage());
+                    schedule(cumulativeDelay, -1, msg.string, 
+                            historyEnabled, hudMessageEnabled);
                 }
             }
             case TYPE -> {
@@ -239,8 +199,7 @@ public class Macro {
                 }
             }
             case CYCLE -> {
-                if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 
-                        altKey.getValue())) {
+                if (altKeybind.equals(trigger)) {
                     if (cycleIndex == 0) cycleIndex = messages.size() - 1;
                     else cycleIndex--;
                 } else {
@@ -249,7 +208,7 @@ public class Macro {
                 // Allow spacer blank messages, and multiple messages per press.
                 for (String msg : messages.get(cycleIndex).string.split(",,")) {
                     if (!msg.isBlank()) {
-                        CommandKeys.send(msg, addToHistory(), showHudMessage());
+                        CommandKeys.send(msg, historyEnabled, hudMessageEnabled);
                     }
                 }
             }
@@ -257,7 +216,7 @@ public class Macro {
                 if (!messages.isEmpty()) {
                     Message msg = messages.get(RANDOM.nextInt(messages.size()));
                     if (!msg.string.isBlank()) {
-                        CommandKeys.send(msg.string, addToHistory(), showHudMessage());
+                        CommandKeys.send(msg.string, historyEnabled, hudMessageEnabled);
                     }
                 }
             }
@@ -265,8 +224,8 @@ public class Macro {
                 int cumulativeDelay = 0;
                 for (Message msg : messages) {
                     cumulativeDelay += msg.delayTicks;
-                    schedule(cumulativeDelay, spaceTicks, msg.string,
-                            addToHistory(), showHudMessage());
+                    schedule(cumulativeDelay, spaceTicks, msg.string, 
+                            historyEnabled, hudMessageEnabled);
                 }
             }
         }
@@ -275,6 +234,10 @@ public class Macro {
     // Scheduling
 
     private transient final List<ScheduledMessage> scheduledMessages = new ArrayList<>();
+    
+    public void clearScheduled() {
+        scheduledMessages.clear();
+    }
 
     public boolean hasRepeating() {
         for (ScheduledMessage msg : scheduledMessages) {
@@ -330,12 +293,6 @@ public class Macro {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Macro> {
-        Profile profile;
-
-        public Deserializer(Profile profile) {
-            this.profile = profile;
-        }
-
         @Override
         public Macro deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
@@ -353,28 +310,33 @@ public class Macro {
                     : getSendMode(obj.get("sendStrategy").getAsString());
 
             int spaceTicks = version >= 1 ? obj.get("spaceTicks").getAsInt() : 0;
-
-            InputConstants.Key key = version >= 3
-                    ? InputConstants.getKey(obj.get("keyName").getAsString())
-                    : InputConstants.getKey(obj.getAsJsonObject("key").get("name").getAsString());
-            InputConstants.Key limitKey = version >= 3
-                    ? InputConstants.getKey(obj.get("limitKeyName").getAsString())
-                    : InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString());
-            InputConstants.Key altKey = version >= 4
-                    ? InputConstants.getKey(obj.get("altKeyName").getAsString())
-                    : InputConstants.UNKNOWN;
+            
+            Keybind keybind = version >= 4
+                    ? ctx.deserialize(obj.get("keybind"), Keybind.class)
+                    : version == 3 
+                        ? new Keybind(
+                            InputConstants.getKey(obj.get("keyName").getAsString()), 
+                            InputConstants.getKey(obj.get("limitKeyName").getAsString()))
+                        : new Keybind(
+                            InputConstants.getKey(obj.getAsJsonObject("key").get("name").getAsString()),
+                            InputConstants.getKey(obj.getAsJsonObject("limitKey").get("name").getAsString()));
+            Keybind altKeybind = version >= 4 
+                    ? ctx.deserialize(obj.get("altKeybind"), Keybind.class) 
+                    : new Keybind();
+            
             List<Message> messages = new ArrayList<>();
             for (JsonElement je : obj.getAsJsonArray("messages")) {
-                messages.add(version >= 2
+                Message message = version >= 2
                         ? ctx.deserialize(je, Message.class)
-                        : new Message(true, je.getAsString(), 0));
+                        : new Message(true, je.getAsString(), 0);
+                if (message != null) messages.add(message);
             }
 
             // Validate
             if (spaceTicks < 0) throw new JsonParseException("Macro Error: spaceTicks < 0");
 
-            return new Macro(profile, addToHistory, showHudMessage, conflictStrategy,
-                    sendMode, spaceTicks, key, limitKey, altKey, messages);
+            return new Macro(addToHistory, showHudMessage, conflictStrategy,
+                    sendMode, spaceTicks, keybind, altKeybind, messages);
         }
 
         public static ConflictStrategy getConflictStrategy(String str) {

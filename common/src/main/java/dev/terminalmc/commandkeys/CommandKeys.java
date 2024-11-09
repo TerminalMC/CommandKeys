@@ -46,7 +46,7 @@ public class CommandKeys {
             InputConstants.KEY_K, translationKey("key", "main"));
     public static final Component PREFIX = Component.empty()
             .append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
-            .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.GOLD))
+            .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
     
@@ -70,7 +70,7 @@ public class CommandKeys {
             mc.setScreen(new OptionsScreen(mc.screen, true));
         }
         // Tick ratelimiter
-        rateLimiter.removeIf((tc) -> tc.tick() > Config.get().ratelimitTicks);
+        rateLimiter.removeIf((tc) -> tc.tick() > Config.get().getRatelimitTicks());
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
@@ -95,13 +95,13 @@ public class CommandKeys {
     }
     
     public static boolean canTrigger(InputConstants.Key key) {
-        if (rateLimiter.size() >= Config.get().ratelimitCount) {
+        if (rateLimiter.size() >= Config.get().getRatelimitCount()) {
             Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
                     localized("message", "sendBlocked",
                             key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
-                            Component.literal(String.valueOf(Config.get().ratelimitCount))
+                            Component.literal(String.valueOf(Config.get().getRatelimitCount()))
                                     .withStyle(ChatFormatting.GRAY), 
-                            Component.literal(String.valueOf(Config.get().ratelimitTicks))
+                            Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
                                     .withStyle(ChatFormatting.GRAY))
                             .withStyle(ChatFormatting.RED)));
             if (Config.getAndSave().ratelimitHard) rateLimiter.add(new TickCounter());
