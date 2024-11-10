@@ -20,7 +20,6 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.CommandKeys;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -205,7 +204,6 @@ public class Profile {
      * {@link Profile#macroMap}.
      */
     public void rebuildMaps() {
-        CommandKeys.LOG.error("rebuild maps");
         keybindMap.clear();
         macroMap.clear();
         for (Macro macro : macros) {
