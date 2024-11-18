@@ -232,7 +232,8 @@ public class MacroOptionList extends MacroBindList {
                                                         .withStyle(ChatFormatting.UNDERLINE))
                                                 .append(" <").withStyle(ChatFormatting.YELLOW));
                                     })
-                            .tooltip(Tooltip.create(altInfo.tooltip))
+                            .tooltip(Tooltip.create(altInfo.tooltip.getString().isBlank() 
+                                    ? localized("option", "key.alt.tooltip") : altInfo.tooltip))
                             .pos(x + width - buttonWidth, 0)
                             .size(buttonWidth, height)
                             .build());

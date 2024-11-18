@@ -4,7 +4,7 @@
   "message.commandkeys.placeholderFault": "Message \"%s\" could not be sent because one or more placeholders failed to apply.",
   "message.commandkeys.sendBlocked": "Ratelimit exceeded by key %s. Ratelimit is set to %s activations in %s ticks.",
   "option.commandkeys.key": "Macro Options",
-  "option.commandkeys.key.alt.tooltip": "This key, if pressed when the macro is activated, will reverse the cycle order.",
+  "option.commandkeys.key.alt.tooltip": "Use this keybind to cycle the messages in reverse order.",
   "option.commandkeys.key.bind.tooltip.conflict.external": "%s is also used for: %s",
   "option.commandkeys.key.bind.tooltip.conflict.internal": "%s is used for another Macro.",
   "option.commandkeys.key.bind.tooltip.conflictStrategy": "Conflict Strategy: %s",
