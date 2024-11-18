@@ -112,6 +112,8 @@ A powerful command macro mod.
     - `%pmsender%`: The name of the sender of the most recently-received private message, if any. (Searches max of 50).
     - `%pos%`: The integer coordinates of the player (`x y z`).
     - `%x%`: The integer X coordinate of the player. Also available for Y and Z.
+    - `%lpos%`: The integer coordinates of the block the player is looking at, if any. Also provides `%lx%`, `%ly%`, 
+    `%lz%`.
 
   - Regex Placeholders
     - `%#(.*)%`: Regex Group 1 from the most recently-received message matching the regex following the `#`,
@@ -123,6 +125,8 @@ A powerful command macro mod.
     that the player is nearest to facing. E.g. use `%posL20%` to get the coordinates 20 blocks to the player's left.
     - `%x([+-]\d+)%`: `%x%` but offset some number of blocks. E.g. use `%x-10%` to get the X coordinate 10 blocks to
     the player's West. Also available for Y and Z.
+    - `%lpos([FBLR])(\d+)%`: As per `pos` above but for the block the player is looking at, if any.
+    - `%lx([+-]\d+)%`: As per `x` above but for the block the player is looking at, if any.
 </details>
 
 ### Dependencies

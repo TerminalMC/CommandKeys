@@ -26,6 +26,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.ArrayListDeque;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +44,8 @@ public class PlaceholderUtil {
     // ProjectileUtil.getEntityHitResult for entities
 
     private static @Nullable BlockPos playerBlockPos;
-    private static @Nullable Vec3 playerLookingAngle;
+    private static @Nullable BlockPos lookBlockPos;
+    private static @Nullable Vec3 lookAngle;
     private static @Nullable String pmSenderName;
 
     private static final SimplePlaceholder[] SIMPLE_PLACEHOLDERS = {
@@ -55,6 +58,10 @@ public class PlaceholderUtil {
             new SimplePlaceholder("%x%", () -> getPlayerBlockX(new String[]{"0"})),
             new SimplePlaceholder("%y%", () -> getPlayerBlockY(new String[]{"0"})),
             new SimplePlaceholder("%z%", () -> getPlayerBlockZ(new String[]{"0"})),
+            new SimplePlaceholder("%lpos%", () -> getLookBlockPos(new String[]{"0", "0"})),
+            new SimplePlaceholder("%lx%", () -> getLookBlockX(new String[]{"0"})),
+            new SimplePlaceholder("%ly%", () -> getLookBlockY(new String[]{"0"})),
+            new SimplePlaceholder("%lz%", () -> getLookBlockZ(new String[]{"0"})),
     };
 
     private static final Placeholder[] REGEX_PLACEHOLDERS = {
@@ -64,6 +71,10 @@ public class PlaceholderUtil {
             new Placeholder(Pattern.compile("%x([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockX),
             new Placeholder(Pattern.compile("%y([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockY),
             new Placeholder(Pattern.compile("%z([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockZ),
+            new Placeholder(Pattern.compile("%lpos([FBLR])(\\d+)%"), 2, PlaceholderUtil::getLookBlockPos),
+            new Placeholder(Pattern.compile("%lx([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockX),
+            new Placeholder(Pattern.compile("%ly([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockY),
+            new Placeholder(Pattern.compile("%lz([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockZ),
     };
 
     /**
@@ -81,9 +92,9 @@ public class PlaceholderUtil {
 
     private static void clearCache() {
         playerBlockPos = null;
-        playerLookingAngle = null;
+        lookBlockPos = null;
+        lookAngle = null;
         pmSenderName = null;
-
     }
 
     private record SimplePlaceholder(String string, Supplier<String> supplier) {
@@ -212,18 +223,31 @@ public class PlaceholderUtil {
         return playerBlockPos;
     }
 
-    private static Vec3 updatePlayerLookingAngle() {
-        if (playerLookingAngle == null)
-            playerLookingAngle = Minecraft.getInstance().player.getLookAngle();
-        return playerLookingAngle;
+    private static BlockPos updateLookBlockPos() {
+        if (lookBlockPos == null) {
+            Minecraft mc = Minecraft.getInstance();
+            // Distance is arbitrary but will do for now
+            HitResult result = mc.player.pick(Math.max(384, 
+                    (mc.levelRenderer.getLastViewDistance() + 1D) * 16), 0.0F, false);
+            if (result.getType().equals(HitResult.Type.BLOCK)) {
+                lookBlockPos = ((BlockHitResult)result).getBlockPos();
+            }
+        }
+        return lookBlockPos;
+    }
+
+    private static Vec3 updateLookAngle() {
+        if (lookAngle == null)
+            lookAngle = Minecraft.getInstance().player.getLookAngle();
+        return lookAngle;
     }
 
     private static String getPlayerBlockPos(String[] args) {
-        if (updatePlayerBlockPos() == null || updatePlayerLookingAngle() == null) return "? ? ?";
+        if (updatePlayerBlockPos() == null || updateLookAngle() == null) return "? ? ?";
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = playerBlockPos.getBottomCenter();
         if (offset != 0) playerPos = offsetCardinalDirection(
-                playerPos, playerLookingAngle, args[0], offset);
+                playerPos, lookAngle, args[0], offset);
         return String.format("%d %d %d", Mth.floor(playerPos.x),
                 Mth.floor(playerPos.y), Mth.floor(playerPos.z));
     }
@@ -241,6 +265,31 @@ public class PlaceholderUtil {
     private static String getPlayerBlockZ(String[] offset) {
         if (updatePlayerBlockPos() == null) return "?";
         return String.valueOf(Mth.floor(playerBlockPos.getZ()) + Integer.parseInt(offset[0]));
+    }
+
+    private static String getLookBlockPos(String[] args) {
+        if (updateLookBlockPos() == null || updateLookAngle() == null) return "? ? ?";
+        int offset = Integer.parseInt(args[1]);
+        Vec3 playerPos = lookBlockPos.getBottomCenter();
+        if (offset != 0) playerPos = offsetCardinalDirection(
+                playerPos, lookAngle, args[0], offset);
+        return String.format("%d %d %d", Mth.floor(playerPos.x),
+                Mth.floor(playerPos.y), Mth.floor(playerPos.z));
+    }
+
+    private static String getLookBlockX(String[] offset) {
+        if (updateLookBlockPos() == null) return "?";
+        return String.valueOf(Mth.floor(lookBlockPos.getX()) + Integer.parseInt(offset[0]));
+    }
+
+    private static String getLookBlockY(String[] offset) {
+        if (updateLookBlockPos() == null) return "?";
+        return String.valueOf(Mth.floor(lookBlockPos.getY()) + Integer.parseInt(offset[0]));
+    }
+
+    private static String getLookBlockZ(String[] offset) {
+        if (updateLookBlockPos() == null) return "?";
+        return String.valueOf(Mth.floor(lookBlockPos.getZ()) + Integer.parseInt(offset[0]));
     }
 
     // Util
