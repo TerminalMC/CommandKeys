@@ -94,8 +94,15 @@ public class CommandKeys {
         return (player != null && player.connection.getConnection().isConnected());
     }
     
+    public static boolean inSingleplayer() {
+        return Minecraft.getInstance().getSingleplayerServer() != null;
+    }
+    
     public static boolean canTrigger(InputConstants.Key key) {
-        if (rateLimiter.size() >= Config.get().getRatelimitCount()) {
+        if (
+                (!inSingleplayer() || Config.get().ratelimitSp) 
+                && rateLimiter.size() >= Config.get().getRatelimitCount()) 
+        {
             Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
                     localized("message", "sendBlocked",
                             key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
@@ -104,7 +111,7 @@ public class CommandKeys {
                             Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
                                     .withStyle(ChatFormatting.GRAY))
                             .withStyle(ChatFormatting.RED)));
-            if (Config.getAndSave().ratelimitHard) rateLimiter.add(new TickCounter());
+            if (Config.getAndSave().ratelimitStrict) rateLimiter.add(new TickCounter());
             return false;
         }
         rateLimiter.add(new TickCounter());

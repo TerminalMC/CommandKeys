@@ -48,8 +48,8 @@ public class MacroOptionList extends MacroBindList {
 
         addEntry(new Entry.BindAndControlsEntry(entryX, entryWidth, entryHeight, this, profile, macro));
 
-        if (profile.showHudMessage.equals(Profile.Control.DEFER)
-                || profile.addToHistory.equals(Profile.Control.DEFER)) {
+        if (profile.getShowHudMessage().equals(Profile.Control.DEFER)
+                || profile.getAddToHistory().equals(Profile.Control.DEFER)) {
             addEntry(new Entry.HudAndHistoryEntry(entryX, entryWidth, entryHeight, profile, macro));
         }
 
@@ -182,7 +182,7 @@ public class MacroOptionList extends MacroBindList {
                                 localized("option", "macro.hud"),
                                 (button, status) -> profile.setShowHudMessage(macro, status));
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
-                if (!profile.showHudMessage.equals(Profile.Control.DEFER)) hudButton.active = false;
+                hudButton.active = profile.getShowHudMessage().equals(Profile.Control.DEFER);
                 elements.add(hudButton);
 
                 CycleButton<Boolean> historyButton = CycleButton.booleanBuilder(
@@ -195,7 +195,7 @@ public class MacroOptionList extends MacroBindList {
                                 localized("option", "macro.history"),
                                 (button, status) -> profile.setAddToHistory(macro, status));
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
-                if (!profile.addToHistory.equals(Profile.Control.DEFER)) historyButton.active = false;
+                historyButton.active = profile.getAddToHistory().equals(Profile.Control.DEFER);
                 elements.add(historyButton);
             }
         }
@@ -237,11 +237,15 @@ public class MacroOptionList extends MacroBindList {
                             .size(buttonWidth, height)
                             .build());
                 } else {
-                    elements.add(Button.builder(localized("option", "profile.controls"),
-                                    (button) -> list.openMinecraftControlsScreen())
-                            .pos(x + width - buttonWidth, 0)
-                            .size(buttonWidth, height)
-                            .build());
+                    elements.add(CycleButton.booleanBuilder(
+                                    CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                            .withInitialValue(macro.ignoreRatelimit)
+                            .withTooltip((status) -> Tooltip.create(
+                                    localized("option", "macro.ignoreRatelimit.tooltip")))
+                            .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                    localized("option", "macro.ignoreRatelimit"),
+                                    (button, status) -> macro.ignoreRatelimit = status));
                 }
             }
         }

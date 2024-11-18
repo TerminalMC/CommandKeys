@@ -51,7 +51,7 @@ public class MainOptionList extends OptionList {
         boolean inGame = CommandKeys.inGame();
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                inGame ? localized("option", "main.active_profile")
+                inGame ? localized("option", "main.activateProfile")
                         : localized("option", "main.profiles", "\u2139"),
                 inGame ? null : Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
 
@@ -69,7 +69,7 @@ public class MainOptionList extends OptionList {
             }
             if (i == 0 && inGame) {
                 addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
-                        localized("option", "main.other_profiles", "\u2139"),
+                        localized("option", "main.otherProfiles", "\u2139"),
                         Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
             }
             i++;
@@ -205,7 +205,7 @@ public class MainOptionList extends OptionList {
                 elements.add(Button.builder(name, (button) ->
                                 list.openProfileOptionsScreen(profile))
                         .tooltip(Tooltip.create(
-                                localized("option", "main.edit_profile.tooltip")))
+                                localized("option", "main.editProfile.tooltip")))
                         .pos(mainButtonX, 0)
                         .size(mainButtonWidth, height)
                         .build());
@@ -230,14 +230,14 @@ public class MainOptionList extends OptionList {
                         },
                         Component.empty());
                 configureButton.setTooltip(Tooltip.create(
-                        localized("option", "main.edit_details.tooltip")));
+                        localized("option", "main.editDetails.tooltip")));
                 configureButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(configureButton);
                 movingX += smallButtonWidth + SPACING;
 
                 // Singleplayer default button
                 Button setAsSpDefaultButton = Button.builder(
-                        localized("option", "main.default_singleplayer.set"),
+                        localized("option", "main.defaultSingleplayer.set"),
                         (button) -> {
                             Config.get().setSpDefault(index);
                             list.reload();
@@ -247,12 +247,12 @@ public class MainOptionList extends OptionList {
                         .build();
                 if (spDefault) {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.default_singleplayer.tooltip")));
+                            localized("option", "main.defaultSingleplayer.tooltip")));
                     setAsSpDefaultButton.setMessage(setAsSpDefaultButton.getMessage().copy()
                             .withStyle(ChatFormatting.GREEN));
                 } else {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.default_singleplayer.set.tooltip")));
+                            localized("option", "main.defaultSingleplayer.set.tooltip")));
                 }
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !spDefault;
@@ -261,7 +261,7 @@ public class MainOptionList extends OptionList {
 
                 // Multiplayer default button
                 Button setAsMpDefaultButton = Button.builder(
-                        localized("option", "main.default_multiplayer.set"),
+                        localized("option", "main.defaultMultiplayer.set"),
                                 (button) -> {
                                     Config.get().setMpDefault(index);
                                     list.reload();
@@ -271,12 +271,12 @@ public class MainOptionList extends OptionList {
                         .build();
                 if (mpDefault) {
                     setAsMpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.default_multiplayer.tooltip")));
+                            localized("option", "main.defaultMultiplayer.tooltip")));
                     setAsMpDefaultButton.setMessage(setAsMpDefaultButton.getMessage().copy()
                             .withStyle(ChatFormatting.GREEN));
                 } else {
                     setAsMpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.default_multiplayer.set.tooltip")
+                            localized("option", "main.defaultMultiplayer.set.tooltip")
                     ));
                 }
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
@@ -377,7 +377,7 @@ public class MainOptionList extends OptionList {
                         .size(list.smallButtonWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(
-                        localized("option", "main.remove_link.tooltip")));
+                        localized("option", "main.removeLink.tooltip")));
                 removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
             }
@@ -395,7 +395,7 @@ public class MainOptionList extends OptionList {
                         .withTooltip((status) -> Tooltip.create(
                                 KeybindUtil.localizeStrategyTooltip(status)))
                         .create(x, 0, buttonWidth, height,
-                                localized("option", "main.default.conflict_strategy"),
+                                localized("option", "main.default.conflictStrategy"),
                                 (button, status) ->
                                         Config.get().defaultConflictStrategy = status));
 
@@ -406,7 +406,7 @@ public class MainOptionList extends OptionList {
                         .withTooltip((status) -> Tooltip.create(
                                 KeybindUtil.localizeModeTooltip(status)))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "main.default.send_mode"),
+                                localized("option", "main.default.sendMode"),
                                 (button, status) ->
                                         Config.get().defaultSendMode = status));
             }
@@ -416,11 +416,13 @@ public class MainOptionList extends OptionList {
             RatelimitEntry(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACING * 2) / 3;
+                int fieldWidth = (buttonWidth - SPACING) / 2;
+                int movingX = x;
 
                 // Message count field
                 EditBox countField = new EditBox(Minecraft.getInstance().font,
-                        x, 0, buttonWidth, height, Component.empty());
-                countField.setMaxLength(8);
+                        movingX, 0, fieldWidth, height, Component.empty());
+                countField.setMaxLength(6);
                 countField.setResponder((val) -> {
                     try {
                         int space = Integer.parseInt(val.strip());
@@ -435,11 +437,12 @@ public class MainOptionList extends OptionList {
                 countField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.count.tooltip")));
                 elements.add(countField);
+                movingX += fieldWidth + SPACING;
 
                 // Time window field
                 EditBox ticksField = new EditBox(Minecraft.getInstance().font,
-                        x + buttonWidth + SPACING, 0, buttonWidth, height, Component.empty());
-                ticksField.setMaxLength(8);
+                        movingX, 0, fieldWidth, height, Component.empty());
+                ticksField.setMaxLength(6);
                 ticksField.setResponder((val) -> {
                     try {
                         int space = Integer.parseInt(val.strip());
@@ -454,18 +457,32 @@ public class MainOptionList extends OptionList {
                 ticksField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.ticks.tooltip")));
                 elements.add(ticksField);
+                movingX = x + width - buttonWidth * 2 - SPACING;
 
-                CycleButton<Boolean> limitButton = CycleButton.booleanBuilder(
+                CycleButton<Boolean> strictButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .withInitialValue(Config.get().ratelimitHard)
+                        .withInitialValue(Config.get().ratelimitStrict)
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "main.ratelimit.hard.tooltip")))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "main.ratelimit.hard"),
-                                (button, status) -> Config.get().ratelimitHard = status);
-                limitButton.setTooltipDelay(Duration.ofMillis(500));
-                elements.add(limitButton);
+                                localized("option", "main.ratelimit.strict.tooltip")))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "main.ratelimit.strict"),
+                                (button, status) -> Config.get().ratelimitStrict = status);
+                strictButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(strictButton);
+                movingX = x + width - buttonWidth;
+
+                CycleButton<Boolean> spButton = CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(Config.get().ratelimitSp)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "main.ratelimit.sp.tooltip")))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "main.ratelimit.sp"),
+                                (button, status) -> Config.get().ratelimitSp = status);
+                spButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(spButton);
             }
         }
     }

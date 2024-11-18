@@ -90,7 +90,7 @@ public class KeybindUtil {
                 
                 if (send) {
                     if (first) {
-                        ratelimited = !canTrigger(key);
+                        ratelimited = !macro.ignoreRatelimit && !canTrigger(key);
                         first = false;
                     }
                     // Always allow repeat-stop
@@ -179,7 +179,7 @@ public class KeybindUtil {
                         .append(label.withStyle(ChatFormatting.WHITE))
                         .append(" ]").withStyle(ChatFormatting.RED);
                 tooltip.append("\n");
-                tooltip.append(localized("option", "key.bind.tooltip.conflict_strategy",
+                tooltip.append(localized("option", "key.bind.tooltip.conflictStrategy",
                         localizeStrategy(macro.getStrategy())));
             }
             else if (internalConflict) {

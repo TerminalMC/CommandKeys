@@ -62,7 +62,6 @@ public class Config {
 
     // Profile list
     private final List<Profile> profiles;
-
     private int spDefault;
     private int mpDefault;
 
@@ -73,25 +72,16 @@ public class Config {
     // Ratelimit options
     private int ratelimitCount;
     private int ratelimitTicks;
-    public boolean ratelimitHard;
+    public boolean ratelimitStrict;
+    public boolean ratelimitSp;
 
     /**
      * Creates a profile list with a single profile, set as both singleplayer
      * and multiplayer default.
      */
     public Config() {
-        this.profiles = new ArrayList<>();
-        Profile defaultProfile = new Profile();
-        defaultProfile.name = "Default Profile";
-        this.profiles.add(defaultProfile);
-        this.spDefault = 0;
-        this.mpDefault = 0;
-        
-        this.defaultConflictStrategy = Macro.ConflictStrategy.SUBMIT;
-        this.defaultSendMode = Macro.SendMode.SEND;
-        this.ratelimitCount = 4;
-        this.ratelimitTicks = 20;
-        this.ratelimitHard = false;
+        this(new ArrayList<>(List.of(new Profile("Default Profile"))), 0, 0, 
+                Macro.ConflictStrategy.SUBMIT, Macro.SendMode.SEND, 4, 20, false, false);
     }
 
     /**
@@ -99,7 +89,7 @@ public class Config {
      */
     private Config(List<Profile> profiles, int spDefault, int mpDefault, 
                    Macro.ConflictStrategy defaultConflictStrategy, Macro.SendMode defaultSendMode,
-                   int ratelimitCount, int ratelimitTicks, boolean ratelimitHard) {
+                   int ratelimitCount, int ratelimitTicks, boolean ratelimitStrict, boolean ratelimitSp) {
         this.profiles = profiles;
         this.spDefault = spDefault;
         this.mpDefault = mpDefault;
@@ -108,7 +98,8 @@ public class Config {
         this.defaultSendMode = defaultSendMode;
         this.ratelimitCount = ratelimitCount;
         this.ratelimitTicks = ratelimitTicks;
-        this.ratelimitHard = ratelimitHard;
+        this.ratelimitStrict = ratelimitStrict;
+        this.ratelimitSp = ratelimitSp;
     }
 
     public int getSpDefault() {
@@ -330,8 +321,11 @@ public class Config {
             int ratelimitTicks = version >= 5
                     ? obj.get("ratelimitTicks").getAsInt()
                     : 20;
-            boolean ratelimitHard = version >= 5
-                    ? obj.get("ratelimitHard").getAsBoolean()
+            boolean ratelimitStrict = version >= 5
+                    ? obj.get("ratelimitStrict").getAsBoolean()
+                    : false;
+            boolean ratelimitSp = version >= 5
+                    ? obj.get("ratelimitSp").getAsBoolean()
                     : false;
 
             List<Profile> profiles = new ArrayList<>();
@@ -362,7 +356,7 @@ public class Config {
 
             return new Config(profiles, spDefault, mpDefault, 
                     defaultConflictStrategy, defaultSendMode, 
-                    ratelimitCount, ratelimitTicks, ratelimitHard);
+                    ratelimitCount, ratelimitTicks, ratelimitStrict, ratelimitSp);
         }
     }
 }

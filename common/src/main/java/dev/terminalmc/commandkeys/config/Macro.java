@@ -40,6 +40,8 @@ public class Macro {
     public transient boolean historyEnabled;
     boolean showHudMessage;
     public transient boolean hudMessageEnabled;
+    
+    public boolean ignoreRatelimit;
 
     ConflictStrategy conflictStrategy;
     public enum ConflictStrategy {
@@ -78,6 +80,7 @@ public class Macro {
     public Macro() {
         this.addToHistory = false;
         this.showHudMessage = false;
+        this.ignoreRatelimit = false;
         this.conflictStrategy = Config.get().defaultConflictStrategy;
         this.sendMode = Config.get().defaultSendMode;
         this.spaceTicks = 0;
@@ -90,11 +93,12 @@ public class Macro {
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Macro(boolean addToHistory, boolean showHudMessage,
+    private Macro(boolean addToHistory, boolean showHudMessage, boolean ignoreRatelimit,
                   ConflictStrategy conflictStrategy, SendMode sendMode, int spaceTicks,
                   Keybind keybind, Keybind altKeybind, List<Message> messages) {
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
+        this.ignoreRatelimit = ignoreRatelimit;
         this.conflictStrategy = conflictStrategy;
         this.sendMode = sendMode;
         this.spaceTicks = spaceTicks;
@@ -301,6 +305,7 @@ public class Macro {
 
             boolean addToHistory = version >= 3 ? obj.get("addToHistory").getAsBoolean() : false;
             boolean showHudMessage = version >= 3 ? obj.get("showHudMessage").getAsBoolean() : false;
+            boolean ignoreRatelimit = version >= 4 ? obj.get("ignoreRatelimit").getAsBoolean() : false;
 
             ConflictStrategy conflictStrategy = version >= 3
                     ? ConflictStrategy.valueOf(obj.get("conflictStrategy").getAsString())
@@ -335,7 +340,7 @@ public class Macro {
             // Validate
             if (spaceTicks < 0) throw new JsonParseException("Macro Error: spaceTicks < 0");
 
-            return new Macro(addToHistory, showHudMessage, conflictStrategy,
+            return new Macro(addToHistory, showHudMessage, ignoreRatelimit, conflictStrategy,
                     sendMode, spaceTicks, keybind, altKeybind, messages);
         }
 

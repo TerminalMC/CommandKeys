@@ -52,8 +52,8 @@ public class Profile {
     private final List<String> links;
 
     // Behavior controls
-    public Control addToHistory;
-    public Control showHudMessage;
+    private Control addToHistory;
+    private Control showHudMessage;
     public enum Control {
         ON,
         OFF,
@@ -67,11 +67,11 @@ public class Profile {
      * Creates a default empty instance.
      */
     public Profile() {
-        this.name = "";
-        this.links = new ArrayList<>();
-        this.addToHistory = Control.OFF;
-        this.showHudMessage = Control.OFF;
-        this.macros = new ArrayList<>();
+        this("", new ArrayList<>(), Control.OFF, Control.OFF, new ArrayList<>());
+    }
+    
+    public Profile(String name) {
+        this(name, new ArrayList<>(), Control.OFF, Control.OFF, new ArrayList<>());
     }
 
     /**
@@ -136,6 +136,26 @@ public class Profile {
     public void removeLink(String link) {
         links.remove(link);
         LINK_PROFILE_MAP.remove(link);
+    }
+    
+    // Behavior management
+
+    public Control getAddToHistory() {
+        return addToHistory;
+    }
+
+    public void setAddToHistory(Control addToHistory) {
+        this.addToHistory = addToHistory;
+        macros.forEach((macro) -> setAddToHistory(macro, macro.addToHistory));
+    }
+
+    public Control getShowHudMessage() {
+        return showHudMessage;
+    }
+
+    public void setShowHudMessage(Control showHudMessage) {
+        this.showHudMessage = showHudMessage;
+        macros.forEach((macro) -> setShowHudMessage(macro, macro.showHudMessage));
     }
     
     // Macro management

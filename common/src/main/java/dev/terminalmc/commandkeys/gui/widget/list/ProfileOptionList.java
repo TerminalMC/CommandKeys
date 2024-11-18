@@ -185,23 +185,23 @@ public class ProfileOptionList extends MacroBindList {
 
                 CycleButton<Profile.Control> hudButton = CycleButton.builder(this::getLabel)
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.showHudMessage)
+                        .withInitialValue(list.profile.getShowHudMessage())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "profile.hud.tooltip")))
                         .create(x, 0, buttonWidth, height,
                                 localized("option", "macro.hud"),
-                                (button, status) -> list.profile.showHudMessage = status);
+                                (button, status) -> list.profile.setShowHudMessage(status));
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(hudButton);
 
                 CycleButton<Profile.Control> historyButton = CycleButton.builder(this::getLabel)
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.addToHistory)
+                        .withInitialValue(list.profile.getAddToHistory())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "profile.history.tooltip")))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
                                 localized("option", "macro.history"),
-                                (button, status) -> list.profile.addToHistory = status);
+                                (button, status) -> list.profile.setAddToHistory(status));
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(historyButton);
             }
