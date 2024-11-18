@@ -16,6 +16,7 @@
 
 package dev.terminalmc.commandkeys.util;
 
+import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.mixin.accessor.ChatComponentAccessor;
 import net.minecraft.client.GuiMessage;
@@ -40,9 +41,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class PlaceholderUtil {
 
-    // Entity.pick for blocks
-    // ProjectileUtil.getEntityHitResult for entities
-
+    private static int faults;
     private static @Nullable BlockPos playerBlockPos;
     private static @Nullable BlockPos lookBlockPos;
     private static @Nullable Vec3 lookAngle;
@@ -81,20 +80,26 @@ public class PlaceholderUtil {
      * Breaks if player is not in-game. Does not self-check for performance
      * reasons, but expects caller to validate.
      */
-    public static String replace(String message) {
-        if (!message.contains("%")) return message;
-        clearCache();
+    public static Pair<String,Integer> replace(String message) {
+        if (!message.contains("%")) return new Pair<>(message, 0);
+        reset();
         for (SimplePlaceholder p : SIMPLE_PLACEHOLDERS) message = p.process(message);
         for (Placeholder p : REGEX_PLACEHOLDERS) message = p.process(message);
 
-        return message;
+        return new Pair<>(message, faults);
     }
 
-    private static void clearCache() {
+    private static void reset() {
+        faults = 0;
         playerBlockPos = null;
         lookBlockPos = null;
         lookAngle = null;
         pmSenderName = null;
+    }
+    
+    private static String fault() {
+        faults++;
+        return "?";
     }
 
     private record SimplePlaceholder(String string, Supplier<String> supplier) {
@@ -134,7 +139,7 @@ public class PlaceholderUtil {
                         return matcher.group(1);
                     } catch (IndexOutOfBoundsException e) {
                         CommandKeys.LOG.error("Recent chat placeholder failed: Group 1 not available: " + e);
-                        return "?";
+                        return fault();
                     }
                 }
             }
@@ -144,7 +149,7 @@ public class PlaceholderUtil {
             CommandKeys.LOG.error("Recent chat placeholder failed: Invalid regex: " + e);
         }
 
-        return "?";
+        return fault();
     }
 
     // Clipboard
@@ -153,17 +158,17 @@ public class PlaceholderUtil {
         String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
         if (clipboard.isEmpty()) {
             CommandKeys.LOG.warn("Clipboard placeholder failed: No data");
-            return "?";
+            return fault();
         }
         if (pattern != null) {
             try {
                 if (!Pattern.compile(pattern[0]).matcher(clipboard).find()) {
                     CommandKeys.LOG.warn("Clipboard placeholder failed: Non-matching regex");
-                    return "?";
+                    return fault();
                 }
             } catch (PatternSyntaxException e) {
                 CommandKeys.LOG.warn("Clipboard placeholder failed: Invalid regex: " + e);
-                return "?";
+                return fault();
             }
         }
         return clipboard;
@@ -173,7 +178,7 @@ public class PlaceholderUtil {
 
     private static String getLastMessage() {
         String lastMsg = Minecraft.getInstance().gui.getChat().getRecentChat().peekLast();
-        if (lastMsg == null) return "?";
+        if (lastMsg == null) return fault();
         return lastMsg;
     }
 
@@ -184,7 +189,7 @@ public class PlaceholderUtil {
         } else {
             CommandKeys.LOG.error("Command history not ArrayListDeque");
         }
-        return "?";
+        return fault();
     }
 
     // Player name
@@ -210,7 +215,7 @@ public class PlaceholderUtil {
         }
         if (pmSenderName == null) {
             CommandKeys.LOG.warn("PmSenderName placeholder failed: No message found: Checked " + i);
-            return "?";
+            return fault();
         }
         return pmSenderName;
     }
@@ -224,6 +229,7 @@ public class PlaceholderUtil {
     }
 
     private static BlockPos updateLookBlockPos() {
+        // Note: ProjectileUtil.getEntityHitResult for entities
         if (lookBlockPos == null) {
             Minecraft mc = Minecraft.getInstance();
             // Distance is arbitrary but will do for now
@@ -243,7 +249,7 @@ public class PlaceholderUtil {
     }
 
     private static String getPlayerBlockPos(String[] args) {
-        if (updatePlayerBlockPos() == null || updateLookAngle() == null) return "? ? ?";
+        if (updatePlayerBlockPos() == null || updateLookAngle() == null) return fault();
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = playerBlockPos.getBottomCenter();
         if (offset != 0) playerPos = offsetCardinalDirection(
@@ -253,22 +259,22 @@ public class PlaceholderUtil {
     }
 
     private static String getPlayerBlockX(String[] offset) {
-        if (updatePlayerBlockPos() == null) return "?";
+        if (updatePlayerBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getX()) + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockY(String[] offset) {
-        if (updatePlayerBlockPos() == null) return "?";
+        if (updatePlayerBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getY()) + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockZ(String[] offset) {
-        if (updatePlayerBlockPos() == null) return "?";
+        if (updatePlayerBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getZ()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockPos(String[] args) {
-        if (updateLookBlockPos() == null || updateLookAngle() == null) return "? ? ?";
+        if (updateLookBlockPos() == null || updateLookAngle() == null) return fault();
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = lookBlockPos.getBottomCenter();
         if (offset != 0) playerPos = offsetCardinalDirection(
@@ -278,17 +284,17 @@ public class PlaceholderUtil {
     }
 
     private static String getLookBlockX(String[] offset) {
-        if (updateLookBlockPos() == null) return "?";
+        if (updateLookBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getX()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockY(String[] offset) {
-        if (updateLookBlockPos() == null) return "?";
+        if (updateLookBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getY()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockZ(String[] offset) {
-        if (updateLookBlockPos() == null) return "?";
+        if (updateLookBlockPos() == null) return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getZ()) + Integer.parseInt(offset[0]));
     }
 

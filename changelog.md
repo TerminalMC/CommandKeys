@@ -1,3 +1,4 @@
 - Add activation ratelimiter
 - Add reversal key for cycling macros
 - Add placeholder for targeted block
+- Prevent sending messages when placeholders fail

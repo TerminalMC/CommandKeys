@@ -17,6 +17,7 @@
 package dev.terminalmc.commandkeys;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
@@ -30,6 +31,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,22 +121,40 @@ public class CommandKeys {
     }
 
     public static void send(String message, boolean addToHistory, boolean showHudMsg) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        message = PlaceholderUtil.replace(message);
-        // new ChatScreen("").handleChatInput(message, addToHistory)
-        // could be slightly better for compat but costs performance.
-        if (message.startsWith("/")) {
-            mc.player.connection.sendCommand(message.substring(1));
-        } else {
-            mc.player.connection.sendChat(message);
-        }
-        if (addToHistory) mc.gui.getChat().addRecentChat(message);
-        if (showHudMsg) mc.gui.setOverlayMessage(Component.literal(message)
-                .withStyle(ChatFormatting.GRAY), false);
+        send(false, message, addToHistory, showHudMsg);
     }
 
     public static void type(String message) {
-        Minecraft.getInstance().setScreen(new ChatScreen(PlaceholderUtil.replace(message)));
+        send(true, message, false, false);
+    }
+
+    public static void send(boolean type, String message, boolean addToHistory, boolean showHudMsg) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        Pair<String,Integer> result = PlaceholderUtil.replace(message);
+        message = result.getFirst();
+        int faults = result.getSecond();
+        if (faults == 0) {
+            if (type) {
+                mc.setScreen(new ChatScreen(message));
+            } else {
+                // new ChatScreen("").handleChatInput(message, addToHistory)
+                // could be slightly better for compat but costs performance.
+                if (message.startsWith("/")) {
+                    mc.player.connection.sendCommand(message.substring(1));
+                } else {
+                    mc.player.connection.sendChat(message);
+                }
+                if (addToHistory) mc.gui.getChat().addRecentChat(message);
+                if (showHudMsg) mc.gui.setOverlayMessage(Component.literal(message)
+                        .withStyle(ChatFormatting.GRAY), false);
+            }
+        } else {
+            MutableComponent msg = PREFIX.copy();
+            msg.append(localized("message", "placeholderFault",
+                    Component.literal(message).withStyle(ChatFormatting.GRAY))
+                    .withStyle(ChatFormatting.RED));
+            mc.gui.getChat().addMessage(msg);
+        }
     }
 }
