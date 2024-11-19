@@ -145,12 +145,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void render(@NotNull GuiGraphics context, int index, int y, int x,
+        public void render(@NotNull GuiGraphics graphics, int index, int y, int x,
                            int entryWidth, int entryHeight, int mouseX, int mouseY,
                            boolean hovered, float tickDelta) {
             elements.forEach((button) -> {
                 button.setY(y);
-                button.render(context, mouseX, mouseY, tickDelta);
+                button.render(graphics, mouseX, mouseY, tickDelta);
             });
         }
 
