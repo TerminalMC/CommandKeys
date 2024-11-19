@@ -199,7 +199,7 @@ public class Macro {
             }
             case TYPE -> {
                 if (!messages.isEmpty()) {
-                    CommandKeys.type(messages.getFirst().string);
+                    CommandKeys.type(messages.get(0).string);
                 }
             }
             case CYCLE -> {
