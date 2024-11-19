@@ -41,7 +41,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  *
  * <p>When a profile is activated it is automatically moved to the start of the
  * list, so the list maintains most-recently-used order and the current active
- * profile can be obtained using {@code getFirst()}.</p>
+ * profile can be obtained using {@code get(0)}.</p>
  *
  * <p>The profile list is guaranteed to contain at least one instance at all
  * times, and at least two if the singleplayer default instance is not also the
@@ -52,7 +52,7 @@ public class Config {
     private static final Path DIR_PATH = Path.of("config");
     private static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Config.class, new Config.Deserializer())
+            .registerTypeAdapter(Config.class, new Deserializer())
             .registerTypeAdapter(Profile.class, new Profile.Deserializer())
             .registerTypeAdapter(Macro.class, new Macro.Deserializer())
             .registerTypeAdapter(Keybind.class, new Keybind.Deserializer())
@@ -146,7 +146,7 @@ public class Config {
      * @return the most recently activated {@link Profile}.
      */
     public Profile activeProfile() {
-        return profiles.getFirst();
+        return profiles.get(0);
     }
 
     /**
@@ -154,9 +154,9 @@ public class Config {
      * active.
      */
     public void activateProfile(int index) {
-        profiles.getFirst().getMacros().forEach(Macro::stopRepeating);
+        profiles.get(0).getMacros().forEach(Macro::stopRepeating);
         if (index != 0) {
-            profiles.addFirst(profiles.remove(index));
+            profiles.add(0, profiles.remove(index));
             if (index == spDefault) spDefault = 0;
             else if (index > spDefault) spDefault++;
             if (index == mpDefault) mpDefault = 0;
@@ -336,8 +336,8 @@ public class Config {
             int spDefault;
             int mpDefault;
             if (version == 1) {
-                profiles.addFirst(ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class));
-                profiles.addFirst(ctx.deserialize(obj.get("spDefaultProfile"), Profile.class));
+                profiles.add(0, ctx.deserialize(obj.get("mpDefaultProfile"), Profile.class));
+                profiles.add(0, ctx.deserialize(obj.get("spDefaultProfile"), Profile.class));
                 if (profiles.size() < 2) throw new JsonParseException(
                         "Expected 2 or more profiles, got " + profiles.size());
                 spDefault = 0;

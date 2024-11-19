@@ -33,8 +33,8 @@ import java.util.Locale;
 
 import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
-import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
-import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
+import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.AVOID;
+import static dev.terminalmc.commandkeys.config.Macro.SendMode.TYPE;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 public class KeybindUtil {
