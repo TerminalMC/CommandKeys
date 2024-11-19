@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- Update German translation (Lucanoria)
+
 ## 2.3.0
 
 - Added activation ratelimiter to prevent spam on servers 
