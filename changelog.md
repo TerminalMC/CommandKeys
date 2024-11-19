@@ -1,4 +1,0 @@
-- Add activation ratelimiter to prevent spam on servers
-- Add alternate keybind to allow reversal of cycling macros
-- Add placeholders for the block that the player is looking at
-- Prevent sending messages when placeholders fail

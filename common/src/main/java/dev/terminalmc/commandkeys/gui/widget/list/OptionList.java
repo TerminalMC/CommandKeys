@@ -115,10 +115,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_disabled"),
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_highlighted"));
-        public static final WidgetSprites GEAR_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/gear_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/gear_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/gear_button_highlighted"));
+        public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button"),
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_disabled"),
+                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_highlighted"));
         public static final WidgetSprites LINK_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_disabled"),

@@ -139,12 +139,10 @@ NeoForge: None
 
 If you encounter issues, please report on Discord or GitHub.
 
-### License
-
-[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 ### Contact
 
 [![Discord Server](https://img.shields.io/discord/1103153365216669797?logo=discord&label=Discord%20Server&color=%235865F2)](https://discord.terminalmc.dev)
 
 [![GitHub Issues](https://img.shields.io/github/issues/TerminalMC/CommandKeys?logo=github&label=GitHub%20Issues)](https://github.com/TerminalMC/CommandKeys/issues)
+
+[![License](https://img.shields.io/github/license/TerminalMC/CommandKeys?label=License&logo=github&logoColor=white)](https://github.com/TerminalMC/CommandKeys/blob/HEAD/LICENSE.txt)

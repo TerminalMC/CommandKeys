@@ -292,7 +292,7 @@ public class ProfileOptionList extends MacroBindList {
 
                 // Edit button
                 ImageButton editButton = new ImageButton(movingX, 0,
-                        list.smallButtonWidth, height, GEAR_SPRITES,
+                        list.smallButtonWidth, height, OPTION_SPRITES,
                         (button) -> {
                             list.openCommandKeyOptionsScreen(macro);
                             list.reload();

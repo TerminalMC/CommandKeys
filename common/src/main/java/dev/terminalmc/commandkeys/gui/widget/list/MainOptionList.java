@@ -215,7 +215,7 @@ public class MainOptionList extends OptionList {
 
                 // Edit details button
                 ImageButton configureButton = new ImageButton(movingX, 0, smallButtonWidth, height,
-                        GEAR_SPRITES,
+                        OPTION_SPRITES,
                         (button) -> {
                             if (list.editingProfile == null) {
                                 list.editingProfile = profile;
