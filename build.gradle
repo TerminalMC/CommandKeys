@@ -1,6 +1,8 @@
 plugins {
     id("fabric-loom") version("${loom_version}") apply(false)
-    id("net.neoforged.moddev") version("${moddev_version}") apply(false)
+    id("net.minecraftforge.gradle") version("${forgegradle_version}") apply(false)
+    id("org.spongepowered.gradle.vanilla") version("${vanillagradle_version}") apply(false)
+    id("org.spongepowered.mixin") version("${mixingradle_version}") apply(false)
     id("com.modrinth.minotaur") version("${minotaur_version}")
     id("net.darkhax.curseforgegradle") version("${curseforgegradle_version}")
     id("com.github.breadmoirai.github-release") version("${githubrelease_version}")
@@ -43,7 +45,8 @@ subprojects {
                 versionType = release_type
                 versionName = "v${mod_version}-${capsLoader(name)}"
                 changelog = versionChangelog()
-                uploadFile = name == "fabric" ? remapJar : jar
+                uploadFile = name == "fabric" ? remapJar : name == "forge" 
+                        ? project.file("build/libs/${mod_id}-${name}-${mod_version}.jar") : jar
                 loaders = project.property("release_mod_loaders_${name}").split(",") as List
                 gameVersions = project.property("release_game_versions_${name}").split(",") as List
 
@@ -76,7 +79,9 @@ subprojects {
                 disableVersionDetection()
                 String module = project.name
 
-                def file = upload(curseforge_id, module == "fabric" ? remapJar : jar)
+                def file = upload(curseforge_id, 
+                        module == "fabric" ? remapJar : module == "forge" 
+                                ? project.file("build/libs/${mod_id}-${module}-${mod_version}.jar") : jar)
                 file.displayName = "v${mod_version}-${capsLoader(module)}"
                 file.releaseType = release_type
                 file.changelog = versionChangelog()
@@ -120,15 +125,19 @@ subprojects {
                 if (project.hasProperty("release_game_versions_fabric"))
                     versions = String.format("%s - Fabric: %s\n", versions,
                             project.property("release_game_versions_fabric"))
-                if (project.hasProperty("release_game_versions_neoforge"))
-                    versions = String.format("%s - NeoForge: %s\n", versions,
-                            project.property("release_game_versions_neoforge"))
+                if (project.hasProperty("release_game_versions_forge"))
+                    versions = String.format("%s - Forge: %s\n", versions,
+                            project.property("release_game_versions_forge"))
                 body = versions + changelog
                 
                 targetCommitish = grgitService.service.get().grgit.branch.current().name
                 overwrite = false
                 allowUploadToExisting = true
-                releaseAssets = List.of(name == "fabric" ? remapJar : jar, sourcesJar)
+                releaseAssets = List.of(
+                        name == "fabric" ? remapJar : name == "forge" 
+                                ? project.file("build/libs/${mod_id}-${name}-${mod_version}.jar") : jar, 
+                        sourcesJar
+                )
             }
             tasks.githubRelease.onlyIf { System.getenv().GITHUB_TOKEN }
             tasks.githubRelease.dependsOn(build)
