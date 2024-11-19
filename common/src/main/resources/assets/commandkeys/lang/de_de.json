@@ -4,7 +4,7 @@
   "message.commandkeys.placeholderFault": "Die Nachricht \"%s\" konnte nicht gesendet werden, da ein oder mehrere Platzhalter nicht angewendet werden konnten.",
   "message.commandkeys.sendBlocked": "Ratenlimit von %s Taste überschritten. Ratenlimit ist auf %s Aktivierungen pro %s Ticks eingestellt.",
   "option.commandkeys.key": "Makro Optionen",
-  "option.commandkeys.key.alt.tooltip": "Verwenden diese Tastenbelegung, um die Nachrichten in umgekehrter Reihenfolge zu durchlaufen.",
+  "option.commandkeys.key.alt.tooltip": "Verwende diese Tastenbelegung, um die Nachrichten in umgekehrter Reihenfolge zu durchlaufen.",
   "option.commandkeys.key.bind.tooltip.conflict.external": "%s wird bereits für: %s verwendet",
   "option.commandkeys.key.bind.tooltip.conflict.internal": "%s wird bereits für einen anderen Makro verwendet.",
   "option.commandkeys.key.bind.tooltip.conflictStrategy": "Konflikt Strategie: %s",
