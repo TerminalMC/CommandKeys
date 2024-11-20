@@ -40,6 +40,32 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 public class KeybindUtil {
 
     /**
+     * Allows other mods to activate macros.
+     * 
+     * <p>{@link InputConstants#getKey(String)} can be used to get a key from
+     * a string of the format key.keyboard.h</p>
+     * @param key the primary key.
+     * @param limitKey the limit key.
+     * @return the number of macros activated.
+     */
+    public static int handleKeys(InputConstants.Key key, InputConstants.Key limitKey) {
+        if (key.equals(InputConstants.UNKNOWN)) return 0;
+        if (!profile().keybindMap.containsKey(key)) return 0;
+        
+        int i = 0;
+        Collection<Keybind> keybinds = profile().keybindMap.get(key);
+        for (Keybind keybind : keybinds) {
+            if (!keybind.getLimitKey().equals(limitKey)) continue;
+            for (Macro macro : profile().macroMap.get(keybind)) {
+                macro.trigger(keybind);
+                i++;
+            }
+        }
+        
+        return i;
+    }
+
+    /**
      * @return the number of operations to cancel.
      * 0 -> None.
      * 1 -> KeyboardHandler#charTyped.
@@ -52,7 +78,7 @@ public class KeybindUtil {
             // Get all keybinds matching the pressed key
             Collection<Keybind> keybinds = profile().keybindMap.get(key);
             Keybind triggerKb = null;
-            Keybind otherKb = null;
+            Keybind monoKb = null;
             
             Collection<Macro> activeMacros = null;
             for (Keybind kb : keybinds) {
@@ -65,11 +91,11 @@ public class KeybindUtil {
                     if (!activeMacros.isEmpty()) break;
                 } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
                     // Save for use if no limited keybinds found
-                    otherKb = kb;
+                    monoKb = kb;
                 }
             }
             if (activeMacros == null || activeMacros.isEmpty()) {
-                triggerKb = otherKb;
+                triggerKb = monoKb;
                 if (triggerKb == null) return cancel;
                 activeMacros = profile().macroMap.get(triggerKb).stream()
                         .filter((macro) -> !macro.getStrategy().equals(AVOID))

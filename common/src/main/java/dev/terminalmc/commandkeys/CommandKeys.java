@@ -76,6 +76,9 @@ public class CommandKeys {
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
+            // Note: If multiple macros are triggered in the same tick, the
+            // message order will be based on their list positions, not the 
+            // order in which they were triggered order.
         }
     }
 
