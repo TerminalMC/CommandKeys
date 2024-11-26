@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.3
+
+- Added Ukrainian translation (ttrafford7)
+
 ## 2.3.2
 
 - Add Russian translation (rfin0)
