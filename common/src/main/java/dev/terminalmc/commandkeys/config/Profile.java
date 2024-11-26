@@ -186,7 +186,7 @@ public class Profile {
     
     public void removeMacro(Macro macro) {
         macros.remove(macro);
-        removeFromMaps(macro);
+        rebuildMaps();
     }
     
     // Macro map management
@@ -202,20 +202,6 @@ public class Profile {
         if (macro.usesAltKeybind()) {
             keybindMap.put(macro.altKeybind.getKey(), macro.altKeybind);
             macroMap.put(macro.altKeybind, macro);
-        }
-    }
-
-    /**
-     * Removes the keybind key and, if appropriate, the alternate keybind key of 
-     * {@code macro} from {@link Profile#keybindMap}, and removes the macro from
-     * {@link Profile#macroMap}. 
-     */
-    public void removeFromMaps(Macro macro) {
-        keybindMap.remove(macro.keybind.getKey(), macro.keybind);
-        macroMap.remove(macro.keybind, macro);
-        if (macro.usesAltKeybind()) {
-            keybindMap.remove(macro.altKeybind.getKey(), macro.altKeybind);
-            macroMap.remove(macro.altKeybind, macro);
         }
     }
 
@@ -294,11 +280,7 @@ public class Profile {
             if (!macro.sendMode.equals(Macro.SendMode.CYCLE)) {
                 macro.messages.removeIf((msg) -> msg.string.isBlank());
             }
-            if (macro.messages.isEmpty()) {
-                removeFromMaps(macro);
-                return true;
-            }
-            return false;
+            return macro.messages.isEmpty();
         });
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.4
+
+- Fixed macros becoming unresponsive on deletion of a macro with the same keybind
+
 ## 2.3.3
 
 - Added Ukrainian translation (ttrafford7)
