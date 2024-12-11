@@ -137,7 +137,7 @@ public class OptionsScreen extends OptionsSubScreen {
     public OptionList reload(int width, int height) {
         clearWidgets();
         optionList = optionList.reload(this, width, height - TOP_MARGIN - BOTTOM_MARGIN,
-                optionList.getScrollAmount());
+                optionList.scrollAmount());
         addRenderableWidget(optionList);
 
         // Title text
