@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.5
+
+- Prevented blank messages from being automatically removed from type-mode macros on save
+
 ## 2.3.4
 
 - Fixed macros becoming unresponsive on deletion of a macro with the same keybind

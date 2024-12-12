@@ -270,14 +270,15 @@ public class Profile {
 
     // Cleanup and validation
 
-    public void cleanup() {
+    void cleanup() {
         macros.removeIf((macro) -> {
             // Allow trailing whitespace only for TYPE mode
             if (!macro.sendMode.equals(Macro.SendMode.TYPE)) {
                 macro.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
             }
-            // Allow blank messages for CYCLE mode as spacers
-            if (!macro.sendMode.equals(Macro.SendMode.CYCLE)) {
+            // Allow blank messages for CYCLE mode as spacers and TYPE mode to open chat
+            if (!macro.sendMode.equals(Macro.SendMode.CYCLE) && 
+                    !macro.sendMode.equals(Macro.SendMode.TYPE)) {
                 macro.messages.removeIf((msg) -> msg.string.isBlank());
             }
             return macro.messages.isEmpty();
