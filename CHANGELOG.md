@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.6
+
+- Added high contrast button textures
+
 ## 2.3.5
 
 - Prevented blank messages from being automatically removed from type-mode macros on save
