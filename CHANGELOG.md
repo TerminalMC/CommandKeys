@@ -3,6 +3,7 @@
 ## 2.3.6
 
 - Added high contrast button textures
+- Added option to allow repeating macros to resume on re-activation of profile
 
 ## 2.3.5
 

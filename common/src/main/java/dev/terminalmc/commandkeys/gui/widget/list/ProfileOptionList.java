@@ -52,7 +52,7 @@ public class ProfileOptionList extends MacroBindList {
 
         addEntry(new Entry.ScreenSwitchEntry(entryX, entryWidth, entryHeight, this));
 
-        addEntry(new Entry.HudAndHistoryEntry(entryX, entryWidth, entryHeight, this));
+        addEntry(new Entry.ControlsEntry(entryX, entryWidth, entryHeight, this));
 
         addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
                 localized("option", "profile.keys", "\u2139"),
@@ -178,32 +178,62 @@ public class ProfileOptionList extends MacroBindList {
             }
         }
 
-        private static class HudAndHistoryEntry extends Entry {
-            HudAndHistoryEntry(int x, int width, int height, ProfileOptionList list) {
+        private static class ControlsEntry extends Entry {
+            ControlsEntry(int x, int width, int height, ProfileOptionList list) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SMALL_SPACING * 3) / 4;
+                int movingX = x;
 
                 CycleButton<Profile.Control> hudButton = CycleButton.builder(this::getLabel)
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getShowHudMessage())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "profile.hud.tooltip")))
-                        .create(x, 0, buttonWidth, height,
+                                localized("option", "macro.hud.tooltip").append("\n")
+                                        .append(localized("option", "profile.defer.tooltip"))))
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.hud"),
                                 (button, status) -> list.profile.setShowHudMessage(status));
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(hudButton);
+                movingX += buttonWidth + SMALL_SPACING;
 
                 CycleButton<Profile.Control> historyButton = CycleButton.builder(this::getLabel)
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getAddToHistory())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "profile.history.tooltip")))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                                localized("option", "macro.history.tooltip").append("\n")
+                                        .append(localized("option", "profile.defer.tooltip"))))
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.history"),
                                 (button, status) -> list.profile.setAddToHistory(status));
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(historyButton);
+                movingX = x + width - buttonWidth * 2 - SMALL_SPACING;
+
+                CycleButton<Profile.Control> resumeButton = CycleButton.builder(this::getLabel)
+                        .withValues(Profile.Control.values())
+                        .withInitialValue(list.profile.getResumeRepeating())
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "macro.resume.tooltip").append("\n")
+                                        .append(localized("option", "profile.defer.tooltip"))))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "macro.resume"),
+                                (button, status) -> list.profile.setResumeRepeating(status));
+                resumeButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(resumeButton);
+                movingX += buttonWidth + SMALL_SPACING;
+
+                CycleButton<Profile.Control> ratelimitButton = CycleButton.builder(this::getLabel)
+                        .withValues(Profile.Control.values())
+                        .withInitialValue(list.profile.getUseRatelimit())
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "macro.ratelimit.tooltip").append("\n")
+                                        .append(localized("option", "profile.defer.tooltip"))))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "macro.ratelimit"),
+                                (button, status) -> list.profile.setUseRatelimit(status));
+                ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(ratelimitButton);
             }
 
             private Component getLabel(Profile.Control control) {

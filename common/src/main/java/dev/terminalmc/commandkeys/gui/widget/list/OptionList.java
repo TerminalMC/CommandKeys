@@ -110,6 +110,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
         public static final int SPACING = 4;
+        public static final int SMALL_SPACING = 2;
 
         public static final WidgetSprites COPY_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),

@@ -32,18 +32,21 @@ import java.util.Random;
  * a list of {@link Message} instances.
  */
 public class Macro {
-    public final int version = 4;
+    public final int version = 5;
 
     public static final Random RANDOM = new Random();
 
     boolean addToHistory;
-    public transient boolean historyEnabled;
+    public transient boolean addToHistoryStatus;
     boolean showHudMessage;
-    public transient boolean hudMessageEnabled;
-    
-    public boolean ignoreRatelimit;
+    public transient boolean showHudMessageStatus;
+    boolean resumeRepeating;
+    public transient boolean resumeRepeatingStatus;
+    boolean useRatelimit;
+    public transient boolean useRatelimitStatus;
 
     ConflictStrategy conflictStrategy;
+
     public enum ConflictStrategy {
         SUBMIT,
         ASSERT,
@@ -78,31 +81,45 @@ public class Macro {
      * Creates a default empty instance.
      */
     public Macro() {
-        this.addToHistory = false;
-        this.showHudMessage = false;
-        this.ignoreRatelimit = false;
-        this.conflictStrategy = Config.get().defaultConflictStrategy;
-        this.sendMode = Config.get().defaultSendMode;
-        this.spaceTicks = 0;
-        this.cycleIndex = 0;
-        this.keybind = new Keybind();
-        this.altKeybind = new Keybind();
-        this.messages = new ArrayList<>();
+        this(
+                false,
+                false,
+                false,
+                false,
+                Config.get().defaultConflictStrategy,
+                Config.get().defaultSendMode,
+                0,
+                0,
+                new Keybind(),
+                new Keybind(),
+                new ArrayList<>()
+        );
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Macro(boolean addToHistory, boolean showHudMessage, boolean ignoreRatelimit,
-                  ConflictStrategy conflictStrategy, SendMode sendMode, int spaceTicks,
-                  Keybind keybind, Keybind altKeybind, List<Message> messages) {
+    private Macro(
+            boolean addToHistory,
+            boolean showHudMessage,
+            boolean resumeRepeating,
+            boolean useRatelimit,
+            ConflictStrategy conflictStrategy,
+            SendMode sendMode,
+            int spaceTicks,
+            int cycleIndex,
+            Keybind keybind,
+            Keybind altKeybind,
+            List<Message> messages
+    ) {
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
-        this.ignoreRatelimit = ignoreRatelimit;
+        this.resumeRepeating = resumeRepeating;
+        this.useRatelimit = useRatelimit;
         this.conflictStrategy = conflictStrategy;
         this.sendMode = sendMode;
         this.spaceTicks = spaceTicks;
-        this.cycleIndex = 0;
+        this.cycleIndex = cycleIndex;
         this.keybind = keybind;
         this.altKeybind = altKeybind;
         this.messages = messages;
@@ -114,6 +131,14 @@ public class Macro {
 
     public boolean getShowHudMessage() {
         return showHudMessage;
+    }
+
+    public boolean getResumeRepeating() {
+        return resumeRepeating;
+    }
+
+    public boolean getUseRatelimit() {
+        return useRatelimit;
     }
 
     public ConflictStrategy getStrategy() {
@@ -193,8 +218,8 @@ public class Macro {
                 int cumulativeDelay = standardDelay ? -spaceTicks : 0;
                 for (Message msg : messages) {
                     cumulativeDelay += standardDelay ? spaceTicks : msg.delayTicks;
-                    schedule(cumulativeDelay, -1, msg.string, 
-                            historyEnabled, hudMessageEnabled);
+                    schedule(cumulativeDelay, -1, msg.string,
+                            addToHistoryStatus, showHudMessageStatus);
                 }
             }
             case TYPE -> {
@@ -212,7 +237,7 @@ public class Macro {
                 // Allow spacer blank messages, and multiple messages per press.
                 for (String msg : messages.get(cycleIndex).string.split(",,")) {
                     if (!msg.isBlank()) {
-                        CommandKeys.send(msg, historyEnabled, hudMessageEnabled);
+                        CommandKeys.send(msg, addToHistoryStatus, showHudMessageStatus);
                     }
                 }
             }
@@ -220,7 +245,7 @@ public class Macro {
                 if (!messages.isEmpty()) {
                     Message msg = messages.get(RANDOM.nextInt(messages.size()));
                     if (!msg.string.isBlank()) {
-                        CommandKeys.send(msg.string, historyEnabled, hudMessageEnabled);
+                        CommandKeys.send(msg.string, addToHistoryStatus, showHudMessageStatus);
                     }
                 }
             }
@@ -228,8 +253,8 @@ public class Macro {
                 int cumulativeDelay = 0;
                 for (Message msg : messages) {
                     cumulativeDelay += msg.delayTicks;
-                    schedule(cumulativeDelay, spaceTicks, msg.string, 
-                            historyEnabled, hudMessageEnabled);
+                    schedule(cumulativeDelay, spaceTicks, msg.string,
+                            addToHistoryStatus, showHudMessageStatus);
                 }
             }
         }
@@ -305,7 +330,8 @@ public class Macro {
 
             boolean addToHistory = version >= 3 ? obj.get("addToHistory").getAsBoolean() : false;
             boolean showHudMessage = version >= 3 ? obj.get("showHudMessage").getAsBoolean() : false;
-            boolean ignoreRatelimit = version >= 4 ? obj.get("ignoreRatelimit").getAsBoolean() : false;
+            boolean resumeRepeating = version >= 5 ? obj.get("resumeRepeating").getAsBoolean() : false;
+            boolean useRatelimit = version >= 4 ? obj.get("useRatelimit").getAsBoolean() : false;
 
             ConflictStrategy conflictStrategy = version >= 3
                     ? ConflictStrategy.valueOf(obj.get("conflictStrategy").getAsString())
@@ -340,8 +366,19 @@ public class Macro {
             // Validate
             if (spaceTicks < 0) throw new JsonParseException("Macro Error: spaceTicks < 0");
 
-            return new Macro(addToHistory, showHudMessage, ignoreRatelimit, conflictStrategy,
-                    sendMode, spaceTicks, keybind, altKeybind, messages);
+            return new Macro(
+                    addToHistory,
+                    showHudMessage,
+                    resumeRepeating,
+                    useRatelimit,
+                    conflictStrategy,
+                    sendMode,
+                    spaceTicks,
+                    0,
+                    keybind,
+                    altKeybind,
+                    messages
+            );
         }
 
         public static ConflictStrategy getConflictStrategy(String str) {

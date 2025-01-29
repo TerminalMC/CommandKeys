@@ -38,7 +38,7 @@ import java.util.*;
  * </p>
  */
 public class Profile {
-    public final int version = 3;
+    public final int version = 4;
     
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
     
@@ -52,8 +52,14 @@ public class Profile {
     private final List<String> links;
 
     // Behavior controls
+    public static final Control addToHistoryDefault = Control.OFF;
     private Control addToHistory;
+    public static final  Control showHudMessageDefault = Control.OFF;
     private Control showHudMessage;
+    public static final  Control resumeRepeatingDefault = Control.OFF;
+    private Control resumeRepeating;
+    public static final  Control useRatelimitDefault = Control.ON;
+    private Control useRatelimit;
     public enum Control {
         ON,
         OFF,
@@ -67,22 +73,39 @@ public class Profile {
      * Creates a default empty instance.
      */
     public Profile() {
-        this("", new ArrayList<>(), Control.OFF, Control.OFF, new ArrayList<>());
+        this("");
     }
     
     public Profile(String name) {
-        this(name, new ArrayList<>(), Control.OFF, Control.OFF, new ArrayList<>());
+        this(
+                name,
+                new ArrayList<>(),
+                addToHistoryDefault,
+                showHudMessageDefault,
+                resumeRepeatingDefault,
+                useRatelimitDefault,
+                new ArrayList<>()
+        );
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    private Profile(String name, List<String> links, Control addToHistory, 
-                    Control showHudMessage, List<Macro> macros) {
+    private Profile(
+            String name,
+            List<String> links,
+            Control addToHistory,
+            Control showHudMessage,
+            Control resumeRepeating,
+            Control useRatelimit,
+            List<Macro> macros
+    ) {
         this.name = name;
         this.links = links;
         this.addToHistory = addToHistory;
         this.showHudMessage = showHudMessage;
+        this.resumeRepeating = resumeRepeating;
+        this.useRatelimit = useRatelimit;
         this.macros = macros;
         // Add missing links to map
         this.links.removeIf((link) -> LINK_PROFILE_MAP.putIfAbsent(link, this) != null);
@@ -96,6 +119,8 @@ public class Profile {
         this.links = new ArrayList<>();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
+        this.resumeRepeating = profile.resumeRepeating;
+        this.useRatelimit = profile.useRatelimit;
         this.macros = profile.macros;
     }
 
@@ -156,6 +181,24 @@ public class Profile {
     public void setShowHudMessage(Control showHudMessage) {
         this.showHudMessage = showHudMessage;
         macros.forEach((macro) -> setShowHudMessage(macro, macro.showHudMessage));
+    }
+
+    public Control getResumeRepeating() {
+        return resumeRepeating;
+    }
+
+    public void setResumeRepeating(Control resumeRepeating) {
+        this.resumeRepeating = resumeRepeating;
+        macros.forEach((macro) -> setResumeRepeating(macro, macro.resumeRepeating));
+    }
+
+    public Control getUseRatelimit() {
+        return useRatelimit;
+    }
+
+    public void setUseRatelimit(Control useRatelimit) {
+        this.useRatelimit = useRatelimit;
+        macros.forEach((macro) -> setUseRatelimit(macro, macro.useRatelimit));
     }
     
     // Macro management
@@ -252,7 +295,7 @@ public class Profile {
     
     public void setAddToHistory(Macro macro, boolean value) {
         macro.addToHistory = value;
-        macro.historyEnabled = switch(this.addToHistory) {
+        macro.addToHistoryStatus = switch(this.addToHistory) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.addToHistory;
@@ -261,10 +304,28 @@ public class Profile {
 
     public void setShowHudMessage(Macro macro, boolean value) {
         macro.showHudMessage = value;
-        macro.hudMessageEnabled = switch(this.showHudMessage) {
+        macro.showHudMessageStatus = switch(this.showHudMessage) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.showHudMessage;
+        };
+    }
+
+    public void setResumeRepeating(Macro macro, boolean value) {
+        macro.resumeRepeating = value;
+        macro.resumeRepeatingStatus = switch(this.resumeRepeating) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.resumeRepeating;
+        };
+    }
+
+    public void setUseRatelimit(Macro macro, boolean value) {
+        macro.useRatelimit = value;
+        macro.useRatelimitStatus = switch(this.useRatelimit) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.useRatelimit;
         };
     }
 
@@ -281,6 +342,11 @@ public class Profile {
                     !macro.sendMode.equals(Macro.SendMode.TYPE)) {
                 macro.messages.removeIf((msg) -> msg.string.isBlank());
             }
+            // Update transients in macros
+            setAddToHistory(addToHistory);
+            setShowHudMessage(showHudMessage);
+            setResumeRepeating(resumeRepeating);
+            setUseRatelimit(useRatelimit);
             return macro.messages.isEmpty();
         });
     }
@@ -301,15 +367,29 @@ public class Profile {
             }
             Control addToHistory = version >= 2
                     ? Control.valueOf(obj.get("addToHistory").getAsString())
-                    : Control.OFF;
+                    : addToHistoryDefault;
             Control showHudMessage = version >= 2
                     ? Control.valueOf(obj.get("showHudMessage").getAsString())
-                    : Control.OFF;
+                    : showHudMessageDefault;
+            Control resumeRepeating = version >= 4
+                    ? Control.valueOf(obj.get("resumeRepeating").getAsString())
+                    : resumeRepeatingDefault;
+            Control useRatelimit = version >= 4
+                    ? Control.valueOf(obj.get("useRatelimit").getAsString())
+                    : useRatelimitDefault;
 
             // Deserialize CommandKey objects with link to deserialized Profile
             List<Macro> macros = new ArrayList<>();
 
-            Profile profile = new Profile(name, addresses, addToHistory, showHudMessage, macros);
+            Profile profile = new Profile(
+                    name,
+                    addresses,
+                    addToHistory,
+                    showHudMessage,
+                    resumeRepeating,
+                    useRatelimit,
+                    macros
+            );
             for (JsonElement je : obj.getAsJsonArray(version >= 2 ? "macros" : "commandKeys")) {
                 macros.add(ctx.deserialize(je, Macro.class));
             }

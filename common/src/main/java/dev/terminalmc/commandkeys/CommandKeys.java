@@ -134,6 +134,7 @@ public class CommandKeys {
     public static void send(boolean type, String message, boolean addToHistory, boolean showHudMsg) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        if (!mc.player.connection.isAcceptingMessages()) return;
         Pair<String,Integer> result = PlaceholderUtil.replace(message);
         message = result.getFirst();
         int faults = result.getSecond();

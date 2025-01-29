@@ -34,6 +34,7 @@ import java.util.List;
 
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
+import static dev.terminalmc.commandkeys.config.Profile.Control.DEFER;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 public class MacroOptionList extends MacroBindList {
@@ -48,9 +49,13 @@ public class MacroOptionList extends MacroBindList {
 
         addEntry(new Entry.BindAndControlsEntry(entryX, entryWidth, entryHeight, this, profile, macro));
 
-        if (profile.getShowHudMessage().equals(Profile.Control.DEFER)
-                || profile.getAddToHistory().equals(Profile.Control.DEFER)) {
-            addEntry(new Entry.HudAndHistoryEntry(entryX, entryWidth, entryHeight, profile, macro));
+        if (
+                profile.getShowHudMessage().equals(DEFER)
+                || profile.getAddToHistory().equals(DEFER)
+                || profile.getResumeRepeating().equals(DEFER)
+                || profile.getUseRatelimit().equals(DEFER)
+        ) {
+            addEntry(new Entry.ControlsEntry(entryX, entryWidth, entryHeight, profile, macro));
         }
 
         addEntry(new Entry.StrategyAndModeEntry(entryX, entryWidth, entryHeight, this, profile, macro));
@@ -167,36 +172,74 @@ public class MacroOptionList extends MacroBindList {
     }
 
     private abstract static class Entry extends OptionList.Entry {
-        private static class HudAndHistoryEntry extends Entry {
-            HudAndHistoryEntry(int x, int width, int height, Profile profile, Macro macro) {
+        private static class ControlsEntry extends Entry {
+            ControlsEntry(int x, int width, int height, Profile profile, Macro macro) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
-
+                int buttonWidth = (width - SMALL_SPACING * 3) / 4;
+                int movingX = x;
+                
+                boolean hudActive = profile.getShowHudMessage().equals(DEFER);
                 CycleButton<Boolean> hudButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .withInitialValue(macro.getShowHudMessage())
+                        .withInitialValue(hudActive
+                                ? macro.getShowHudMessage() : macro.showHudMessageStatus)
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.hud.tooltip")))
-                        .create(x, 0, buttonWidth, height,
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.hud"),
                                 (button, status) -> profile.setShowHudMessage(macro, status));
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
-                hudButton.active = profile.getShowHudMessage().equals(Profile.Control.DEFER);
+                hudButton.active = hudActive;
                 elements.add(hudButton);
+                movingX += buttonWidth + SMALL_SPACING;
 
+                boolean historyActive = profile.getAddToHistory().equals(DEFER);
                 CycleButton<Boolean> historyButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                        .withInitialValue(macro.getAddToHistory())
+                        .withInitialValue(historyActive
+                                ? macro.getAddToHistory() : macro.addToHistoryStatus)
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.history.tooltip")))
-                        .create(x + width - buttonWidth, 0, buttonWidth, height,
+                        .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.history"),
                                 (button, status) -> profile.setAddToHistory(macro, status));
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
-                historyButton.active = profile.getAddToHistory().equals(Profile.Control.DEFER);
+                historyButton.active = historyActive;
                 elements.add(historyButton);
+                movingX = x + width - buttonWidth * 2 - SMALL_SPACING;
+
+                boolean resumeActive = profile.getResumeRepeating().equals(DEFER);
+                CycleButton<Boolean> resumeButton = CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(resumeActive
+                                ? macro.getResumeRepeating() : macro.resumeRepeatingStatus)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "macro.resume.tooltip")))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "macro.resume"),
+                                (button, status) -> profile.setResumeRepeating(macro, status));
+                resumeButton.setTooltipDelay(Duration.ofMillis(500));
+                resumeButton.active = resumeActive;
+                elements.add(resumeButton);
+                movingX += buttonWidth + SMALL_SPACING;
+
+                boolean ratelimitActive = profile.getUseRatelimit().equals(DEFER);
+                CycleButton<Boolean> ratelimitButton = CycleButton.booleanBuilder(
+                                CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
+                        .withInitialValue(ratelimitActive
+                                ? macro.getUseRatelimit() : macro.useRatelimitStatus)
+                        .withTooltip((status) -> Tooltip.create(
+                                localized("option", "macro.ratelimit.tooltip")))
+                        .create(movingX, 0, buttonWidth, height,
+                                localized("option", "macro.ratelimit"),
+                                (button, status) -> profile.setUseRatelimit(macro, status));
+                ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
+                ratelimitButton.active = ratelimitActive;
+                elements.add(ratelimitButton);
             }
         }
 
@@ -220,34 +263,22 @@ public class MacroOptionList extends MacroBindList {
                         .pos(x, 0)
                         .size(buttonWidth, height)
                         .build());
-
-                if (macro.getMode().equals(CYCLE)) {
-                    KeybindUtil.KeybindInfo altInfo = 
-                            new KeybindUtil.KeybindInfo(profile, macro, macro.getAltKeybind());
-                    elements.add(Button.builder(altInfo.conflictLabel,
-                                    (button) -> {
-                                        list.setSelected(macro, macro.getAltKeybind());
-                                        button.setMessage(Component.literal("> ")
-                                                .append(altInfo.label.withStyle(ChatFormatting.WHITE)
-                                                        .withStyle(ChatFormatting.UNDERLINE))
-                                                .append(" <").withStyle(ChatFormatting.YELLOW));
-                                    })
-                            .tooltip(Tooltip.create(altInfo.tooltip.getString().isBlank() 
-                                    ? localized("option", "key.alt.tooltip") : altInfo.tooltip))
-                            .pos(x + width - buttonWidth, 0)
-                            .size(buttonWidth, height)
-                            .build());
-                } else {
-                    elements.add(CycleButton.booleanBuilder(
-                                    CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                    CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
-                            .withInitialValue(macro.ignoreRatelimit)
-                            .withTooltip((status) -> Tooltip.create(
-                                    localized("option", "macro.ignoreRatelimit.tooltip")))
-                            .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                    localized("option", "macro.ignoreRatelimit"),
-                                    (button, status) -> macro.ignoreRatelimit = status));
-                }
+                
+                KeybindUtil.KeybindInfo altInfo = 
+                        new KeybindUtil.KeybindInfo(profile, macro, macro.getAltKeybind());
+                elements.add(Button.builder(altInfo.conflictLabel,
+                                (button) -> {
+                                    list.setSelected(macro, macro.getAltKeybind());
+                                    button.setMessage(Component.literal("> ")
+                                            .append(altInfo.label.withStyle(ChatFormatting.WHITE)
+                                                    .withStyle(ChatFormatting.UNDERLINE))
+                                            .append(" <").withStyle(ChatFormatting.YELLOW));
+                                })
+                        .tooltip(Tooltip.create(altInfo.tooltip.getString().isBlank() 
+                                ? localized("option", "key.bind.alt.tooltip") : altInfo.tooltip))
+                        .pos(x + width - buttonWidth, 0)
+                        .size(buttonWidth, height)
+                        .build());
             }
         }
 

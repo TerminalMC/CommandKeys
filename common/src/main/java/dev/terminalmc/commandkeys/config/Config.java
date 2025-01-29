@@ -155,7 +155,9 @@ public class Config {
      * active.
      */
     public void activateProfile(int index) {
-        profiles.getFirst().getMacros().forEach(Macro::stopRepeating);
+        profiles.getFirst().getMacros().forEach((macro) -> {
+            if (!macro.resumeRepeatingStatus) macro.stopRepeating();
+        });
         if (index != 0) {
             profiles.addFirst(profiles.remove(index));
             if (index == spDefault) spDefault = 0;
