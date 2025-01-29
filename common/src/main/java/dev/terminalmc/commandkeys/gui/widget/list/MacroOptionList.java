@@ -17,7 +17,9 @@
 package dev.terminalmc.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.terminalmc.commandkeys.config.*;
+import dev.terminalmc.commandkeys.config.Macro;
+import dev.terminalmc.commandkeys.config.Message;
+import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,11 +30,10 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
+import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.AVOID;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
 import static dev.terminalmc.commandkeys.config.Profile.Control.DEFER;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
@@ -41,10 +42,10 @@ public class MacroOptionList extends MacroBindList {
     private final Macro macro;
     private int dragSourceSlot = -1;
 
-    public MacroOptionList(Minecraft mc, int width, int height, int y,
+    public MacroOptionList(Minecraft mc, int width, int height, int top, int bottom,
                            int itemHeight, int entryWidth, int entryHeight,
                            Profile profile, Macro macro) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight, profile);
+        super(mc, width, height, top, bottom, itemHeight, entryWidth, entryHeight, profile);
         this.macro = macro;
 
         addEntry(new Entry.BindAndControlsEntry(entryX, entryWidth, entryHeight, this, profile, macro));
@@ -79,9 +80,9 @@ public class MacroOptionList extends MacroBindList {
     }
 
     @Override
-    protected OptionList reload(int width, int height, double scrollAmount) {
+    protected OptionList reload(int width, int height, int top, int bottom, double scrollAmount) {
         MacroOptionList newListWidget = new MacroOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, profile, macro);
+                top, bottom, itemHeight, entryWidth, entryHeight, profile, macro);
         newListWidget.setScrollAmount(scrollAmount);
         return newListWidget;
     }
@@ -101,8 +102,8 @@ public class MacroOptionList extends MacroBindList {
     // Message dragging
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
             super.renderItem(graphics, mouseX, mouseY, delta, dragSourceSlot,
                     mouseX, mouseY, entryWidth, entryHeight);
@@ -189,7 +190,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.hud"),
                                 (button, status) -> profile.setShowHudMessage(macro, status));
-                hudButton.setTooltipDelay(Duration.ofMillis(500));
+                hudButton.setTooltipDelay(500);
                 hudButton.active = hudActive;
                 elements.add(hudButton);
                 movingX += buttonWidth + SMALL_SPACING;
@@ -205,7 +206,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.history"),
                                 (button, status) -> profile.setAddToHistory(macro, status));
-                historyButton.setTooltipDelay(Duration.ofMillis(500));
+                historyButton.setTooltipDelay(500);
                 historyButton.active = historyActive;
                 elements.add(historyButton);
                 movingX = x + width - buttonWidth * 2 - SMALL_SPACING;
@@ -221,7 +222,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.resume"),
                                 (button, status) -> profile.setResumeRepeating(macro, status));
-                resumeButton.setTooltipDelay(Duration.ofMillis(500));
+                resumeButton.setTooltipDelay(500);
                 resumeButton.active = resumeActive;
                 elements.add(resumeButton);
                 movingX += buttonWidth + SMALL_SPACING;
@@ -237,7 +238,7 @@ public class MacroOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.ratelimit"),
                                 (button, status) -> profile.setUseRatelimit(macro, status));
-                ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
+                ratelimitButton.setTooltipDelay(500);
                 ratelimitButton.active = ratelimitActive;
                 elements.add(ratelimitButton);
             }
@@ -388,7 +389,7 @@ public class MacroOptionList extends MacroBindList {
                     List<Integer> values = new ArrayList<>();
                     for (int i = 0; i < macro.getMessages().size(); i++) values.add(i);
                     if (values.isEmpty()) values.add(0);
-                    if (macro.cycleIndex > values.getLast()) macro.cycleIndex = 0;
+                    if (macro.cycleIndex > values.get(values.size() - 1)) macro.cycleIndex = 0;
                     elements.add(CycleButton.<Integer>builder(
                                     (status) -> Component.literal(status.toString()))
                             .withValues(values)
@@ -450,7 +451,7 @@ public class MacroOptionList extends MacroBindList {
                     delayField.setTooltip(Tooltip.create(
                             localized("option", "key.delay.individual.tooltip"
                                     + (index == 0 ? ".first" : ".subsequent"))));
-                    delayField.setTooltipDelay(Duration.ofMillis(500));
+                    delayField.setTooltipDelay(500);
                     delayField.setMaxLength(8);
                     delayField.setResponder((val) -> {
                         // Resize

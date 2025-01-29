@@ -18,10 +18,12 @@ package dev.terminalmc.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
-import dev.terminalmc.commandkeys.config.*;
+import dev.terminalmc.commandkeys.config.Keybind;
+import dev.terminalmc.commandkeys.config.Macro;
+import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,10 +40,10 @@ public abstract class MacroBindList extends OptionList {
     private InputConstants.Key heldKey;
     private InputConstants.Key sendKey;
 
-    public MacroBindList(Minecraft mc, int width, int height, int y,
+    public MacroBindList(Minecraft mc, int width, int height, int top, int bottom,
                          int itemHeight, int entryWidth, int entryHeight, 
                          @NotNull Profile profile) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+        super(mc, width, height, top, bottom, itemHeight, entryWidth, entryHeight);
         this.profile = profile;
     }
     

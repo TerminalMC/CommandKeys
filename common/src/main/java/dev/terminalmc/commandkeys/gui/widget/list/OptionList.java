@@ -31,7 +31,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,9 +64,9 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
     protected final int smallButtonWidth;
 
-    public OptionList(Minecraft mc, int width, int height, int y, int itemHeight,
+    public OptionList(Minecraft mc, int width, int height, int top, int bottom, int itemHeight,
                       int entryWidth, int entryHeight) {
-        super(mc, width, height, y, itemHeight);
+        super(mc, width, height, top, bottom, itemHeight);
         this.entryWidth = entryWidth;
         this.dynEntryWidth = Math.max(entryWidth, (int)(width / 5.0F * 4));
         this.entryHeight = entryHeight;
@@ -92,13 +91,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         return screen.reload();
     }
 
-    public OptionList reload(OptionsScreen screen, int width, int height, double scrollAmount) {
-        OptionList newList = reload(width, height, scrollAmount);
+    public OptionList reload(OptionsScreen screen, int width, int height, int top, int bottom, double scrollAmount) {
+        OptionList newList = reload(width, height, top, bottom, scrollAmount);
         newList.screen = screen;
         return newList;
     }
 
-    protected abstract OptionList reload(int width, int height, double scrollAmount);
+    protected abstract OptionList reload(int width, int height, int top, int bottom, double scrollAmount);
 
     public abstract boolean keyPressed(InputConstants.Key key);
     public abstract boolean keyReleased(InputConstants.Key key);
@@ -112,22 +111,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         public static final int SPACING = 4;
         public static final int SMALL_SPACING = 2;
 
-        public static final WidgetSprites COPY_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_highlighted"));
-        public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_highlighted"));
-        public static final WidgetSprites LINK_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_highlighted"));
-        public static final WidgetSprites SEND_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_highlighted"));
+        public static final ResourceLocation COPY_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/sprites/widget/copy_button.png");
+        public static final ResourceLocation OPTIONS_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/sprites/widget/options_button.png");
+        public static final ResourceLocation LINK_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/sprites/widget/link_button.png");
+        public static final ResourceLocation SEND_ICON = new ResourceLocation(CommandKeys.MOD_ID, "textures/gui/sprites/widget/send_button.png");
 
         public final List<AbstractWidget> elements;
 
@@ -171,7 +158,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                             .setCentered(true);
                 }
                 if (tooltip != null) widget.setTooltip(tooltip);
-                if (tooltipDelay >= 0) widget.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                if (tooltipDelay >= 0) widget.setTooltipDelay(tooltipDelay);
 
                 elements.add(widget);
             }
@@ -188,7 +175,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                         .size(width, height)
                         .build();
                 if (tooltip != null) button.setTooltip(tooltip);
-                if (tooltipDelay >= 0) button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                if (tooltipDelay >= 0) button.setTooltipDelay(tooltipDelay);
 
                 elements.add(button);
             }
