@@ -331,7 +331,7 @@ public class Macro {
             boolean addToHistory = version >= 3 ? obj.get("addToHistory").getAsBoolean() : false;
             boolean showHudMessage = version >= 3 ? obj.get("showHudMessage").getAsBoolean() : false;
             boolean resumeRepeating = version >= 5 ? obj.get("resumeRepeating").getAsBoolean() : false;
-            boolean useRatelimit = version >= 4 ? obj.get("useRatelimit").getAsBoolean() : false;
+            boolean useRatelimit = version >= 5 ? obj.get("useRatelimit").getAsBoolean() : false;
 
             ConflictStrategy conflictStrategy = version >= 3
                     ? ConflictStrategy.valueOf(obj.get("conflictStrategy").getAsString())

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.7
+
+- Fixed a deserialization bug. If your macros were reset when upgrading to v2.3.6,
+install v2.3.7 and check the `config` folder of your Minecraft instance for a 
+`commandkeys.unreadable.json` file. If it exists, delete your `commandkeys.json` 
+file, rename the `unreadable` file to `commandkeys.json`, and start the game again.
+
 ## 2.3.6
 
 - Added high contrast button textures
