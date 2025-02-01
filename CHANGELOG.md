@@ -6,6 +6,8 @@
 install v2.3.7 and check the `config` folder of your Minecraft instance for a 
 `commandkeys.unreadable.json` file. If it exists, delete your `commandkeys.json` 
 file, rename the `unreadable` file to `commandkeys.json`, and start the game again.
+- Updated German translation (Lucanoria)
+- Updated Russian translation (rfin0)
 
 ## 2.3.6
 
