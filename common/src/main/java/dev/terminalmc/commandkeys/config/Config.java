@@ -397,10 +397,10 @@ public class Config {
             boolean silent = version != VERSION;
 
             Macro.ConflictStrategy defaultConflictStrategy = JsonUtil.getOrDefault(obj, "defaultConflictStrategy",
-                    Macro.ConflictStrategy.class, Macro.ConflictStrategy.values()[0], silent);
+                    Macro.ConflictStrategy.class, Macro.conflictStrategyDefault, silent);
 
             Macro.SendMode defaultSendMode = JsonUtil.getOrDefault(obj, "defaultSendMode",
-                    Macro.SendMode.class, Macro.SendMode.values()[0], silent);
+                    Macro.SendMode.class, Macro.sendModeDefault, silent);
             
             int ratelimitCount = JsonUtil.getOrDefault(obj, "ratelimitCount",
                     ratelimitCountDefault, silent);

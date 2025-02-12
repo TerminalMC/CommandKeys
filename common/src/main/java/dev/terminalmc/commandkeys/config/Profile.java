@@ -398,10 +398,11 @@ public class Profile {
             String name = JsonUtil.getOrDefault(obj, "name",
                     nameDefault, silent);
             
-            List<String> addresses = JsonUtil.getOrDefault(obj, "links", 
-                    JsonUtil.getOrDefault(obj, "addresses",
-                            new ArrayList<>(), silent),
-                    silent);
+            List<String> links = version >= 3 // Since 2.3.0-beta.2
+                    ? JsonUtil.getOrDefault(obj, "links",
+                    linksDefault.get(), silent)
+                    : JsonUtil.getOrDefault(obj, "addresses",
+                    linksDefault.get(), true);
             
             Control addToHistory = JsonUtil.getOrDefault(obj, "addToHistory",
                     Control.class, addToHistoryDefault, silent);
@@ -415,15 +416,15 @@ public class Profile {
             Control useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
                     Control.class, useRatelimitDefault, silent);
             
-            List<Macro> macros = JsonUtil.getOrDefault(ctx, obj, "macros",
-                    Macro.class,
-                    JsonUtil.getOrDefault(ctx, obj, "commandKeys",
-                            Macro.class, new ArrayList<>(), silent),
-                    silent);
+            List<Macro> macros = version >= 2 // Since 2.1.0-beta.2
+                    ? JsonUtil.getOrDefault(ctx, obj, "macros",
+                    Macro.class, macrosDefault.get(), silent) 
+                    : JsonUtil.getOrDefault(ctx, obj, "commandKeys", 
+                    Macro.class, macrosDefault.get(), true);
 
             return new Profile(
                     name,
-                    addresses,
+                    links,
                     addToHistory,
                     showHudMessage,
                     resumeRepeating,

@@ -478,40 +478,36 @@ public class Macro {
             boolean useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
                     useRatelimitDefault, silent);
 
-            ConflictStrategy conflictStrategy = JsonUtil.getOrDefault(obj, "conflictStrategy", 
-                    ConflictStrategy.class,
-                    getConflictStrategy(JsonUtil.getOrDefault(obj, "conflictStrategy",
-                            "", true)),
-                    silent);
+            ConflictStrategy conflictStrategy = version >= 3 // Since 2.1.0-beta.2
+                    ? JsonUtil.getOrDefault(obj, "conflictStrategy",
+                    ConflictStrategy.class, conflictStrategyDefault, silent)
+                    : getConflictStrategy(JsonUtil.getOrDefault(obj, "conflictStrategy",
+                    "", true));
 
-            SendMode sendMode = JsonUtil.getOrDefault(obj, "sendMode",
-                    SendMode.class,
-                    getSendMode(JsonUtil.getOrDefault(obj, "sendMode",
-                            "", true)),
-                    silent);
+            SendMode sendMode = version >= 3 // Since 2.1.0-beta.2
+                    ? JsonUtil.getOrDefault(obj, "sendMode",
+                    SendMode.class, sendModeDefault, silent)
+                    : getSendMode(JsonUtil.getOrDefault(obj, "sendMode",
+                    "", true));
 
             int spaceTicks = JsonUtil.getOrDefault(obj, "spaceTicks",
                     spaceTicksDefault, silent);
             
-            Keybind keybind = JsonUtil.getOrDefault(ctx, obj, "keybind",
-                    Keybind.class,
-                    new Keybind(
+            Keybind keybind = version >= 4 // Since 2.3.0-beta.1
+                    ? JsonUtil.getOrDefault(ctx, obj, "keybind",
+                    Keybind.class, new Keybind(), silent)
+                    : new Keybind(
                             JsonUtil.getOrDefault(obj, "keyName",
-                                    InputConstants.UNKNOWN, silent),
+                                    InputConstants.UNKNOWN, true),
                             JsonUtil.getOrDefault(obj, "limitKeyName",
-                                    InputConstants.UNKNOWN, silent)
-                    ).validate(),
-                    silent);
+                                    InputConstants.UNKNOWN, true)
+                    ).validate();
 
             Keybind altKeybind = JsonUtil.getOrDefault(ctx, obj, "altKeybind",
                     Keybind.class, new Keybind(), silent);
             
             List<Message> messages = JsonUtil.getOrDefault(ctx, obj, "messages", 
-                    Message.class,
-                    new ArrayList<>(JsonUtil.getOrDefault(obj, "messages", 
-                            List.of(), true).stream().map((str) ->
-                            new Message(str, 0)).toList()),
-                    silent);
+                    Message.class, messagesDefault.get(), silent);
 
             return new Macro(
                     addToHistory,
