@@ -27,8 +27,10 @@ import dev.terminalmc.commandkeys.util.PlaceholderUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -51,6 +53,7 @@ public class CommandKeys {
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    public static boolean hasResetConfig = false;
     
     public static String lastConnection = "";
     
@@ -71,14 +74,24 @@ public class CommandKeys {
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new OptionsScreen(mc.screen, true));
         }
+        
         // Tick ratelimiter
         rateLimiter.removeIf((tc) -> tc.tick() > Config.get().getRatelimitTicks());
+        
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
             // Note: If multiple macros are triggered in the same tick, the
             // message order will be based on their list positions, not the 
             // order in which they were triggered order.
+        }
+        
+        // Config reset warning toast
+        if (hasResetConfig && mc.screen instanceof TitleScreen) {
+            hasResetConfig = false;
+            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
+                    localized("toast", "reset.title"), localized("toast", "reset.message",
+                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
         }
     }
 

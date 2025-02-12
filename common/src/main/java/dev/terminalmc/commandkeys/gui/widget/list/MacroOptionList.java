@@ -183,7 +183,7 @@ public class MacroOptionList extends MacroBindList {
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(hudActive
-                                ? macro.getShowHudMessage() : macro.showHudMessageStatus)
+                                ? macro.getShowHudMessage() : macro.getShowHudMessageStatus())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.hud.tooltip")))
                         .create(movingX, 0, buttonWidth, height,
@@ -199,7 +199,7 @@ public class MacroOptionList extends MacroBindList {
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(historyActive
-                                ? macro.getAddToHistory() : macro.addToHistoryStatus)
+                                ? macro.getAddToHistory() : macro.getAddToHistoryStatus())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.history.tooltip")))
                         .create(movingX, 0, buttonWidth, height,
@@ -215,7 +215,7 @@ public class MacroOptionList extends MacroBindList {
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(resumeActive
-                                ? macro.getResumeRepeating() : macro.resumeRepeatingStatus)
+                                ? macro.getResumeRepeating() : macro.getResumeRepeatingStatus())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.resume.tooltip")))
                         .create(movingX, 0, buttonWidth, height,
@@ -231,7 +231,7 @@ public class MacroOptionList extends MacroBindList {
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
                                 CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED))
                         .withInitialValue(ratelimitActive
-                                ? macro.getUseRatelimit() : macro.useRatelimitStatus)
+                                ? macro.getUseRatelimit() : macro.getUseRatelimitStatus())
                         .withTooltip((status) -> Tooltip.create(
                                 localized("option", "macro.ratelimit.tooltip")))
                         .create(movingX, 0, buttonWidth, height,
@@ -416,9 +416,12 @@ public class MacroOptionList extends MacroBindList {
                          Macro macro, Message msg, int index) {
                 super();
                 Font font = Minecraft.getInstance().font;
-                boolean showDelayField = (macro.getStrategy() == AVOID
+                boolean showDelayField = (
+                        macro.getStrategy() == AVOID
                         || (macro.getMode() == SEND && macro.spaceTicks == 0)
-                        || macro.getMode() == REPEAT);
+                        || macro.getMode() == REPEAT
+                        || macro.getMode() == RANDOM
+                );
                 int minDelayFieldWidth = font.width("0__") + 8;
                 int msgFieldWidth = width - list.smallButtonWidth * 2 - SPACING * 2
                         - (showDelayField ? minDelayFieldWidth + SPACING : 0);

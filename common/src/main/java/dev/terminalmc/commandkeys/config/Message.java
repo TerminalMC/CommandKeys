@@ -17,57 +17,70 @@
 package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
-import dev.terminalmc.commandkeys.CommandKeys;
+import dev.terminalmc.commandkeys.util.JsonUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
 public class Message {
-    public final int version = 1;
-
-    private boolean enabled; // v1 parity
+    public static final int VERSION = 1;
+    public final int version = VERSION;
+    
     public String string;
     public int delayTicks;
 
     /**
-     * Creates a default instance.
+     * Creates a blank default instance.
      */
     public Message() {
-        enabled = true;
-        string = "";
-        delayTicks = 0;
+        this.string = "";
+        this.delayTicks = 0;
     }
 
     /**
      * Not validated, only for use by self-validating deserializer.
      */
-    Message(boolean enabled, String string, int delayTicks) {
-        this.enabled = enabled;
+    Message(String string, int delayTicks) {
         this.string = string;
         this.delayTicks = delayTicks;
     }
+
+    /**
+     * Copy constructor.
+     */
+    Message(Message message) {
+        this.string = message.string;
+        this.delayTicks = message.delayTicks;
+    }
+
+    // Validation
+
+    Message validate() {
+        if (string == null) string = "";
+        if (delayTicks < 0) delayTicks = 0;
+        return this;
+    }
+    
+    // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Message> {
         @Override
         public @Nullable Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
-            try {
-                int version = obj.get("version").getAsInt();
-                
-                boolean enabled = obj.get("enabled").getAsBoolean();
-                String string = obj.get("string").getAsString();
-                int delayTicks = obj.get("delayTicks").getAsInt();
+            int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
+            
+            String string = JsonUtil.getOrDefault(obj, "string",
+                    "", silent);
 
-                // Validation
-                if (delayTicks < 0) throw new JsonParseException("ResponseMessage Error: delayTicks < 0");
-
-                return new Message(enabled, string, delayTicks);
-            }
-            catch (Exception e) {
-                CommandKeys.LOG.warn("Unable to deserialize ResponseMessage", e);
-                return null;
-            }
+            int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks",
+                    0, silent);
+            
+            return new Message(
+                    string,
+                    delayTicks
+            ).validate();
         }
     }
 }

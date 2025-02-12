@@ -116,7 +116,7 @@ public class KeybindUtil {
                 
                 if (send) {
                     if (first) {
-                        ratelimited = macro.useRatelimitStatus && !canTrigger(key);
+                        ratelimited = macro.getUseRatelimitStatus() && !canTrigger(key);
                         first = false;
                     }
                     // Always allow repeat-stop

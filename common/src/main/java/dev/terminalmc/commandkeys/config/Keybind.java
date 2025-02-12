@@ -18,6 +18,7 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.util.JsonUtil;
 import net.minecraft.client.Minecraft;
 
 import java.lang.reflect.Type;
@@ -28,13 +29,17 @@ import java.util.Objects;
  * and dual-key activation.
  */
 public class Keybind {
-    public final int version = 0;
+    public static final int VERSION = 0;
+    public final int version = VERSION;
 
     private transient InputConstants.Key key;
     private String keyName;
     private transient InputConstants.Key limitKey;
     private String limitKeyName;
 
+    /**
+     * Creates a default instance.
+     */
     public Keybind() {
         this.key = InputConstants.UNKNOWN;
         this.keyName = key.getName();
@@ -42,11 +47,24 @@ public class Keybind {
         this.limitKeyName = limitKey.getName();
     }
 
-    public Keybind(InputConstants.Key key, InputConstants.Key limitKey) {
+    /**
+     * Not validated. Only for use by self-validating deserializer.
+     */
+    Keybind(InputConstants.Key key, InputConstants.Key limitKey) {
         this.key = key;
         this.keyName = key.getName();
         this.limitKey = limitKey;
         this.limitKeyName = limitKey.getName();
+    }
+
+    /**
+     * Copy constructor.
+     */
+    Keybind(Keybind keybind) {
+        this.key = keybind.key;
+        this.keyName = keybind.keyName;
+        this.limitKey = keybind.limitKey;
+        this.limitKeyName = keybind.limitKeyName;
     }
 
     public InputConstants.Key getKey() {
@@ -92,6 +110,19 @@ public class Keybind {
     public int hashCode() {
         return Objects.hash(key, limitKey);
     }
+    
+    // Validation
+    
+    Keybind validate() {
+        // If main key is unbound, limit key cannot be bound
+        if (key.equals(InputConstants.UNKNOWN) && !limitKey.equals(InputConstants.UNKNOWN)) {
+            limitKey = InputConstants.UNKNOWN;
+        }
+        // Update names just because
+        keyName = key.getName();
+        limitKeyName = limitKey.getName();
+        return this;
+    }
 
     // Deserialization
 
@@ -101,11 +132,17 @@ public class Keybind {
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
+            boolean silent = version != VERSION;
             
-            InputConstants.Key key = InputConstants.getKey(obj.get("keyName").getAsString());
-            InputConstants.Key limitKey = InputConstants.getKey(obj.get("limitKeyName").getAsString());
+            InputConstants.Key key = JsonUtil.getOrDefault(obj, "keyName",
+                    InputConstants.UNKNOWN, silent);
+            InputConstants.Key limitKey = JsonUtil.getOrDefault(obj, "limitKeyName",
+                    InputConstants.UNKNOWN, silent);
 
-            return new Keybind(key, limitKey);
+            return new Keybind(
+                    key,
+                    limitKey
+            ).validate();
         }
     }
 }

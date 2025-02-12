@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.8
+
+- Improved stability of deserializers
+- Fixed an issue where editing a copy of a profile would edit the original
+
 ## 2.3.7
 
 - Fixed a deserialization bug. If your macros were reset when upgrading to v2.3.6,

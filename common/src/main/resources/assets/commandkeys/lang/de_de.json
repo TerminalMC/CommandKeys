@@ -89,5 +89,7 @@
   "option.commandkeys.profile.keys": "Makros %s",
   "option.commandkeys.profile.keys.tooltip": "Aktiviert ein Makro durch Drücken der entsprechenden Taste im Spiel.\nMakros mit einer einzigen gebundenen Taste können auch auf diesem Bildschirm aktiviert werden, wenn nichts ausgewählt ist.",
   "option.commandkeys.profile.send.tooltip": "Diesen Makro auslösen",
-  "option.commandkeys.profile.switch": "Profil wechseln"
+  "option.commandkeys.profile.switch": "Profil wechseln",
+  "toast.commandkeys.reset.message": "Backup saved to %s",
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
 }

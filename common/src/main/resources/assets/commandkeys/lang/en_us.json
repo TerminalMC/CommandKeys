@@ -89,5 +89,7 @@
   "option.commandkeys.profile.keys": "Macros %s",
   "option.commandkeys.profile.keys.tooltip": "Activate a macro by pressing its keybind in-game.\nMacros with a single bound key can also be activated on this screen if nothing is selected.",
   "option.commandkeys.profile.send.tooltip": "Trigger this Macro",
-  "option.commandkeys.profile.switch": "Switch Profile"
+  "option.commandkeys.profile.switch": "Switch Profile",
+  "toast.commandkeys.reset.message": "Backup saved to %s",
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
 }

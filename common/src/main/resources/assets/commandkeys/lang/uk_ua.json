@@ -89,5 +89,7 @@
   "option.commandkeys.profile.keys": "Макроси %s",
   "option.commandkeys.profile.keys.tooltip": "Активуйте макрос, натиснувши його комбінацію клавіш у грі.\nМакроси з однією прив'язаною клавішею також можуть бути активовані на цьому екрані, якщо нічого не вибрано.",
   "option.commandkeys.profile.send.tooltip": "Запустити цей макрос",
-  "option.commandkeys.profile.switch": "Змінити профіль"
+  "option.commandkeys.profile.switch": "Змінити профіль",
+  "toast.commandkeys.reset.message": "Backup saved to %s",
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
 }

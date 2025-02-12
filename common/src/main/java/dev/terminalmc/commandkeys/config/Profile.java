@@ -20,25 +20,30 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.util.JsonUtil;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
- * Consists of behavioral options, a list of {@link Macro} instances, and
- * a list of strings identifying worlds and/or servers to which the
- * {@link Profile} is linked, collectively referred to as 'links'.
+ * Consists of behavioral options, a list of {@link Macro} instances, and a list
+ * of strings identifying worlds and/or servers to which the profile is linked,
+ * collectively referred to as 'links'.
  *
  * <p>A static {@link Map} {@link Profile#LINK_PROFILE_MAP} is maintained to
  * ensure no overlap of links across different profiles, and to improve link
- * lookup time.</p>
+ * lookup time. Note that as such, no two profiles can be allowed to contain
+ * the same link.</p>
  *
  * <p>A pair of transient {@link Multimap} instances ({@link Profile#keybindMap}
  * and {@link Profile#macroMap}) are maintained to improve macro lookup time.
  * </p>
  */
 public class Profile {
-    public final int version = 4;
+    public static final int VERSION = 4;
+    public final int version = VERSION;
     
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
     
@@ -49,17 +54,19 @@ public class Profile {
 
     // Profile details
     public String name;
+    public static final String nameDefault = "";
     private final List<String> links;
+    public static final Supplier<List<String>> linksDefault = ArrayList::new;
 
     // Behavior controls
-    public static final Control addToHistoryDefault = Control.OFF;
     private Control addToHistory;
-    public static final  Control showHudMessageDefault = Control.OFF;
+    public static final Control addToHistoryDefault = Control.OFF;
     private Control showHudMessage;
-    public static final  Control resumeRepeatingDefault = Control.OFF;
+    public static final Control showHudMessageDefault = Control.OFF;
     private Control resumeRepeating;
-    public static final  Control useRatelimitDefault = Control.ON;
+    public static final Control resumeRepeatingDefault = Control.OFF;
     private Control useRatelimit;
+    public static final Control useRatelimitDefault = Control.ON;
     public enum Control {
         ON,
         OFF,
@@ -68,23 +75,24 @@ public class Profile {
 
     // Macro list
     private final List<Macro> macros;
+    public static final Supplier<List<Macro>> macrosDefault = ArrayList::new;
 
     /**
      * Creates a default empty instance.
      */
     public Profile() {
-        this("");
+        this(nameDefault);
     }
     
     public Profile(String name) {
         this(
                 name,
-                new ArrayList<>(),
+                linksDefault.get(),
                 addToHistoryDefault,
                 showHudMessageDefault,
                 resumeRepeatingDefault,
                 useRatelimitDefault,
-                new ArrayList<>()
+                macrosDefault.get()
         );
     }
 
@@ -107,26 +115,36 @@ public class Profile {
         this.resumeRepeating = resumeRepeating;
         this.useRatelimit = useRatelimit;
         this.macros = macros;
-        // Add missing links to map
+        // Add missing links to map, and remove from the links list any that
+        // were already present in the map.
         this.links.removeIf((link) -> LINK_PROFILE_MAP.putIfAbsent(link, this) != null);
     }
 
     /**
-     * Copy constructor.
+     * Custom copy constructor.
+     * 
+     * <p><b>Note:</b> all fields are copied except for {@link Profile#name}
+     * (which has is set to the value of {@link Profile#getDisplayName()} with
+     * {@code " (Copy)"} appended), and {@link Profile#links} (which is set to
+     * default).</p>
      */
     Profile(Profile profile) {
-        this.name = profile.name;
-        this.links = new ArrayList<>();
+        this.name = profile.getDisplayName() + " (Copy)";
+        this.links = linksDefault.get();
         this.addToHistory = profile.addToHistory;
         this.showHudMessage = profile.showHudMessage;
         this.resumeRepeating = profile.resumeRepeating;
         this.useRatelimit = profile.useRatelimit;
-        this.macros = profile.macros;
+        this.macros = profile.macros.stream().map(Macro::new)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
-
+    
+    // Display name util
+    
     /**
-     * @return the first non-blank of the following: the profile name, the first
-     * link, the string "[Unnamed]".
+     * @return the first non-blank of the following: {@link Profile#name}, 
+     * the first element of {@link Profile#links}, the string 
+     * {@code "[Unnamed]"}.
      */
     public String getDisplayName() {
         String name = this.name;
@@ -209,10 +227,21 @@ public class Profile {
     public List<Macro> getMacros() {
         return Collections.unmodifiableList(macros);
     }
-    
+
+    /**
+     * Adds {@code macro} to this profile.
+     */
     public void addMacro(Macro macro) {
         macros.add(macro);
         addToMaps(macro);
+    }
+
+    /**
+     * Removes {@code macro} from this profile.
+     */
+    public void removeMacro(Macro macro) {
+        macros.remove(macro);
+        rebuildMaps();
     }
 
     /**
@@ -227,16 +256,11 @@ public class Profile {
         }
     }
     
-    public void removeMacro(Macro macro) {
-        macros.remove(macro);
-        rebuildMaps();
-    }
-    
     // Macro map management
 
     /**
      * Adds the keybind key and, if appropriate, the alternate keybind key of 
-     * {@code macro} to {@link Profile#keybindMap}, and adds the macro to
+     * {@code macro} to {@link Profile#keybindMap}, and adds {@code macro} to
      * {@link Profile#macroMap}. 
      */
     public void addToMaps(Macro macro) {
@@ -266,6 +290,8 @@ public class Profile {
         if (sendMode.equals(macro.sendMode)) return;
         macro.clearScheduled();
         macro.sendMode = sendMode;
+        // Rebuilding maps is required as only certain types of macro use their
+        // alternate keybind.
         rebuildMaps();
     }
     
@@ -274,7 +300,12 @@ public class Profile {
         macro.clearScheduled();
         macro.conflictStrategy = conflictStrategy;
     }
-    
+
+    /**
+     * If {@code keybind} is the {@link Macro#keybind} or
+     * {@link Macro#altKeybind} of {@code macro}, sets the primary key of the
+     * appropriate {@link Keybind} to {@code key}.
+     */
     public void setKey(Macro macro, Keybind keybind, InputConstants.Key key) {
         if (key.equals(keybind.getKey())) return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
@@ -284,6 +315,11 @@ public class Profile {
         }
     }
 
+    /**
+     * If {@code keybind} is the {@link Macro#keybind} or
+     * {@link Macro#altKeybind} of {@code macro}, sets the limit key of the
+     * appropriate {@link Keybind} to {@code key}.
+     */
     public void setLimitKey(Macro macro, Keybind keybind, InputConstants.Key key) {
         if (key.equals(keybind.getLimitKey())) return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
@@ -329,28 +365,24 @@ public class Profile {
         };
     }
 
-    // Cleanup and validation
+    // Validation
 
-    void cleanup() {
-        macros.removeIf((macro) -> {
-            // Allow trailing whitespace only for TYPE mode
-            if (!macro.sendMode.equals(Macro.SendMode.TYPE)) {
-                macro.messages.forEach((msg) -> msg.string = msg.string.stripTrailing());
-            }
-            // Allow blank messages for CYCLE mode as spacers and TYPE mode to open chat
-            if (!macro.sendMode.equals(Macro.SendMode.CYCLE) && 
-                    !macro.sendMode.equals(Macro.SendMode.TYPE)) {
-                macro.messages.removeIf((msg) -> msg.string.isBlank());
-            }
-            // Update transients in macros
-            setAddToHistory(addToHistory);
-            setShowHudMessage(showHudMessage);
-            setResumeRepeating(resumeRepeating);
-            setUseRatelimit(useRatelimit);
-            return macro.messages.isEmpty();
-        });
+    Profile validate() {
+        macros.forEach(Macro::validate);
+        macros.removeIf((macro) -> macro.messages.isEmpty());
+        
+        // Update transients in macros
+        setAddToHistory(addToHistory);
+        setShowHudMessage(showHudMessage);
+        setResumeRepeating(resumeRepeating);
+        setUseRatelimit(useRatelimit);
+        
+        // Possibly not required?
+        rebuildMaps();
+        
+        return this;
     }
-
+    
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Profile> {
@@ -359,29 +391,35 @@ public class Profile {
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
+            boolean silent = version != VERSION;
 
-            String name = obj.get("name").getAsString();
-            List<String> addresses = new ArrayList<>();
-            for (JsonElement je : obj.getAsJsonArray(version >= 3 ? "links" : "addresses")) {
-                addresses.add(je.getAsString());
-            }
-            Control addToHistory = version >= 2
-                    ? Control.valueOf(obj.get("addToHistory").getAsString())
-                    : addToHistoryDefault;
-            Control showHudMessage = version >= 2
-                    ? Control.valueOf(obj.get("showHudMessage").getAsString())
-                    : showHudMessageDefault;
-            Control resumeRepeating = version >= 4
-                    ? Control.valueOf(obj.get("resumeRepeating").getAsString())
-                    : resumeRepeatingDefault;
-            Control useRatelimit = version >= 4
-                    ? Control.valueOf(obj.get("useRatelimit").getAsString())
-                    : useRatelimitDefault;
+            String name = JsonUtil.getOrDefault(obj, "name",
+                    nameDefault, silent);
+            
+            List<String> addresses = JsonUtil.getOrDefault(obj, "links", 
+                    JsonUtil.getOrDefault(obj, "addresses",
+                            new ArrayList<>(), silent),
+                    silent);
+            
+            Control addToHistory = JsonUtil.getOrDefault(obj, "addToHistory",
+                    Control.class, addToHistoryDefault, silent);
 
-            // Deserialize CommandKey objects with link to deserialized Profile
-            List<Macro> macros = new ArrayList<>();
+            Control showHudMessage = JsonUtil.getOrDefault(obj, "showHudMessage",
+                    Control.class, showHudMessageDefault, silent);
 
-            Profile profile = new Profile(
+            Control resumeRepeating = JsonUtil.getOrDefault(obj, "resumeRepeating",
+                    Control.class, resumeRepeatingDefault, silent);
+
+            Control useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
+                    Control.class, useRatelimitDefault, silent);
+            
+            List<Macro> macros = JsonUtil.getOrDefault(ctx, obj, "macros",
+                    Macro.class,
+                    JsonUtil.getOrDefault(ctx, obj, "commandKeys",
+                            Macro.class, new ArrayList<>(), silent),
+                    silent);
+
+            return new Profile(
                     name,
                     addresses,
                     addToHistory,
@@ -389,16 +427,7 @@ public class Profile {
                     resumeRepeating,
                     useRatelimit,
                     macros
-            );
-            for (JsonElement je : obj.getAsJsonArray(version >= 2 ? "macros" : "commandKeys")) {
-                macros.add(ctx.deserialize(je, Macro.class));
-            }
-            profile.rebuildMaps();
-
-            // Validate
-            if (name == null) throw new JsonParseException("Profile Error: name == null");
-
-            return profile;
+            ).validate();
         }
     }
 }

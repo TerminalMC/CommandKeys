@@ -78,9 +78,7 @@ public class MainOptionList extends OptionList {
         addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    Profile newProfile = new Profile();
-                    Config.get().addProfile(newProfile);
-                    setEditingProfile(newProfile);
+                    setEditingProfile(Config.get().addNewProfile());
                     reload();
                 }));
 
@@ -288,7 +286,7 @@ public class MainOptionList extends OptionList {
                 ImageButton copyButton = new ImageButton(movingX, 0, smallButtonWidth, height,
                         COPY_SPRITES,
                         (button) -> {
-                            Config.get().copyProfile(profile);
+                            Config.get().addCopyProfile(profile);
                             list.reload();
                         },
                         Component.empty());
