@@ -136,6 +136,7 @@ public class Keybind {
             
             InputConstants.Key key = JsonUtil.getOrDefault(obj, "keyName",
                     InputConstants.UNKNOWN, silent);
+            
             InputConstants.Key limitKey = JsonUtil.getOrDefault(obj, "limitKeyName",
                     InputConstants.UNKNOWN, silent);
 

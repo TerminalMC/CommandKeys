@@ -419,6 +419,7 @@ public class Config {
             
             int spDefault = JsonUtil.getOrDefault(obj, "spDefault",
                     defaultIndexDefault, silent);
+            
             int mpDefault = JsonUtil.getOrDefault(obj, "mpDefault",
                     defaultIndexDefault, silent);
             
