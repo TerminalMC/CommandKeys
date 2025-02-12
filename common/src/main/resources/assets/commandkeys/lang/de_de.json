@@ -64,7 +64,7 @@
   "option.commandkeys.main.editDetails.tooltip": "Details bearbeiten",
   "option.commandkeys.main.editProfile.tooltip": "Profil bearbeiten",
   "option.commandkeys.main.exit_without_saving": "Are you sure you want to exit without saving?",
-  "option.commandkeys.main.exit_without_saving.confirm": "This will reload the configuration file to revert any changes you have made. If you have any active macros, you will have to re-start them.",
+  "option.commandkeys.main.exit_without_saving.confirm": "This will reload the configuration file to revert any changes you have made. If you have any active macros, they will be stopped.",
   "option.commandkeys.main.link": "Verbinden",
   "option.commandkeys.main.link.tooltip": "Verbindung zu dieser Welt/Server",
   "option.commandkeys.main.linked.tooltip": "Bereits mit dieser Welt/Server verbunden",
