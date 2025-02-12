@@ -63,6 +63,8 @@
   "option.commandkeys.main.delete.tooltip": "Удалить профиль",
   "option.commandkeys.main.editDetails.tooltip": "Редактировать детали",
   "option.commandkeys.main.editProfile.tooltip": "Редактировать профиль",
+  "option.commandkeys.main.exit_without_saving": "Are you sure you want to exit without saving?",
+  "option.commandkeys.main.exit_without_saving.confirm": "This will reload the configuration file to revert any changes you have made. If you have any active macros, you will have to re-start them.",
   "option.commandkeys.main.link": "Связать",
   "option.commandkeys.main.link.tooltip": "Связать с этим миром/сервером",
   "option.commandkeys.main.linked.tooltip": "Уже связано с этим миром/сервером",

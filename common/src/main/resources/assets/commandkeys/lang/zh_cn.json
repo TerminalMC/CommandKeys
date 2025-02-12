@@ -63,6 +63,8 @@
   "option.commandkeys.main.delete.tooltip": "删除配置文件",
   "option.commandkeys.main.editDetails.tooltip": "编辑详细信息",
   "option.commandkeys.main.editProfile.tooltip": "编辑配置文件",
+  "option.commandkeys.main.exit_without_saving": "Are you sure you want to exit without saving?",
+  "option.commandkeys.main.exit_without_saving.confirm": "This will reload the configuration file to revert any changes you have made. If you have any active macros, you will have to re-start them.",
   "option.commandkeys.main.link": "关联",
   "option.commandkeys.main.link.tooltip": "关联到这个世界/服务器",
   "option.commandkeys.main.linked.tooltip": "已经关联到这个世界/服务器",

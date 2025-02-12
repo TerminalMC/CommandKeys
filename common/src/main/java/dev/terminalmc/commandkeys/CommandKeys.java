@@ -21,7 +21,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
-import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
+import dev.terminalmc.commandkeys.gui.screen.MainOptionScreen;
 import dev.terminalmc.commandkeys.util.ModLogger;
 import dev.terminalmc.commandkeys.util.PlaceholderUtil;
 import net.minecraft.ChatFormatting;
@@ -72,7 +72,7 @@ public class CommandKeys {
     public static void onEndTick(Minecraft mc) {
         // Open config screen via keybind
         while (CONFIG_KEY.consumeClick()) {
-            mc.setScreen(new OptionScreen(mc.screen, true));
+            mc.setScreen(new MainOptionScreen(mc.screen, true));
         }
         
         // Tick ratelimiter
@@ -104,7 +104,7 @@ public class CommandKeys {
     }
 
     public static Screen getConfigScreen(Screen lastScreen) {
-        return new OptionScreen(lastScreen, inGame());
+        return new MainOptionScreen(lastScreen, inGame());
     }
 
     public static boolean inGame() {

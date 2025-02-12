@@ -18,10 +18,7 @@ package dev.terminalmc.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
-import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.gui.widget.list.OptionList;
-import dev.terminalmc.commandkeys.gui.widget.list.ProfileOptionList;
-import dev.terminalmc.commandkeys.gui.widget.list.MainOptionList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -31,8 +28,6 @@ import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-
-import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
  * Contains one tightly-coupled {@link OptionList}, which is used to display
@@ -79,21 +74,6 @@ public class OptionScreen extends OptionsSubScreen {
             - (HANGING_WIDGET_MARGIN * 2);
 
     protected OptionList list;
-
-    public OptionScreen(Screen lastScreen, boolean inGame) {
-        super(lastScreen, Minecraft.getInstance().options, inGame 
-                ? localized("option", "profile", CommandKeys.profile().getDisplayName()) 
-                : localized("option", "main"));
-        if (inGame) {
-            list = new ProfileOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                    BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
-                    CommandKeys.profile());
-        }
-        else {
-            list = new MainOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                    BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, null);
-        }
-    }
 
     /**
      * The {@link OptionList} passed here is not required to have the correct 

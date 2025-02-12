@@ -124,7 +124,6 @@ public class Config {
         this.profiles = profiles;
         this.spDefault = spDefault;
         this.mpDefault = mpDefault;
-        activateProfile(spDefault);
         this.defaultConflictStrategy = defaultConflictStrategy;
         this.defaultSendMode = defaultSendMode;
         this.ratelimitCount = ratelimitCount;
@@ -295,6 +294,12 @@ public class Config {
         instance = new Config();
         save();
         return instance;
+    }
+
+    public static Config reload() {
+        instance = null;
+        LINK_PROFILE_MAP.clear(); // Only static state
+        return get();
     }
 
     // Load and save
