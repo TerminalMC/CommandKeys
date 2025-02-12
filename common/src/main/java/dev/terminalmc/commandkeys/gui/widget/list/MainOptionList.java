@@ -21,7 +21,7 @@ import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
-import dev.terminalmc.commandkeys.gui.screen.OptionsScreen;
+import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -36,74 +36,77 @@ import java.time.Duration;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
- * Displays the list of {@link Profile} instances, with various widgets for
- * management.
+ * Displays the list of {@link Profile} instances with various widgets for
+ * management, as well as global control widgets.
  */
 public class MainOptionList extends OptionList {
     private @Nullable Profile editingProfile;
 
-    public MainOptionList(Minecraft mc, int width, int height, int y,
-                          int itemHeight, int entryWidth, int entryHeight,
-                          @Nullable Profile editingProfile) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+    public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                          int entryHeight, int entrySpace, @Nullable Profile editingProfile) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpace);
         this.editingProfile = editingProfile;
-
+    }
+    
+    @Override
+    protected void addEntries() {
         boolean inGame = CommandKeys.inGame();
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        // List title
+        addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                 inGame ? localized("option", "main.activateProfile")
                         : localized("option", "main.profiles", "\u2139"),
                 inGame ? null : Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
-
-        Config config = Config.get();
+        
+        // Profile list
         int i = 0;
-        for (Profile profile : config.getProfiles()) {
-            addEntry(new Entry.ProfileEntry(entryX, entryWidth, entryHeight, this,
-                    profile, i, i == config.getSpDefault(), i == config.getMpDefault(), inGame));
+        for (Profile profile : Config.get().getProfiles()) {
+            addEntry(new Entry.ProfileOptions(dynEntryX, dynEntryWidth, entryHeight, this,
+                    profile, i, inGame));
             if (profile.equals(editingProfile)) {
-                addEntry(new Entry.ProfileNameEntry(entryX, entryWidth, entryHeight, profile));
+                // Show name field and list of links
+                addEntry(new Entry.ProfileName(dynEntryX, dynEntryWidth, entryHeight, profile));
                 for (String address : profile.getLinks()) {
-                    addEntry(new Entry.ServerAddressEntry(entryX, entryWidth, entryHeight, this,
+                    addEntry(new Entry.ProfileLink(dynEntryX, dynEntryWidth, entryHeight, this,
                             profile, address));
                 }
             }
-            if (i == 0 && inGame) {
-                addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+            if (i++ == 0 && inGame) {
+                // Separate active profile and other profiles
+                addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                         localized("option", "main.otherProfiles", "\u2139"),
                         Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
             }
-            i++;
         }
-
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.ActionButton(dynEntryX, dynEntryWidth, entryHeight,
                 Component.literal("+"), null, -1,
                 (button) -> {
-                    setEditingProfile(Config.get().addNewProfile());
-                    reload();
+                    editingProfile = Config.get().addNewProfile();
+                    init();
                 }));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        // Default options
+        addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                 localized("option", "main.default", "\u2139"),
                 Tooltip.create(localized("option", "main.default.tooltip")), 500));
-        addEntry(new Entry.DefaultOptionsEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.DefaultOptions(dynEntryX, dynEntryWidth, entryHeight));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        // Ratelimit options
+        addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                 localized("option", "main.ratelimit", "\u2139"),
                 Tooltip.create(localized("option", "main.ratelimit.tooltip")), 500));
-        addEntry(new Entry.RatelimitEntry(entryX, entryWidth, entryHeight));
+        addEntry(new Entry.Ratelimit(dynEntryX, dynEntryWidth, entryHeight));
+    }
+    
+    // Sub-screen opening
+
+    public void openProfileOptions(Profile profile) {
+        mc.setScreen(new OptionScreen(screen, localized("option", "profile",
+                profile.getDisplayName()), new ProfileOptionList(mc, width, height,
+                getY(), entryWidth, entryHeight, entrySpacing, profile)));
     }
 
-    private void setEditingProfile(@Nullable Profile profile) {
-        editingProfile = profile;
-    }
-
-    @Override
-    public MainOptionList reload(int width, int height, double scrollAmount) {
-        MainOptionList newListWidget = new MainOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, editingProfile);
-        newListWidget.setScrollAmount(scrollAmount);
-        return newListWidget;
-    }
+    // Input handling
 
     @Override
     public boolean keyPressed(InputConstants.Key key) {
@@ -125,36 +128,35 @@ public class MainOptionList extends OptionList {
         return false;
     }
 
-    public void openProfileOptionsScreen(Profile profile) {
-        minecraft.setScreen(new OptionsScreen(screen, localized("option", "profile", profile.getDisplayName()),
-                new ProfileOptionList(minecraft, screen.width, screen.height, getY(),
-                        itemHeight, entryWidth, entryHeight, profile)));
-    }
+    // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
 
-        private static class ProfileEntry extends Entry {
+        private static class ProfileOptions extends Entry {
             MainOptionList list;
             Profile profile;
 
-            ProfileEntry(int x, int width, int height, MainOptionList list, Profile profile,
-                         int index, boolean spDefault, boolean mpDefault, boolean inGame) {
+            ProfileOptions(int x, int width, int height, MainOptionList list, Profile profile,
+                           int index, boolean inGame) {
                 super();
                 this.list = list;
                 this.profile = profile;
+                
+                boolean spDefault = index == Config.get().getSpDefault();
+                boolean mpDefault = index == Config.get().getMpDefault();
 
-                int smallButtonWidth = list.smallButtonWidth;
-                int mainButtonWidth = width - smallButtonWidth * 5 - SPACING * 5;
+                int smallWidgetWidth = list.smallWidgetWidth;
+                int mainButtonWidth = width - smallWidgetWidth * 5 - SPACE * 5;
                 int mainButtonX = x;
 
                 if (inGame) {
                     if (index == 0) {
                         // Link button
                         ImageButton linkButton = new ImageButton(
-                                x, 0, smallButtonWidth, height, LINK_SPRITES,
+                                x, 0, smallWidgetWidth, height, LINK_SPRITES,
                                 (button) -> {
                                     profile.forceAddLink(CommandKeys.lastConnection);
-                                    list.reload();
+                                    list.init();
                                 });
                         if (profile.getLinks().contains(CommandKeys.lastConnection)) {
                             linkButton.setTooltip(Tooltip.create(
@@ -172,18 +174,18 @@ public class MainOptionList extends OptionList {
                         Button activateButton = Button.builder(Component.literal("\u2191"),
                                         (button) -> {
                                             Config.get().activateProfile(index);
-                                            list.reload();
+                                            list.init();
                                         })
                                 .pos(x, 0)
-                                .size(smallButtonWidth, smallButtonWidth)
+                                .size(smallWidgetWidth, smallWidgetWidth)
                                 .build();
                         activateButton.setTooltip(Tooltip.create(
                                 localized("option", "main.activate.tooltip")));
                         activateButton.setTooltipDelay(Duration.ofMillis(500));
                         elements.add(activateButton);
                     }
-                    mainButtonWidth -= (smallButtonWidth + SPACING);
-                    mainButtonX += (smallButtonWidth + SPACING);
+                    mainButtonWidth -= (smallWidgetWidth + SPACE);
+                    mainButtonX += (smallWidgetWidth + SPACE);
                 }
 
                 MutableComponent name = Component.literal(profile.getDisplayName());
@@ -201,7 +203,7 @@ public class MainOptionList extends OptionList {
 
                 // Edit profile button
                 elements.add(Button.builder(name, (button) ->
-                                list.openProfileOptionsScreen(profile))
+                                list.openProfileOptions(profile))
                         .tooltip(Tooltip.create(
                                 localized("option", "main.editProfile.tooltip")))
                         .pos(mainButtonX, 0)
@@ -209,10 +211,10 @@ public class MainOptionList extends OptionList {
                         .build());
 
                 // Switch to right-justified
-                int movingX = x + width - smallButtonWidth * 5 - SPACING * 4;
+                int movingX = x + width - smallWidgetWidth * 5 - SPACE * 4;
 
                 // Edit details button
-                ImageButton configureButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                ImageButton configureButton = new ImageButton(movingX, 0, smallWidgetWidth, height,
                         OPTION_SPRITES,
                         (button) -> {
                             if (list.editingProfile == null) {
@@ -224,24 +226,24 @@ public class MainOptionList extends OptionList {
                             else {
                                 list.editingProfile = null;
                             }
-                            list.reload();
+                            list.init();
                         },
                         Component.empty());
                 configureButton.setTooltip(Tooltip.create(
                         localized("option", "main.editDetails.tooltip")));
                 configureButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(configureButton);
-                movingX += smallButtonWidth + SPACING;
+                movingX += smallWidgetWidth + SPACE;
 
                 // Singleplayer default button
                 Button setAsSpDefaultButton = Button.builder(
                         localized("option", "main.defaultSingleplayer.set"),
                         (button) -> {
                             Config.get().setSpDefault(index);
-                            list.reload();
+                            list.init();
                         })
                         .pos(movingX, 0)
-                        .size(smallButtonWidth, height)
+                        .size(smallWidgetWidth, height)
                         .build();
                 if (spDefault) {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
@@ -255,17 +257,17 @@ public class MainOptionList extends OptionList {
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !spDefault;
                 elements.add(setAsSpDefaultButton);
-                movingX += smallButtonWidth + SPACING;
+                movingX += smallWidgetWidth + SPACE;
 
                 // Multiplayer default button
                 Button setAsMpDefaultButton = Button.builder(
                         localized("option", "main.defaultMultiplayer.set"),
                                 (button) -> {
                                     Config.get().setMpDefault(index);
-                                    list.reload();
+                                    list.init();
                                 })
                         .pos(movingX, 0)
-                        .size(smallButtonWidth, height)
+                        .size(smallWidgetWidth, height)
                         .build();
                 if (mpDefault) {
                     setAsMpDefaultButton.setTooltip(Tooltip.create(
@@ -280,30 +282,30 @@ public class MainOptionList extends OptionList {
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsMpDefaultButton.active = !mpDefault;
                 elements.add(setAsMpDefaultButton);
-                movingX += smallButtonWidth + SPACING;
+                movingX += smallWidgetWidth + SPACE;
 
                 // Copy button
-                ImageButton copyButton = new ImageButton(movingX, 0, smallButtonWidth, height,
+                ImageButton copyButton = new ImageButton(movingX, 0, smallWidgetWidth, height,
                         COPY_SPRITES,
                         (button) -> {
                             Config.get().addCopyProfile(profile);
-                            list.reload();
+                            list.init();
                         },
                         Component.empty());
                 copyButton.setTooltip(Tooltip.create(
                         localized("option", "main.copy.tooltip")));
                 copyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(copyButton);
-                movingX += smallButtonWidth + SPACING;
+                movingX += smallWidgetWidth + SPACE;
 
                 // Delete button
                 Button deleteButton = Button.builder(Component.literal("\u274C"),
                                 (button) -> {
                                     Config.get().removeProfile(index);
-                                    list.reload();
+                                    list.init();
                                 })
                         .pos(movingX, 0)
-                        .size(smallButtonWidth, height)
+                        .size(smallWidgetWidth, height)
                         .build();
                 if (spDefault || mpDefault) {
                     deleteButton.active = false;
@@ -323,11 +325,11 @@ public class MainOptionList extends OptionList {
             }
         }
 
-        private static class ProfileNameEntry extends Entry {
-            ProfileNameEntry(int x, int width, int height, Profile profile) {
+        private static class ProfileName extends Entry {
+            ProfileName(int x, int width, int height, Profile profile) {
                 super();
                 int labelWidth = 50;
-                int nameBoxWidth = width - labelWidth - SPACING;
+                int nameBoxWidth = width - labelWidth - SPACE;
 
                 Button label = Button.builder(localized("option", "main.name"), (button -> {}))
                         .pos(x, 0)
@@ -345,12 +347,12 @@ public class MainOptionList extends OptionList {
             }
         }
 
-        private static class ServerAddressEntry extends Entry {
-            ServerAddressEntry(int x, int width, int height, MainOptionList list,
-                               Profile profile, String address) {
+        private static class ProfileLink extends Entry {
+            ProfileLink(int x, int width, int height, MainOptionList list, Profile profile,
+                        String address) {
                 super();
                 int labelWidth = 50;
-                int addressBoxWidth = width - labelWidth - list.smallButtonWidth - SPACING;
+                int addressBoxWidth = width - labelWidth - list.smallWidgetWidth - SPACE;
 
                 Button label = Button.builder(localized("option", "main.link"), (button -> {}))
                         .pos(x, 0)
@@ -369,10 +371,10 @@ public class MainOptionList extends OptionList {
                 Button removeButton = Button.builder(Component.literal("\u274C"),
                         (button) -> {
                             profile.removeLink(address);
-                            list.reload();
+                            list.init();
                         })
-                        .pos(x + width - list.smallButtonWidth, 0)
-                        .size(list.smallButtonWidth, height)
+                        .pos(x + width - list.smallWidgetWidth, 0)
+                        .size(list.smallWidgetWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(
                         localized("option", "main.removeLink.tooltip")));
@@ -381,10 +383,10 @@ public class MainOptionList extends OptionList {
             }
         }
 
-        private static class DefaultOptionsEntry extends Entry {
-            DefaultOptionsEntry(int x, int width, int height) {
+        private static class DefaultOptions extends Entry {
+            DefaultOptions(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACE) / 2;
 
                 // Conflict strategy button
                 elements.add(CycleButton.builder(KeybindUtil::localizeStrategy)
@@ -410,11 +412,11 @@ public class MainOptionList extends OptionList {
             }
         }
 
-        private static class RatelimitEntry extends Entry {
-            RatelimitEntry(int x, int width, int height) {
+        private static class Ratelimit extends Entry {
+            Ratelimit(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACING * 2) / 3;
-                int fieldWidth = (buttonWidth - SPACING) / 2;
+                int buttonWidth = (width - SPACE * 2) / 3;
+                int fieldWidth = (buttonWidth - SPACE) / 2;
                 int movingX = x;
 
                 // Message count field
@@ -435,7 +437,7 @@ public class MainOptionList extends OptionList {
                 countField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.count.tooltip")));
                 elements.add(countField);
-                movingX += fieldWidth + SPACING;
+                movingX += fieldWidth + SPACE;
 
                 // Time window field
                 EditBox ticksField = new EditBox(Minecraft.getInstance().font,
@@ -455,7 +457,7 @@ public class MainOptionList extends OptionList {
                 ticksField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.ticks.tooltip")));
                 elements.add(ticksField);
-                movingX = x + width - buttonWidth * 2 - SPACING;
+                movingX = x + width - buttonWidth * 2 - SPACE;
 
                 CycleButton<Boolean> strictButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),

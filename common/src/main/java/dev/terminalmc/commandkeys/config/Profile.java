@@ -249,11 +249,13 @@ public class Profile {
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
      */
-    public void moveMacro(int sourceIndex, int destIndex) {
+    public boolean moveMacro(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             macros.add(destIndex, macros.remove(sourceIndex));
             rebuildMaps();
+            return true;
         }
+        return false;
     }
     
     // Macro map management

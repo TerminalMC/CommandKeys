@@ -229,7 +229,7 @@ public class Macro {
      * by this macro, {@code false} otherwise.
      */
     public boolean usesKeybind(Keybind keybind) {
-        return (keybind == this.keybind) || (usesAltKeybind() && keybind == this.altKeybind);
+        return (keybind == this.keybind) || (keybind == this.altKeybind);
     }
 
     /**
@@ -266,10 +266,12 @@ public class Macro {
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
      */
-    public void moveMessage(int sourceIndex, int destIndex) {
+    public boolean moveMessage(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
             messages.add(destIndex, messages.remove(sourceIndex));
+            return true;
         }
+        return false;
     }
 
     // Activation

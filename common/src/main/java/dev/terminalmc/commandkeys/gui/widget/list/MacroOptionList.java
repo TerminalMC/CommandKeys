@@ -16,38 +16,52 @@
 
 package dev.terminalmc.commandkeys.gui.widget.list;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.config.*;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
 import static dev.terminalmc.commandkeys.config.Profile.Control.DEFER;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
+/**
+ * Displays widgets for all options of a {@link Macro}, and a list of entries
+ * for its {@link Message} instances.
+ */
 public class MacroOptionList extends MacroBindList {
     private final Macro macro;
-    private int dragSourceSlot = -1;
+    private OptionList.Entry.ActionButton addMessageEntry;
 
-    public MacroOptionList(Minecraft mc, int width, int height, int y,
-                           int itemHeight, int entryWidth, int entryHeight,
-                           Profile profile, Macro macro) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight, profile);
+    public MacroOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+                           int entryHeight, int entrySpacing, Profile profile, Macro macro) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, profile,
+                new HashMap<>(Map.of(Entry.MessageOptions.class, macro::moveMessage)));
         this.macro = macro;
-
-        addEntry(new Entry.BindAndControlsEntry(entryX, entryWidth, entryHeight, this, profile, macro));
+        
+        addMessageEntry = new OptionList.Entry.ActionButton(
+                entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
+                (button) -> {
+                    macro.addMessage(new Message());
+                    init();
+                    ensureVisible(addMessageEntry);
+                });
+    }
+    
+    @Override
+    protected void addEntries() {
+        addEntry(new Entry.DualKeybind(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
 
         if (
                 profile.getShowHudMessage().equals(DEFER)
@@ -55,127 +69,87 @@ public class MacroOptionList extends MacroBindList {
                 || profile.getResumeRepeating().equals(DEFER)
                 || profile.getUseRatelimit().equals(DEFER)
         ) {
-            addEntry(new Entry.ControlsEntry(entryX, entryWidth, entryHeight, profile, macro));
+            addEntry(new Entry.MacroControls(dynEntryX, dynEntryWidth, entryHeight, profile, macro));
         }
 
-        addEntry(new Entry.StrategyAndModeEntry(entryX, entryWidth, entryHeight, this, profile, macro));
+        addEntry(new Entry.MacroMode(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
 
-        addEntry(new OptionList.Entry.TextEntry(entryX, entryWidth, entryHeight,
+        addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                 localized("option", "key.messages"), null, -1));
 
-        int i = 0;
-        for (Message msg : macro.getMessages()) {
-            Entry msgEntry = new Entry.MessageEntry(dynEntryX, dynEntryWidth, entryHeight,
-                    this, macro, msg, i++);
-            addEntry(msgEntry);
-            addEntry(new OptionList.Entry.SpaceEntry(msgEntry));
-        }
-        addEntry(new OptionList.Entry.ActionButtonEntry(entryX, entryWidth, entryHeight,
-                Component.literal("+"), null, -1,
-                (button) -> {
-                    macro.addMessage(new Message());
-                    reload();
-                }));
+        refreshMessageSubList();
+        addMessageEntry.setBounds(dynEntryX, dynEntryWidth, entryHeight);
+        addEntry(addMessageEntry);
     }
 
-    @Override
-    protected OptionList reload(int width, int height, double scrollAmount) {
-        MacroOptionList newListWidget = new MacroOptionList(minecraft, width, height,
-                getY(), itemHeight, entryWidth, entryHeight, profile, macro);
-        newListWidget.setScrollAmount(scrollAmount);
-        return newListWidget;
-    }
-
-    void focusDelayField() {
-        for (OptionList.Entry e : children()) {
-            if (e instanceof Entry.StrategyAndModeEntry entry) {
-                entry.focusDelayField();
-                entry.setFocused(true);
-                setFocused(entry);
-                screen.setFocused(this);
-                return;
-            }
-        }
-    }
-
-    // Message dragging
-
-    @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
-        if (dragSourceSlot != -1) {
-            super.renderItem(graphics, mouseX, mouseY, delta, dragSourceSlot,
-                    mouseX, mouseY, entryWidth, entryHeight);
-        }
-    }
-
-    @Override
-    public boolean mouseReleased(double x, double y, int button) {
-        if (dragSourceSlot != -1 && button == InputConstants.MOUSE_BUTTON_LEFT) {
-            dropDragged(x, y);
-            return true;
-        }
-        return super.mouseReleased(x, y, button);
-    }
-
-    private void dropDragged(double mouseX, double mouseY) {
-        OptionList.Entry hoveredEntry = getEntryAtPosition(mouseX, mouseY);
-        int hoveredSlot = children().indexOf(hoveredEntry);
-        // Check whether the drop location is valid
-        if (hoveredEntry instanceof Entry.MessageEntry || hoveredSlot == messageListOffset() - 1) {
-            // pass
-        } else if (hoveredEntry instanceof OptionList.Entry.SpaceEntry) {
-            hoveredSlot -= 1; // Reference the 'parent' Entry
+    protected void refreshMessageSubList() {
+        children().removeIf((entry) -> entry instanceof Entry.MessageOptions);
+        // Get list start index
+        int start = children().indexOf(addMessageEntry);
+        if (start == -1) {
+            start = children().size();
         } else {
-            this.dragSourceSlot = -1;
-            return;
+            start--;
         }
-        // Check whether the move operation would actually change anything
-        if (hoveredSlot > dragSourceSlot || hoveredSlot < dragSourceSlot - 1) {
-            // Account for the list not starting at slot 0
-            int sourceIndex = dragSourceSlot - messageEntryOffset(dragSourceSlot);
-            int destIndex = hoveredSlot - messageEntryOffset(hoveredSlot);
-            // I can't really explain why
-            if (sourceIndex > destIndex) destIndex += 1;
-            // Move
-            macro.moveMessage(sourceIndex, destIndex);
-            reload();
+        // Add in reverse order
+        List<Message> messages = macro.getMessages();
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            Message message = messages.get(i);
+            Entry msgEntry = new Entry.MessageOptions(dynWideEntryX, dynWideEntryWidth, entryHeight,
+                    this, macro, message, i);
+            children().add(start, new OptionList.Entry.Space(msgEntry));
+            children().add(start, msgEntry);
         }
-        this.dragSourceSlot = -1;
+        clampScrollAmount();
     }
 
-    /**
-     * @return The index of the first {@link Entry.MessageEntry} in the
-     * {@link OptionList}.
-     */
-    private int messageListOffset() {
-        int i = 0;
-        for (OptionList.Entry entry : children()) {
-            if (entry instanceof Entry.MessageEntry) return i;
-            i++;
-        }
-        throw new IllegalStateException("Response list not found");
-    }
-
-    /**
-     * @return The number of non-{@link Entry.MessageEntry} entries in the
-     * {@link OptionList} before (and including) the specified index.
-     */
-    private int messageEntryOffset(int index) {
-        int i = 0;
-        int offset = 0;
-        for (OptionList.Entry entry : children()) {
-            if (!(entry instanceof Entry.MessageEntry)) offset++;
-            if (i++ == index) return offset;
-        }
-        throw new IllegalStateException("Response index out of range");
-    }
+    // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
-        private static class ControlsEntry extends Entry {
-            ControlsEntry(int x, int width, int height, Profile profile, Macro macro) {
+
+        private static class DualKeybind extends Entry {
+            DualKeybind(int x, int width, int height, MacroOptionList list,
+                        Profile profile, Macro macro) {
                 super();
-                int buttonWidth = (width - SMALL_SPACING * 3) / 4;
+                int buttonWidth = (width - SPACE) / 2;
+
+                KeybindUtil.KeybindInfo info =
+                        new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
+                elements.add(Button.builder(info.conflictLabel,
+                                (button) -> {
+                                    list.setSelected(macro, macro.getKeybind());
+                                    button.setMessage(Component.literal("> ")
+                                            .append(info.label.withStyle(ChatFormatting.WHITE)
+                                                    .withStyle(ChatFormatting.UNDERLINE))
+                                            .append(" <").withStyle(ChatFormatting.YELLOW));
+                                })
+                        .tooltip(Tooltip.create(info.tooltip))
+                        .pos(x, 0)
+                        .size(buttonWidth, height)
+                        .build());
+
+                KeybindUtil.KeybindInfo altInfo =
+                        new KeybindUtil.KeybindInfo(profile, macro, macro.getAltKeybind());
+                elements.add(Button.builder(altInfo.conflictLabel,
+                                (button) -> {
+                                    list.setSelected(macro, macro.getAltKeybind());
+                                    button.setMessage(Component.literal("> ")
+                                            .append(altInfo.label.withStyle(ChatFormatting.WHITE)
+                                                    .withStyle(ChatFormatting.UNDERLINE))
+                                            .append(" <").withStyle(ChatFormatting.YELLOW));
+                                })
+                        .tooltip(Tooltip.create(altInfo.tooltip.getString().isBlank()
+                                ? localized("option", "key.bind.alt.tooltip") : altInfo.tooltip))
+                        .pos(x + width - buttonWidth, 0)
+                        .size(buttonWidth, height)
+                        .build());
+            }
+        }
+        
+        private static class MacroControls extends Entry {
+            MacroControls(int x, int width, int height, Profile profile, Macro macro) {
+                super();
+                int buttonWidth = (width - SPACE_SMALL * 3) / 4;
                 int movingX = x;
                 
                 boolean hudActive = profile.getShowHudMessage().equals(DEFER);
@@ -192,7 +166,7 @@ public class MacroOptionList extends MacroBindList {
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
                 hudButton.active = hudActive;
                 elements.add(hudButton);
-                movingX += buttonWidth + SMALL_SPACING;
+                movingX += buttonWidth + SPACE_SMALL;
 
                 boolean historyActive = profile.getAddToHistory().equals(DEFER);
                 CycleButton<Boolean> historyButton = CycleButton.booleanBuilder(
@@ -208,7 +182,7 @@ public class MacroOptionList extends MacroBindList {
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
                 historyButton.active = historyActive;
                 elements.add(historyButton);
-                movingX = x + width - buttonWidth * 2 - SMALL_SPACING;
+                movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
                 boolean resumeActive = profile.getResumeRepeating().equals(DEFER);
                 CycleButton<Boolean> resumeButton = CycleButton.booleanBuilder(
@@ -224,7 +198,7 @@ public class MacroOptionList extends MacroBindList {
                 resumeButton.setTooltipDelay(Duration.ofMillis(500));
                 resumeButton.active = resumeActive;
                 elements.add(resumeButton);
-                movingX += buttonWidth + SMALL_SPACING;
+                movingX += buttonWidth + SPACE_SMALL;
 
                 boolean ratelimitActive = profile.getUseRatelimit().equals(DEFER);
                 CycleButton<Boolean> ratelimitButton = CycleButton.booleanBuilder(
@@ -243,59 +217,20 @@ public class MacroOptionList extends MacroBindList {
             }
         }
 
-        private static class BindAndControlsEntry extends Entry {
-            BindAndControlsEntry(int x, int width, int height, MacroOptionList list,
-                                 Profile profile, Macro macro) {
-                super();
-                int buttonWidth = (width - SPACING) / 2;
-
-                KeybindUtil.KeybindInfo info = 
-                        new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
-                elements.add(Button.builder(info.conflictLabel,
-                                (button) -> {
-                                    list.setSelected(macro, macro.getKeybind());
-                                    button.setMessage(Component.literal("> ")
-                                            .append(info.label.withStyle(ChatFormatting.WHITE)
-                                                    .withStyle(ChatFormatting.UNDERLINE))
-                                            .append(" <").withStyle(ChatFormatting.YELLOW));
-                                })
-                        .tooltip(Tooltip.create(info.tooltip))
-                        .pos(x, 0)
-                        .size(buttonWidth, height)
-                        .build());
-                
-                KeybindUtil.KeybindInfo altInfo = 
-                        new KeybindUtil.KeybindInfo(profile, macro, macro.getAltKeybind());
-                elements.add(Button.builder(altInfo.conflictLabel,
-                                (button) -> {
-                                    list.setSelected(macro, macro.getAltKeybind());
-                                    button.setMessage(Component.literal("> ")
-                                            .append(altInfo.label.withStyle(ChatFormatting.WHITE)
-                                                    .withStyle(ChatFormatting.UNDERLINE))
-                                            .append(" <").withStyle(ChatFormatting.YELLOW));
-                                })
-                        .tooltip(Tooltip.create(altInfo.tooltip.getString().isBlank() 
-                                ? localized("option", "key.bind.alt.tooltip") : altInfo.tooltip))
-                        .pos(x + width - buttonWidth, 0)
-                        .size(buttonWidth, height)
-                        .build());
-            }
-        }
-
-        private static class StrategyAndModeEntry extends Entry {
+        private static class MacroMode extends Entry {
             private EditBox delayField;
 
-            StrategyAndModeEntry(int x, int width, int height, MacroOptionList list, 
-                                 Profile profile, Macro macro) {
+            MacroMode(int x, int width, int height, MacroOptionList list,
+                      Profile profile, Macro macro) {
                 super();
                 Font font = Minecraft.getInstance().font;
-                int buttonWidth = (width - SPACING) / 2;
+                int buttonWidth = (width - SPACE) / 2;
                 int minDelayFieldWidth = font.width("0_") + 8;
                 int stopButtonWidth = font.width("Stop") + 8;
                 int modeButtonWidth = switch(macro.getMode()) {
                     case SEND -> buttonWidth - minDelayFieldWidth;
                     case TYPE, RANDOM -> buttonWidth;
-                    case CYCLE -> buttonWidth - list.smallButtonWidth;
+                    case CYCLE -> buttonWidth - list.smallWidgetWidth;
                     case REPEAT -> buttonWidth -
                             (macro.hasRepeating() ? stopButtonWidth : minDelayFieldWidth);
                 };
@@ -311,7 +246,7 @@ public class MacroOptionList extends MacroBindList {
                                 localized("option", "key.conflict"),
                                 (button, status) -> {
                                     profile.setConflictStrategy(macro, status);
-                                    list.reload();
+                                    list.init();
                                 });
                 elements.add(conflictButton);
 
@@ -326,12 +261,17 @@ public class MacroOptionList extends MacroBindList {
                                 localized("option", "key.mode"),
                                 (button, status) -> {
                                     profile.setSendMode(macro, status);
-                                    list.reload();
+                                    list.init();
                                 });
                 elements.add(modeButton);
 
-                if (macro.getMode().equals(SEND)
-                        || (macro.getMode().equals(REPEAT) && !macro.hasRepeating())) {
+                if (
+                        macro.getMode().equals(SEND)
+                        || (
+                                macro.getMode().equals(REPEAT)
+                                && !macro.hasRepeating()
+                        )
+                ) {
                     // Delay field
                     delayField = new EditBox(font, x + width - minDelayFieldWidth, 0,
                             minDelayFieldWidth, height, Component.empty());
@@ -353,7 +293,7 @@ public class MacroOptionList extends MacroBindList {
                             // Show/hide per-message delay fields
                             if (macro.getMode() == SEND
                                     && ((space == 0 && oldSpace != 0) || (space != 0 && oldSpace == 0))) {
-                                ((MacroOptionList)list.reload()).focusDelayField();
+                                list.refreshMessageSubList();
                             } else {
                                 delayField.setTextColor(16777215);
                             }
@@ -365,8 +305,9 @@ public class MacroOptionList extends MacroBindList {
                     // Workaround to prevent the value sliding off to the left
                     delayField.setCursorPosition(0);
                     delayField.setHighlightPos(0);
-                    delayField.setTooltip(Tooltip.create(localized("option",
-                            "key.delay.tooltip" + (macro.getMode().equals(REPEAT) ? ".repeat" : ""))));
+                    delayField.setTooltip(Tooltip.create(
+                            localized("option", "key.delay.tooltip"
+                                    + (macro.getMode().equals(REPEAT) ? ".repeat" : ""))));
 
                     elements.add(delayField);
                 }
@@ -375,7 +316,7 @@ public class MacroOptionList extends MacroBindList {
                     elements.add(Button.builder(localized("option", "key.repeat.stop"),
                             (button) -> {
                                 macro.stopRepeating();
-                                list.reload();
+                                list.init();
                             })
                             .tooltip(Tooltip.create(
                                     localized("option", "key.repeat.stop.tooltip")))
@@ -396,24 +337,16 @@ public class MacroOptionList extends MacroBindList {
                             .displayOnlyValue()
                             .withTooltip((status) -> Tooltip.create(
                                     localized("option", "key.cycle.index.tooltip")))
-                            .create(x + width - list.smallButtonWidth, 0,
-                                    list.smallButtonWidth, height, Component.empty(),
+                            .create(x + width - list.smallWidgetWidth, 0,
+                                    list.smallWidgetWidth, height, Component.empty(),
                                     (button, status) -> macro.cycleIndex = status));
                 }
             }
-
-            void focusDelayField() {
-                delayField.setFocused(true);
-                this.setFocused(delayField);
-                int pos = delayField.getValue().length();
-                delayField.setCursorPosition(pos);
-                delayField.setHighlightPos(pos);
-            }
         }
 
-        private static class MessageEntry extends Entry {
-            MessageEntry(int x, int width, int height, MacroOptionList list,
-                         Macro macro, Message msg, int index) {
+        private static class MessageOptions extends Entry {
+            MessageOptions(int x, int width, int height, MacroOptionList list, Macro macro,
+                           Message msg, int index) {
                 super();
                 Font font = Minecraft.getInstance().font;
                 boolean showDelayField = (
@@ -423,24 +356,23 @@ public class MacroOptionList extends MacroBindList {
                         || macro.getMode() == RANDOM
                 );
                 int minDelayFieldWidth = font.width("0__") + 8;
-                int msgFieldWidth = width - list.smallButtonWidth * 2 - SPACING * 2
-                        - (showDelayField ? minDelayFieldWidth + SPACING : 0);
+                int msgFieldWidth = width - (showDelayField ? minDelayFieldWidth + SPACE : 0);
 
                 // Drag reorder button
                 elements.add(Button.builder(Component.literal("\u2191\u2193"),
                                 (button) -> {
                                     this.setDragging(true);
-                                    list.dragSourceSlot = list.children().indexOf(this);
+                                    list.startDragging(this, null, false);
                                 })
-                        .pos(x, 0)
-                        .size(list.smallButtonWidth, height)
+                        .pos(x - list.smallWidgetWidth - SPACE, 0)
+                        .size(list.smallWidgetWidth, height)
                         .build());
 
                 // Message field
                 MultiLineEditBox messageField = new MultiLineEditBox(font,
-                        x + list.smallButtonWidth + SPACING, 0, msgFieldWidth, height * 2,
+                        x, 0, msgFieldWidth, height * 2,
                         Component.empty(), Component.empty());
-                messageField.setCharacterLimit(256);
+                messageField.setCharacterLimit(512);
                 messageField.setValue(msg.string);
                 messageField.setValueListener((val) -> msg.string = val.stripLeading());
                 elements.add(messageField);
@@ -448,7 +380,7 @@ public class MacroOptionList extends MacroBindList {
                 // Delay field
                 if (showDelayField) {
                     EditBox delayField = new EditBox(font,
-                            x + list.smallButtonWidth + msgFieldWidth + SPACING * 2, 0,
+                            x + width - minDelayFieldWidth, 0,
                             minDelayFieldWidth, height, Component.empty());
                     delayField.setTooltip(Tooltip.create(
                             localized("option", "key.delay.individual.tooltip"
@@ -485,10 +417,10 @@ public class MacroOptionList extends MacroBindList {
                                         .withStyle(ChatFormatting.RED),
                                 (button) -> {
                                     macro.removeMessage(index);
-                                    list.reload();
+                                    list.init();
                                 })
-                        .pos(x + width - list.smallButtonWidth, 0)
-                        .size(list.smallButtonWidth, height)
+                        .pos(x + width + SPACE, 0)
+                        .size(list.smallWidgetWidth, height)
                         .build());
             }
         }

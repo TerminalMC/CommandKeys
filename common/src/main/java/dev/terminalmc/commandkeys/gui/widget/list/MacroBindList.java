@@ -26,23 +26,34 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
- * An extension of {@link OptionList} allowing handling of key presses and 
- * mouse button clicks for setting keybinds and triggering macros.
+ * Extends {@link DragReorderList} to add support for handling of key presses
+ * and mouse button clicks for setting keybinds and triggering macros.
  */
-public abstract class MacroBindList extends OptionList {
+public abstract class MacroBindList extends DragReorderList {
     protected @NotNull Profile profile;
     private @Nullable Macro macro;
     private @Nullable Keybind keybind;
-    private InputConstants.Key heldKey;
-    private InputConstants.Key sendKey;
+    private @Nullable InputConstants.Key heldKey;
+    private @Nullable InputConstants.Key sendKey;
 
-    public MacroBindList(Minecraft mc, int width, int height, int y,
-                         int itemHeight, int entryWidth, int entryHeight, 
-                         @NotNull Profile profile) {
-        super(mc, width, height, y, itemHeight, entryWidth, entryHeight);
+    public MacroBindList(Minecraft mc, int width, int height, int y, int entryWidth,
+                         int entryHeight, int entrySpace, @NotNull Profile profile,
+                         Map<Class<? extends Entry>, BiFunction<Integer,Integer,Boolean>> clsFunMap) {
+        super(mc, width, height, y, entryWidth, entryHeight, entrySpace, clsFunMap);
         this.profile = profile;
+    }
+    
+    @Override
+    public void init() {
+        super.init();
+        macro = null;
+        keybind = null;
+        heldKey = null;
+        sendKey = null;
     }
     
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
@@ -60,7 +71,7 @@ public abstract class MacroBindList extends OptionList {
             if (key.getValue() == InputConstants.KEY_ESCAPE) {
                 profile.setKey(macro, keybind, InputConstants.UNKNOWN);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
-                reload();
+                init();
             }
             else {
                 if (heldKey == null) {
@@ -70,7 +81,7 @@ public abstract class MacroBindList extends OptionList {
                     if (key != heldKey) {
                         profile.setKey(macro, keybind, key);
                         profile.setLimitKey(macro, keybind, heldKey);
-                        reload();
+                        init();
                     }
                     else {
                         return false;
@@ -92,7 +103,7 @@ public abstract class MacroBindList extends OptionList {
             if (heldKey == key) {
                 profile.setKey(macro, keybind, key);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
-                reload();
+                init();
                 return true;
             }
         }
