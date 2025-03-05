@@ -16,7 +16,7 @@
   "option.commandkeys.key.conflict.submit": "Підкоритися",
   "option.commandkeys.key.conflict.submit.tooltip": "Якщо клавіша вже використовується Minecraft, ця прив'язка буде скасована.",
   "option.commandkeys.key.conflict.veto": "Заборонити",
-  "option.commandkeys.key.conflict.veto.tooltip": "Якщо клавіша вже використовується Minecraft, інша прив'язка буде скасована.\nПримітка: Деякі клавіші (наприклад, клавіші руху) не можуть бути скасовані.",
+  "option.commandkeys.key.conflict.veto.tooltip": "Якщо клавіша вже використовується Minecraft, інша прив'язка буде скасована.",
   "option.commandkeys.key.cycle.index.tooltip": "Індекс наступного повідомлення для надсилання.",
   "option.commandkeys.key.delay.individual.tooltip.first": "Час у тіках для очікування після натискання клавіші, перед надсиланням.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Час у тіках для очікування після попереднього повідомлення, перед надсиланням.",

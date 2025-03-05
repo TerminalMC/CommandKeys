@@ -16,7 +16,7 @@
   "option.commandkeys.key.conflict.submit": "顺从",
   "option.commandkeys.key.conflict.submit.tooltip": "如果此按键已被Minecraft使用，则此按键绑定将被取消。",
   "option.commandkeys.key.conflict.veto": "否决",
-  "option.commandkeys.key.conflict.veto.tooltip": "如果此按键已被Minecraft使用，则另一个按键绑定将被取消。\n请注意：某些按键（例如移动键）无法取消。",
+  "option.commandkeys.key.conflict.veto.tooltip": "如果此按键已被Minecraft使用，则另一个按键绑定将被取消。",
   "option.commandkeys.key.cycle.index.tooltip": "要发送的下一条消息的索引。",
   "option.commandkeys.key.delay.individual.tooltip.first": "Time in ticks to wait after the key-press, before sending.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Time in ticks to wait after the previous message, before sending.",

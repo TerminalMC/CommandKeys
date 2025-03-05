@@ -27,9 +27,9 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(MouseHandler.class)
 public class MixinMouseHandler {
     /**
-     * Passes mouse button press to {@link KeybindUtil#handleKey} and allows it
+     * Passes mouse button click to {@link KeybindUtil#handleKey} and allows it
      * to be cancelled before being passed to the Minecraft callback.
-     * See also {@link MixinKeyboardHandler#wrapClick}
+     * @see MixinKeyboardHandler#wrapClick
      */
     @WrapOperation(
             method = "onPress",
@@ -38,6 +38,7 @@ public class MixinMouseHandler {
                     target = "Lnet/minecraft/client/KeyMapping;click(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"
             )
     )
+    @SuppressWarnings("JavadocReference")
     private void wrapClick(InputConstants.Key keymapping, Operation<Void> original) {
         int cancel = KeybindUtil.handleKey(keymapping);
         if (cancel != 2) original.call(keymapping);

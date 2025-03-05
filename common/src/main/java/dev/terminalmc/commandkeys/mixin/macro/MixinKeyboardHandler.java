@@ -21,6 +21,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,9 +33,9 @@ public class MixinKeyboardHandler {
     private static boolean commandKeys$cancelCharTyped;
 
     /**
-     * Passes keypress to {@link KeybindUtil#handleKey} and allows it to be
-     * cancelled before being passed to the Minecraft callback.
-     * See also {@link MixinMouseHandler#wrapClick}
+     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it
+     * to be cancelled before being passed to the Minecraft callback.
+     * @see MixinMouseHandler#wrapClick
      */
     @WrapOperation(
             method = "keyPress",
@@ -43,20 +44,29 @@ public class MixinKeyboardHandler {
                     target = "Lnet/minecraft/client/KeyMapping;click(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"
             )
     )
-    private void wrapClick(InputConstants.Key keymapping, Operation<Void> original) {
-        int cancel = KeybindUtil.handleKey(keymapping);
+    @SuppressWarnings("JavadocReference")
+    private void wrapClick(InputConstants.Key key, Operation<Void> original) {
+        int cancel = KeybindUtil.handleKey(key);
         commandKeys$cancelCharTyped = (cancel != 0);
-        if (cancel != 2) original.call(keymapping);
+        if (cancel == 2) {
+            KeyMapping.set(key, false);
+        } else {
+            original.call(key);
+        }
     }
 
     /**
      * Allows cancellation of the call to {@link KeyboardHandler#charTyped}
-     * corresponding to call cancelled in {@link KeyboardHandler#keyPress}.
+     * corresponding to a call cancelled by {@link MixinMouseHandler#wrapClick}.
      */
     @WrapMethod(method = "charTyped")
-    private void wrapCharTyped(long windowPointer, int codePoint, int modifiers, 
+    @SuppressWarnings("JavadocReference")
+    private void wrapCharTyped(long windowPointer, int codePoint, int modifiers,
                                Operation<Void> original) {
-        if (commandKeys$cancelCharTyped) commandKeys$cancelCharTyped = false;
-        else original.call(windowPointer, codePoint, modifiers);
+        if (commandKeys$cancelCharTyped) {
+            commandKeys$cancelCharTyped = false;
+        } else {
+            original.call(windowPointer, codePoint, modifiers);
+        }
     }
 }

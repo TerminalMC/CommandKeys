@@ -16,7 +16,7 @@
   "option.commandkeys.key.conflict.submit": "Abgabe",
   "option.commandkeys.key.conflict.submit.tooltip": "Wenn die Tastatureingabe bereits von Minecraft verwendet wird, wird der Befehl hier aufgehoben.",
   "option.commandkeys.key.conflict.veto": "Veto",
-  "option.commandkeys.key.conflict.veto.tooltip": "Wenn die Taste bereits von Minecraft verwendet wird, wird deren Bindung aufgehoben.\nHinweis: Einige Tastatureingaben (z.B. Bewegungstasten W A S D) können nicht aufgehoben werden.",
+  "option.commandkeys.key.conflict.veto.tooltip": "Wenn die Taste bereits von Minecraft verwendet wird, wird deren Bindung aufgehoben.",
   "option.commandkeys.key.cycle.index.tooltip": "Der Index der nächsten Nachricht, die gesendet werden soll.",
   "option.commandkeys.key.delay.individual.tooltip.first": "Zeit in Ticks, die nach der Tastatureingabe gewartet wird, bis sie gesendet wird.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Zeit in Ticks, die nach der letzten Nachricht gewartet wird, bevor sie gesendet wird.",

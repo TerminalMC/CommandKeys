@@ -16,7 +16,7 @@
   "option.commandkeys.key.conflict.submit": "Отправить",
   "option.commandkeys.key.conflict.submit.tooltip": "Если клавиша уже используется Minecraft, эта привязка клавиш будет отменена.",
   "option.commandkeys.key.conflict.veto": "Запретить",
-  "option.commandkeys.key.conflict.veto.tooltip": "Если клавиша уже используется Minecraft, другая привязка будет отменена.\nПримечание: Некоторые клавиши (например, клавиши перемещения) не могут быть отменены.",
+  "option.commandkeys.key.conflict.veto.tooltip": "Если клавиша уже используется Minecraft, другая привязка будет отменена.",
   "option.commandkeys.key.cycle.index.tooltip": "Индекс следующего сообщения для отправки.",
   "option.commandkeys.key.delay.individual.tooltip.first": "Время в тиках для ожидания после нажатия клавиши перед отправкой.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Время в тиках для ожидания после предыдущего сообщения перед отправкой.",

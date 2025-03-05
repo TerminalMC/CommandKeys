@@ -5,6 +5,7 @@
 - Improved stability of deserializers
 - Fixed an issue where editing a copy of a profile would edit the original
 - Added support for reloading config file to revert edits
+- Enabled cancellation of movement keys
 
 ## 2.3.7
 

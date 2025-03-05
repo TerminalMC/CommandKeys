@@ -16,7 +16,7 @@
   "option.commandkeys.key.conflict.submit": "Submit",
   "option.commandkeys.key.conflict.submit.tooltip": "If the key is already used by Minecraft, this keybind will be cancelled.",
   "option.commandkeys.key.conflict.veto": "Veto",
-  "option.commandkeys.key.conflict.veto.tooltip": "If the key is already used by Minecraft, the other keybind will be cancelled.\nNote: Some keys (such as movement keys) cannot be cancelled.",
+  "option.commandkeys.key.conflict.veto.tooltip": "If the key is already used by Minecraft, the other keybind will be cancelled.",
   "option.commandkeys.key.cycle.index.tooltip": "The index of the next message to be sent.",
   "option.commandkeys.key.delay.individual.tooltip.first": "Time in ticks to wait after the key-press, before sending.",
   "option.commandkeys.key.delay.individual.tooltip.subsequent": "Time in ticks to wait after the previous message, before sending.",
