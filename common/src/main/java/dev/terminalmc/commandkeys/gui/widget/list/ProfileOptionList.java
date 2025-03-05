@@ -44,12 +44,12 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
  */
 public class ProfileOptionList extends MacroBindList {
     private OptionList.Entry.ActionButton addMacroEntry;
-    
+
     public ProfileOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
                              int entryHeight, int entrySpace, @NotNull Profile profile) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpace, profile,
                 new HashMap<>(Map.of(Entry.MacroOptions.class, profile::moveMacro)));
-        
+
         addMacroEntry = new OptionList.Entry.ActionButton(
                 dynWideEntryX, dynWideEntryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
@@ -58,7 +58,7 @@ public class ProfileOptionList extends MacroBindList {
                     ensureVisible(addMacroEntry);
                 });
     }
-    
+
     @Override
     protected void addEntries() {
         addEntry(new Entry.ScreenSwitch(dynEntryX, dynEntryWidth, entryHeight, this));
@@ -307,7 +307,7 @@ public class ProfileOptionList extends MacroBindList {
 
                     // Send mode button
                     CycleButton<Macro.SendMode> modeButton = CycleButton.builder(
-                            KeybindUtil::localizeMode)
+                                    KeybindUtil::localizeMode)
                             .displayOnlyValue()
                             .withValues(Macro.SendMode.values())
                             .withInitialValue(macro.getMode())

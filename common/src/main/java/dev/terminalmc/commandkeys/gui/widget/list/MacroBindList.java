@@ -59,7 +59,7 @@ public abstract class MacroBindList extends DragReorderList {
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
         if (!profile.getMacros().contains(macro)) throw new IllegalArgumentException(
                 "Specified macro does not exist in profile.");
-        if (!macro.usesKeybind(keybind)) throw new IllegalArgumentException(
+        if (!macro.ownsKeybind(keybind)) throw new IllegalArgumentException(
                 "Specified keybind not used by specified macro.");
         this.macro = macro;
         this.keybind = keybind;

@@ -38,7 +38,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
 
 /**
  * Config consists of a list of {@link Profile} instances, two {@code int}
- * 'pointers' to keep track of the default profiles for singleplayer and
+ * 'pointers' to keep track of the default {@link Profile}s for singleplayer and
  * multiplayer, default options for new {@link Profile} or {@link Macro}
  * instances, and global mod options.
  *
@@ -68,9 +68,9 @@ public class Config {
 
     // Profile list
     private final List<Profile> profiles;
-    private static final Supplier<List<Profile>> profilesDefault = 
+    private static final Supplier<List<Profile>> profilesDefault =
             () -> new ArrayList<>(List.of(new Profile("Default Profile")));
-    
+
     private int spDefault;
     private int mpDefault;
     public static final int defaultIndexDefault = 0;
@@ -114,7 +114,7 @@ public class Config {
     private Config(
             List<Profile> profiles,
             int spDefault,
-            int mpDefault, 
+            int mpDefault,
             Macro.ConflictStrategy defaultConflictStrategy,
             Macro.SendMode defaultSendMode,
             int ratelimitCount,
@@ -132,7 +132,7 @@ public class Config {
         this.ratelimitStrict = ratelimitStrict;
         this.ratelimitSp = ratelimitSp;
     }
-    
+
     // Default profile pointer management
 
     public int getSpDefault() {
@@ -140,7 +140,7 @@ public class Config {
     }
 
     public void setSpDefault(int index) {
-        if (index < 0 || index >= profiles.size()) 
+        if (index < 0 || index >= profiles.size())
             throw new IndexOutOfBoundsException(index);
         this.spDefault = index;
     }
@@ -154,7 +154,7 @@ public class Config {
             throw new IndexOutOfBoundsException(index);
         this.mpDefault = index;
     }
-    
+
     // Ratelimit management
 
     public int getRatelimitCount() {
@@ -174,7 +174,7 @@ public class Config {
         if (ticks < 1) throw new IllegalArgumentException();
         this.ratelimitTicks = ticks;
     }
-    
+
     // Profile activation handling
 
     /**
@@ -229,7 +229,7 @@ public class Config {
             activateProfile(mpDefault);
         }
     }
-    
+
     // Profile list management
 
     /**
@@ -242,18 +242,14 @@ public class Config {
     /**
      * Adds a custom copy of {@code profile} (with no links) to the end of the
      * list.
-     * 
-     * @return the copy {@link Profile}.
      */
-    public Profile addCopyProfile(Profile profile) {
+    public void addCopyProfile(Profile profile) {
         Profile copy = new Profile(profile);
         profiles.add(copy);
-        return profile;
     }
 
     /**
      * Adds a new {@link Profile} to the end of the list.
-     * 
      * @return the new {@link Profile}.
      */
     public Profile addNewProfile() {
@@ -291,15 +287,17 @@ public class Config {
         return instance;
     }
 
+    @SuppressWarnings("unused")
     public static Config resetAndSave() {
         instance = new Config();
         save();
         return instance;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static Config reload() {
         instance = null;
-        LINK_PROFILE_MAP.clear(); // Only static state
+        LINK_PROFILE_MAP.clear(); // This is the only static state
         return get();
     }
 
@@ -322,6 +320,7 @@ public class Config {
         return config != null ? config : new Config();
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static @Nullable Config load(Path file, Gson gson) {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file.toFile()), StandardCharsets.UTF_8)) {
@@ -367,20 +366,24 @@ public class Config {
             CommandKeys.LOG.error("Unable to save config", e);
         }
     }
-    
+
     // Validation
 
     /**
-     * Validation method to be called after config editing and before saving.
+     * Validates this instance. To be called after editing and before saving.
      */
     private Config validate() {
+        // Validate each profile
         profiles.forEach(Profile::validate);
-        
+
+        // Validate profile list
         if (profiles.isEmpty()) profiles.addAll(profilesDefault.get());
-        
+
+        // Validate default pointers
         if (spDefault < 0 || spDefault >= profiles.size()) spDefault = defaultIndexDefault;
         if (mpDefault < 0 || mpDefault >= profiles.size()) mpDefault = defaultIndexDefault;
-        
+
+        // Validate ratelimit
         if (ratelimitCount < 1) ratelimitCount = ratelimitCountDefault;
         if (ratelimitTicks < 1) ratelimitTicks = ratelimitTicksDefault;
 
@@ -397,37 +400,37 @@ public class Config {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
             boolean silent = version != VERSION;
 
+            List<Profile> profiles = JsonUtil.getOrDefault(ctx, obj, "profiles",
+                    Profile.class, profilesDefault.get(), silent);
+
+            int spDefault = JsonUtil.getOrDefault(obj, "spDefault",
+                    defaultIndexDefault, silent);
+
+            int mpDefault = JsonUtil.getOrDefault(obj, "mpDefault",
+                    defaultIndexDefault, silent);
+
             Macro.ConflictStrategy defaultConflictStrategy = JsonUtil.getOrDefault(obj, "defaultConflictStrategy",
                     Macro.ConflictStrategy.class, Macro.conflictStrategyDefault, silent);
 
             Macro.SendMode defaultSendMode = JsonUtil.getOrDefault(obj, "defaultSendMode",
                     Macro.SendMode.class, Macro.sendModeDefault, silent);
-            
+
             int ratelimitCount = JsonUtil.getOrDefault(obj, "ratelimitCount",
                     ratelimitCountDefault, silent);
 
             int ratelimitTicks = JsonUtil.getOrDefault(obj, "ratelimitTicks",
                     ratelimitTicksDefault, silent);
-        
+
             boolean ratelimitStrict = JsonUtil.getOrDefault(obj, "ratelimitStrict",
                     ratelimitStrictDefault, silent);
 
             boolean ratelimitSp = JsonUtil.getOrDefault(obj, "ratelimitSp",
                     ratelimitSpDefault, silent);
 
-            List<Profile> profiles = JsonUtil.getOrDefault(ctx, obj, "profiles",
-                    Profile.class, profilesDefault.get(), silent);
-            
-            int spDefault = JsonUtil.getOrDefault(obj, "spDefault",
-                    defaultIndexDefault, silent);
-            
-            int mpDefault = JsonUtil.getOrDefault(obj, "mpDefault",
-                    defaultIndexDefault, silent);
-            
             return new Config(
                     profiles,
                     spDefault,
-                    mpDefault, 
+                    mpDefault,
                     defaultConflictStrategy,
                     defaultSendMode,
                     ratelimitCount,

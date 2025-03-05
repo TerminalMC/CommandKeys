@@ -30,19 +30,19 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
  * The root {@link OptionScreen}.
- * 
+ *
  * <p>Config is saved only when this {@link Screen} is closed.</p>
  */
 public class MainOptionScreen extends OptionScreen {
     public MainOptionScreen(Screen lastScreen, boolean inGame) {
         super(lastScreen,
-                inGame 
+                inGame
                         ? localized("option", "profile", CommandKeys.profile().getDisplayName())
                         : localized("option", "main"),
-                inGame 
-                        ? new ProfileOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN, 
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, 
-                        CommandKeys.profile()) 
+                inGame
+                        ? new ProfileOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
+                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                        CommandKeys.profile())
                         : new MainOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
                         BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, null));
     }
@@ -58,7 +58,7 @@ public class MainOptionScreen extends OptionScreen {
                 height - h, // Bottom of screen
                 height - FOOTER_MARGIN / 2 - h / 2 // Center of margin
         );
-        
+
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL,
                         (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
                                 (confirm) -> {
@@ -69,16 +69,16 @@ public class MainOptionScreen extends OptionScreen {
                                     } else {
                                         Minecraft.getInstance().setScreen(this);
                                     }
-                                }, 
+                                },
                                 localized("option", "main.exit_without_saving"),
                                 localized("option", "main.exit_without_saving.confirm"))))
                 .pos(x1, y)
                 .size(w, h)
                 .build());
-        
+
         addRenderableWidget(Button.builder(
-                CommonComponents.GUI_DONE, 
-                (button) -> onClose())
+                        CommonComponents.GUI_DONE,
+                        (button) -> onClose())
                 .pos(x2, y)
                 .size(w, h)
                 .build());

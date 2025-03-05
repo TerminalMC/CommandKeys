@@ -198,7 +198,7 @@ public class JsonUtil {
             JsonObject obj, String key, InputConstants.Key def, boolean silent) {
         String keyName = getOrDefault(obj, key, (String)null, silent);
         if (keyName == null) return def;
-        
+
         try {
             return InputConstants.getKey(keyName);
         } catch (IllegalArgumentException e) {

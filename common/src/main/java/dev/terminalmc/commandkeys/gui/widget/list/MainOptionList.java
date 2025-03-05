@@ -47,7 +47,7 @@ public class MainOptionList extends OptionList {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpace);
         this.editingProfile = editingProfile;
     }
-    
+
     @Override
     protected void addEntries() {
         boolean inGame = CommandKeys.inGame();
@@ -57,7 +57,7 @@ public class MainOptionList extends OptionList {
                 inGame ? localized("option", "main.activateProfile")
                         : localized("option", "main.profiles", "\u2139"),
                 inGame ? null : Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
-        
+
         // Profile list
         int i = 0;
         for (Profile profile : Config.get().getProfiles()) {
@@ -97,7 +97,7 @@ public class MainOptionList extends OptionList {
                 Tooltip.create(localized("option", "main.ratelimit.tooltip")), 500));
         addEntry(new Entry.Ratelimit(dynEntryX, dynEntryWidth, entryHeight));
     }
-    
+
     // Sub-screen opening
 
     public void openProfileOptions(Profile profile) {
@@ -141,7 +141,7 @@ public class MainOptionList extends OptionList {
                 super();
                 this.list = list;
                 this.profile = profile;
-                
+
                 boolean spDefault = index == Config.get().getSpDefault();
                 boolean mpDefault = index == Config.get().getMpDefault();
 
@@ -237,11 +237,11 @@ public class MainOptionList extends OptionList {
 
                 // Singleplayer default button
                 Button setAsSpDefaultButton = Button.builder(
-                        localized("option", "main.defaultSingleplayer.set"),
-                        (button) -> {
-                            Config.get().setSpDefault(index);
-                            list.init();
-                        })
+                                localized("option", "main.defaultSingleplayer.set"),
+                                (button) -> {
+                                    Config.get().setSpDefault(index);
+                                    list.init();
+                                })
                         .pos(movingX, 0)
                         .size(smallWidgetWidth, height)
                         .build();
@@ -261,7 +261,7 @@ public class MainOptionList extends OptionList {
 
                 // Multiplayer default button
                 Button setAsMpDefaultButton = Button.builder(
-                        localized("option", "main.defaultMultiplayer.set"),
+                                localized("option", "main.defaultMultiplayer.set"),
                                 (button) -> {
                                     Config.get().setMpDefault(index);
                                     list.init();
@@ -369,10 +369,10 @@ public class MainOptionList extends OptionList {
                 elements.add(addressBox);
 
                 Button removeButton = Button.builder(Component.literal("\u274C"),
-                        (button) -> {
-                            profile.removeLink(address);
-                            list.init();
-                        })
+                                (button) -> {
+                                    profile.removeLink(address);
+                                    list.init();
+                                })
                         .pos(x + width - list.smallWidgetWidth, 0)
                         .size(list.smallWidgetWidth, height)
                         .build();

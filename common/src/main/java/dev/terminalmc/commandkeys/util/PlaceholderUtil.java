@@ -96,7 +96,7 @@ public class PlaceholderUtil {
         lookAngle = null;
         pmSenderName = null;
     }
-    
+
     private static String fault() {
         faults++;
         return "?";
@@ -233,7 +233,7 @@ public class PlaceholderUtil {
         if (lookBlockPos == null) {
             Minecraft mc = Minecraft.getInstance();
             // Distance is arbitrary but will do for now
-            HitResult result = mc.player.pick(Math.max(384, 
+            HitResult result = mc.player.pick(Math.max(384,
                     (mc.levelRenderer.getLastViewDistance() + 1D) * 16), 0.0F, false);
             if (result.getType().equals(HitResult.Type.BLOCK)) {
                 lookBlockPos = ((BlockHitResult)result).getBlockPos();

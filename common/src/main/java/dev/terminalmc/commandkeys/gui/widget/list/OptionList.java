@@ -117,11 +117,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     public void setScreen(OptionScreen screen) {
         this.screen = screen;
     }
-    
+
     public void addEntry(int index, Entry entry) {
         children().add(index, entry);
     }
-    
+
     public void addSpacedEntry(Entry entry) {
         super.addEntry(entry);
         super.addEntry(new Entry.Space(entry));

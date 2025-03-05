@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 
+@SuppressWarnings("unused")
 public class ModLogger {
     private final Logger logger;
 

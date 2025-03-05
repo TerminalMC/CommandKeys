@@ -25,7 +25,7 @@ import java.lang.reflect.Type;
 public class Message {
     public static final int VERSION = 1;
     public final int version = VERSION;
-    
+
     public String string;
     public int delayTicks;
 
@@ -33,12 +33,12 @@ public class Message {
      * Creates a blank default instance.
      */
     public Message() {
-        this.string = "";
-        this.delayTicks = 0;
+        this("", 0);
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated, only for use by default constructor and self-validating
+     * deserializer.
      */
     Message(String string, int delayTicks) {
         this.string = string;
@@ -60,7 +60,7 @@ public class Message {
         if (delayTicks < 0) delayTicks = 0;
         return this;
     }
-    
+
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Message> {
@@ -70,13 +70,13 @@ public class Message {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
-            
+
             String string = JsonUtil.getOrDefault(obj, "string",
                     "", silent);
 
             int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks",
                     0, silent);
-            
+
             return new Message(
                     string,
                     delayTicks

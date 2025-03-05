@@ -49,7 +49,7 @@ public class MacroOptionList extends MacroBindList {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing, profile,
                 new HashMap<>(Map.of(Entry.MessageOptions.class, macro::moveMessage)));
         this.macro = macro;
-        
+
         addMessageEntry = new OptionList.Entry.ActionButton(
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1,
                 (button) -> {
@@ -58,16 +58,16 @@ public class MacroOptionList extends MacroBindList {
                     ensureVisible(addMessageEntry);
                 });
     }
-    
+
     @Override
     protected void addEntries() {
         addEntry(new Entry.DualKeybind(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
 
         if (
                 profile.getShowHudMessage().equals(DEFER)
-                || profile.getAddToHistory().equals(DEFER)
-                || profile.getResumeRepeating().equals(DEFER)
-                || profile.getUseRatelimit().equals(DEFER)
+                        || profile.getAddToHistory().equals(DEFER)
+                        || profile.getResumeRepeating().equals(DEFER)
+                        || profile.getUseRatelimit().equals(DEFER)
         ) {
             addEntry(new Entry.MacroControls(dynEntryX, dynEntryWidth, entryHeight, profile, macro));
         }
@@ -145,13 +145,13 @@ public class MacroOptionList extends MacroBindList {
                         .build());
             }
         }
-        
+
         private static class MacroControls extends Entry {
             MacroControls(int x, int width, int height, Profile profile, Macro macro) {
                 super();
                 int buttonWidth = (width - SPACE_SMALL * 3) / 4;
                 int movingX = x;
-                
+
                 boolean hudActive = profile.getShowHudMessage().equals(DEFER);
                 CycleButton<Boolean> hudButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
@@ -237,7 +237,7 @@ public class MacroOptionList extends MacroBindList {
 
                 // Conflict strategy button
                 CycleButton<Macro.ConflictStrategy> conflictButton = CycleButton.builder(
-                        KeybindUtil::localizeStrategy)
+                                KeybindUtil::localizeStrategy)
                         .withValues(Macro.ConflictStrategy.values())
                         .withInitialValue(macro.getStrategy())
                         .withTooltip((status) -> Tooltip.create(
@@ -252,7 +252,7 @@ public class MacroOptionList extends MacroBindList {
 
                 // Send mode button
                 CycleButton<Macro.SendMode> modeButton = CycleButton.builder(
-                        KeybindUtil::localizeMode)
+                                KeybindUtil::localizeMode)
                         .withValues(Macro.SendMode.values())
                         .withInitialValue(macro.getMode())
                         .withTooltip((status) -> Tooltip.create(
@@ -267,9 +267,9 @@ public class MacroOptionList extends MacroBindList {
 
                 if (
                         macro.getMode().equals(SEND)
-                        || (
+                                || (
                                 macro.getMode().equals(REPEAT)
-                                && !macro.hasRepeating()
+                                        && !macro.hasRepeating()
                         )
                 ) {
                     // Delay field
@@ -314,10 +314,10 @@ public class MacroOptionList extends MacroBindList {
                 else if (macro.getMode().equals(REPEAT)) {
                     // Has repeating messages, provide stop button
                     elements.add(Button.builder(localized("option", "key.repeat.stop"),
-                            (button) -> {
-                                macro.stopRepeating();
-                                list.init();
-                            })
+                                    (button) -> {
+                                        macro.stopRepeating();
+                                        list.init();
+                                    })
                             .tooltip(Tooltip.create(
                                     localized("option", "key.repeat.stop.tooltip")))
                             .pos(x + width - stopButtonWidth, 0)
@@ -351,9 +351,9 @@ public class MacroOptionList extends MacroBindList {
                 Font font = Minecraft.getInstance().font;
                 boolean showDelayField = (
                         macro.getStrategy() == AVOID
-                        || (macro.getMode() == SEND && macro.spaceTicks == 0)
-                        || macro.getMode() == REPEAT
-                        || macro.getMode() == RANDOM
+                                || (macro.getMode() == SEND && macro.spaceTicks == 0)
+                                || macro.getMode() == REPEAT
+                                || macro.getMode() == RANDOM
                 );
                 int minDelayFieldWidth = font.width("0__") + 8;
                 int msgFieldWidth = width - (showDelayField ? minDelayFieldWidth + SPACE : 0);

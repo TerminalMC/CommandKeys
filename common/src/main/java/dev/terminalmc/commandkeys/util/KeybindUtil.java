@@ -41,7 +41,7 @@ public class KeybindUtil {
 
     /**
      * Allows other mods to activate macros.
-     * 
+     *
      * <p>{@link InputConstants#getKey(String)} can be used to get a key from
      * a string of the format key.keyboard.h</p>
      * @param key the primary key.
@@ -51,7 +51,7 @@ public class KeybindUtil {
     public static int handleKeys(InputConstants.Key key, InputConstants.Key limitKey) {
         if (key.equals(InputConstants.UNKNOWN)) return 0;
         if (!profile().keybindMap.containsKey(key)) return 0;
-        
+
         int i = 0;
         Collection<Keybind> keybinds = profile().keybindMap.get(key);
         for (Keybind keybind : keybinds) {
@@ -61,7 +61,7 @@ public class KeybindUtil {
                 i++;
             }
         }
-        
+
         return i;
     }
 
@@ -79,7 +79,7 @@ public class KeybindUtil {
             Collection<Keybind> keybinds = profile().keybindMap.get(key);
             Keybind triggerKb = null;
             Keybind monoKb = null;
-            
+
             Collection<Macro> activeMacros = null;
             for (Keybind kb : keybinds) {
                 if (kb.isLimitKeyDown()) {
@@ -102,18 +102,18 @@ public class KeybindUtil {
                         .toList();
                 if (activeMacros.isEmpty()) return cancel;
             }
-            
+
             boolean first = true;
             boolean ratelimited = false;
-            
+
             for (Macro macro : activeMacros) {
                 boolean send = true;
-                
+
                 switch(macro.getStrategy()) {
                     case SUBMIT -> send = getConflict(key) == null;
                     case VETO -> cancel = 2;
                 }
-                
+
                 if (send) {
                     if (first) {
                         ratelimited = macro.getUseRatelimitStatus() && !canTrigger(key);
@@ -121,7 +121,7 @@ public class KeybindUtil {
                     }
                     // Always allow repeat-stop
                     if (ratelimited && !macro.hasRepeating()) continue;
-                    
+
                     macro.trigger(triggerKb);
                     if (cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
                 }
@@ -139,7 +139,7 @@ public class KeybindUtil {
         }
         return null;
     }
-    
+
     public static class KeybindInfo {
         private final Profile profile;
         private final Macro macro;
@@ -148,14 +148,14 @@ public class KeybindUtil {
         public MutableComponent tooltip = Component.empty();
         private boolean internalConflict = false;
         private boolean mcConflict = false;
-        
+
         public KeybindInfo(Profile profile, Macro macro, Keybind keybind) {
             this.profile = profile;
             this.macro = macro;
-            this.label = keybind.getLimitKey().equals(InputConstants.UNKNOWN) 
+            this.label = keybind.getLimitKey().equals(InputConstants.UNKNOWN)
                     ? keybind.getKey().getDisplayName().copy()
                     : keybind.getLimitKey().getDisplayName().copy().append(" + ")
-                            .append(keybind.getKey().getDisplayName());
+                    .append(keybind.getKey().getDisplayName());
             checkConflict(keybind.getLimitKey(), null);
             checkConflict(keybind.getKey(), keybind);
             createConflictLabel();
@@ -164,7 +164,7 @@ public class KeybindUtil {
         /**
          * Checks {@code key} against the keys used by other {@link Macro}
          * instances, and optionally against Minecraft keybinds, updating
-         * {@link KeybindInfo#internalConflict}, {@link KeybindInfo#mcConflict} 
+         * {@link KeybindInfo#internalConflict}, {@link KeybindInfo#mcConflict}
          * and {@code KeybindInfo#tooltip} accordingly.
          */
         private void checkConflict(InputConstants.Key key, Keybind keybind) {
@@ -188,8 +188,8 @@ public class KeybindUtil {
                 KeyMapping keyMapping = getConflict(key);
                 if (keyMapping != null) {
                     if (internalConflict || mcConflict) tooltip.append("\n");
-                    tooltip.append(localized("option", "key.bind.tooltip.conflict.external", 
-                                    key.getDisplayName().copy().withStyle(ChatFormatting.RED), 
+                    tooltip.append(localized("option", "key.bind.tooltip.conflict.external",
+                                    key.getDisplayName().copy().withStyle(ChatFormatting.RED),
                                     Component.translatable(keyMapping.getName())
                                             .withStyle(ChatFormatting.GRAY)))
                             .withStyle(ChatFormatting.WHITE);
@@ -197,7 +197,7 @@ public class KeybindUtil {
                 }
             }
         }
-        
+
         public void createConflictLabel() {
             if (mcConflict) {
                 // Apply red brackets and add conflict strategy to the tooltip

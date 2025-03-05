@@ -156,7 +156,7 @@ public class OptionScreen extends OptionsSubScreen {
     public Screen getLastScreen() {
         return lastScreen;
     }
-    
+
     // Input handling
 
     @Override

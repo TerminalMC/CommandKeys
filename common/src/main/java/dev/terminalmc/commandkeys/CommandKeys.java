@@ -53,10 +53,10 @@ public class CommandKeys {
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    
     public static boolean hasResetConfig = false;
-    
     public static String lastConnection = "";
-    
+
     private static final List<TickCounter> rateLimiter = new ArrayList<>();
     private static class TickCounter {
         int time = 0;
@@ -74,18 +74,18 @@ public class CommandKeys {
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new MainOptionScreen(mc.screen, true));
         }
-        
+
         // Tick ratelimiter
         rateLimiter.removeIf((tc) -> tc.tick() > Config.get().getRatelimitTicks());
-        
+
         // Tick macros
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
             // Note: If multiple macros are triggered in the same tick, the
             // message order will be based on their list positions, not the 
-            // order in which they were triggered order.
+            // order in which they were triggered.
         }
-        
+
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
@@ -111,21 +111,21 @@ public class CommandKeys {
         LocalPlayer player = Minecraft.getInstance().player;
         return (player != null && player.connection.getConnection().isConnected());
     }
-    
+
     public static boolean inSingleplayer() {
         return Minecraft.getInstance().getSingleplayerServer() != null;
     }
-    
+
     public static boolean canTrigger(InputConstants.Key key) {
         if (
-                (!inSingleplayer() || Config.get().ratelimitSp) 
-                && rateLimiter.size() >= Config.get().getRatelimitCount()) 
+                (!inSingleplayer() || Config.get().ratelimitSp)
+                        && rateLimiter.size() >= Config.get().getRatelimitCount())
         {
             Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
                     localized("message", "sendBlocked",
                             key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
                             Component.literal(String.valueOf(Config.get().getRatelimitCount()))
-                                    .withStyle(ChatFormatting.GRAY), 
+                                    .withStyle(ChatFormatting.GRAY),
                             Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
                                     .withStyle(ChatFormatting.GRAY))
                             .withStyle(ChatFormatting.RED)));

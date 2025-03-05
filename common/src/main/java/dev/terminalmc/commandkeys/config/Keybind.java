@@ -26,29 +26,33 @@ import java.util.Objects;
 
 /**
  * Consists of two {@link InputConstants.Key} instances, allowing both single
- * and dual-key activation.
+ * and dual-key activation independent of Minecraft's keybinds.
+ *
+ * <p><b>Note:</b> rather than implementing a custom serializer and deserializer
+ * for {@link InputConstants.Key}, we simply serialize
+ * {@link InputConstants.Key#getName} and deserialize using
+ * {@link InputConstants#getKey(String)}.</p>
  */
 public class Keybind {
     public static final int VERSION = 0;
     public final int version = VERSION;
 
-    private transient InputConstants.Key key;
     private String keyName;
-    private transient InputConstants.Key limitKey;
+    private transient InputConstants.Key key;
+
     private String limitKeyName;
+    private transient InputConstants.Key limitKey;
 
     /**
      * Creates a default instance.
      */
     public Keybind() {
-        this.key = InputConstants.UNKNOWN;
-        this.keyName = key.getName();
-        this.limitKey = InputConstants.UNKNOWN;
-        this.limitKeyName = limitKey.getName();
+        this(InputConstants.UNKNOWN, InputConstants.UNKNOWN);
     }
 
     /**
-     * Not validated. Only for use by self-validating deserializer.
+     * Not validated. Only for use by default constructor or self-validating
+     * deserializer.
      */
     Keybind(InputConstants.Key key, InputConstants.Key limitKey) {
         this.key = key;
@@ -70,7 +74,7 @@ public class Keybind {
     public InputConstants.Key getKey() {
         return key;
     }
-    
+
     void setKey(InputConstants.Key key) {
         this.key = key;
         this.keyName = key.getName();
@@ -94,7 +98,7 @@ public class Keybind {
         return !limitKey.equals(InputConstants.UNKNOWN) && InputConstants.isKeyDown(
                 Minecraft.getInstance().getWindow().getWindow(), limitKey.getValue());
     }
-    
+
     boolean isDown() {
         return isKeyDown() && (limitKey.equals(InputConstants.UNKNOWN) || isLimitKeyDown());
     }
@@ -110,17 +114,19 @@ public class Keybind {
     public int hashCode() {
         return Objects.hash(key, limitKey);
     }
-    
+
     // Validation
-    
+
     Keybind validate() {
         // If main key is unbound, limit key cannot be bound
         if (key.equals(InputConstants.UNKNOWN) && !limitKey.equals(InputConstants.UNKNOWN)) {
             limitKey = InputConstants.UNKNOWN;
         }
+
         // Update names just because
         keyName = key.getName();
         limitKeyName = limitKey.getName();
+
         return this;
     }
 
@@ -128,15 +134,15 @@ public class Keybind {
 
     public static class Deserializer implements JsonDeserializer<Keybind> {
         @Override
-        public Keybind deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx) 
+        public Keybind deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
-            
+
             InputConstants.Key key = JsonUtil.getOrDefault(obj, "keyName",
                     InputConstants.UNKNOWN, silent);
-            
+
             InputConstants.Key limitKey = JsonUtil.getOrDefault(obj, "limitKeyName",
                     InputConstants.UNKNOWN, silent);
 

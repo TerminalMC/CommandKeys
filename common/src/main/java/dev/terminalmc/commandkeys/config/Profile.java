@@ -29,27 +29,27 @@ import java.util.stream.Collectors;
 
 /**
  * Consists of behavioral options, a list of {@link Macro} instances, and a list
- * of strings identifying worlds and/or servers to which the profile is linked,
+ * of strings identifying worlds and/or servers to which the instance is linked,
  * collectively referred to as 'links'.
  *
  * <p>A static {@link Map} {@link Profile#LINK_PROFILE_MAP} is maintained to
- * ensure no overlap of links across different profiles, and to improve link
- * lookup time. Note that as such, no two profiles can be allowed to contain
- * the same link.</p>
+ * ensure no overlap of links across different {@link Profile}s, and to improve
+ * link lookup time. Note that as such, no two {@link Profile}s can be allowed
+ * to contain the same link.</p>
  *
  * <p>A pair of transient {@link Multimap} instances ({@link Profile#keybindMap}
- * and {@link Profile#macroMap}) are maintained to improve macro lookup time.
- * </p>
+ * and {@link Profile#macroMap}) are maintained to improve {@link Macro} lookup
+ * time.</p>
  */
 public class Profile {
     public static final int VERSION = 4;
     public final int version = VERSION;
-    
+
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
-    
-    public transient final Multimap<InputConstants.Key, Keybind> keybindMap 
+
+    public transient final Multimap<InputConstants.Key, Keybind> keybindMap
             = LinkedHashMultimap.create();
-    public transient final Multimap<Keybind, Macro> macroMap 
+    public transient final Multimap<Keybind, Macro> macroMap
             = LinkedHashMultimap.create();
 
     // Profile details
@@ -83,7 +83,7 @@ public class Profile {
     public Profile() {
         this(nameDefault);
     }
-    
+
     public Profile(String name) {
         this(
                 name,
@@ -97,7 +97,8 @@ public class Profile {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated, only for use by default constructor and self-validating
+     * deserializer.
      */
     private Profile(
             String name,
@@ -122,7 +123,7 @@ public class Profile {
 
     /**
      * Custom copy constructor.
-     * 
+     *
      * <p><b>Note:</b> all fields are copied except for {@link Profile#name}
      * (which has is set to the value of {@link Profile#getDisplayName()} with
      * {@code " (Copy)"} appended), and {@link Profile#links} (which is set to
@@ -138,9 +139,9 @@ public class Profile {
         this.macros = profile.macros.stream().map(Macro::new)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
-    
+
     // Display name util
-    
+
     /**
      * @return the first non-blank of the following: {@link Profile#name}, 
      * the first element of {@link Profile#links}, the string 
@@ -152,7 +153,7 @@ public class Profile {
         if (name.isBlank()) name = "[Unnamed]";
         return name;
     }
-    
+
     // Link management
 
     /**
@@ -180,7 +181,7 @@ public class Profile {
         links.remove(link);
         LINK_PROFILE_MAP.remove(link);
     }
-    
+
     // Behavior management
 
     public Control getAddToHistory() {
@@ -218,7 +219,7 @@ public class Profile {
         this.useRatelimit = useRatelimit;
         macros.forEach((macro) -> setUseRatelimit(macro, macro.useRatelimit));
     }
-    
+
     // Macro management
 
     /**
@@ -248,6 +249,7 @@ public class Profile {
      * Moves the {@link Macro} at the source index to the destination index.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified.
      */
     public boolean moveMacro(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
@@ -257,7 +259,7 @@ public class Profile {
         }
         return false;
     }
-    
+
     // Macro map management
 
     /**
@@ -285,9 +287,9 @@ public class Profile {
             addToMaps(macro);
         }
     }
-    
+
     // Macro editing
-    
+
     public void setSendMode(Macro macro, Macro.SendMode sendMode) {
         if (sendMode.equals(macro.sendMode)) return;
         macro.clearScheduled();
@@ -296,7 +298,7 @@ public class Profile {
         // alternate keybind.
         rebuildMaps();
     }
-    
+
     public void setConflictStrategy(Macro macro, Macro.ConflictStrategy conflictStrategy) {
         if (conflictStrategy.equals(macro.conflictStrategy)) return;
         macro.clearScheduled();
@@ -330,7 +332,7 @@ public class Profile {
             rebuildMaps();
         }
     }
-    
+
     public void setAddToHistory(Macro macro, boolean value) {
         macro.addToHistory = value;
         macro.addToHistoryStatus = switch(this.addToHistory) {
@@ -372,19 +374,19 @@ public class Profile {
     Profile validate() {
         macros.forEach(Macro::validate);
         macros.removeIf((macro) -> macro.messages.isEmpty());
-        
+
         // Update transients in macros
         setAddToHistory(addToHistory);
         setShowHudMessage(showHudMessage);
         setResumeRepeating(resumeRepeating);
         setUseRatelimit(useRatelimit);
-        
+
         // Possibly not required?
         rebuildMaps();
-        
+
         return this;
     }
-    
+
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Profile> {
@@ -397,13 +399,13 @@ public class Profile {
 
             String name = JsonUtil.getOrDefault(obj, "name",
                     nameDefault, silent);
-            
+
             List<String> links = version >= 3 // Since 2.3.0-beta.2
                     ? JsonUtil.getOrDefault(obj, "links",
                     linksDefault.get(), silent)
                     : JsonUtil.getOrDefault(obj, "addresses",
                     linksDefault.get(), true);
-            
+
             Control addToHistory = JsonUtil.getOrDefault(obj, "addToHistory",
                     Control.class, addToHistoryDefault, silent);
 
@@ -415,11 +417,11 @@ public class Profile {
 
             Control useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
                     Control.class, useRatelimitDefault, silent);
-            
+
             List<Macro> macros = version >= 2 // Since 2.1.0-beta.2
                     ? JsonUtil.getOrDefault(ctx, obj, "macros",
-                    Macro.class, macrosDefault.get(), silent) 
-                    : JsonUtil.getOrDefault(ctx, obj, "commandKeys", 
+                    Macro.class, macrosDefault.get(), silent)
+                    : JsonUtil.getOrDefault(ctx, obj, "commandKeys",
                     Macro.class, macrosDefault.get(), true);
 
             return new Profile(

@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Consists of behavioral options, a primary and alternate {@link Keybind}, and 
+ * Consists of behavioral controls, a primary and alternate {@link Keybind}, and 
  * a list of {@link Message} instances.
  */
 public class Macro {
@@ -39,19 +39,21 @@ public class Macro {
     public final int version = VERSION;
 
     public static final Random RANDOM = new Random();
-    
+
+    // Controls
+
     boolean addToHistory;
     public static final boolean addToHistoryDefault = false;
     transient boolean addToHistoryStatus;
-    
+
     boolean showHudMessage;
     public static final boolean showHudMessageDefault = false;
     transient boolean showHudMessageStatus;
-    
+
     boolean resumeRepeating;
     public static final boolean resumeRepeatingDefault = false;
     transient boolean resumeRepeatingStatus;
-    
+
     boolean useRatelimit;
     public static final boolean useRatelimitDefault = false;
     transient boolean useRatelimitStatus;
@@ -64,7 +66,7 @@ public class Macro {
         VETO,
         AVOID,
     }
-    
+
     SendMode sendMode;
     public static final SendMode sendModeDefault = SendMode.SEND;
     public enum SendMode {
@@ -80,12 +82,14 @@ public class Macro {
      */
     public int spaceTicks;
     public static final int spaceTicksDefault = 0;
-    
+
     /**
      * Index of next message forwards when cycling.
      */
     public transient int cycleIndex;
     public static final int cycleIndexDefault = 0;
+
+    // Keybinds
 
     /**
      * Primary keybind used for activation.
@@ -98,12 +102,14 @@ public class Macro {
      */
     Keybind altKeybind;
     public static final Supplier<Keybind> altKeybindDefault = Keybind::new;
-    
+
+    // Messages
+
     final List<Message> messages;
     public static final Supplier<List<Message>> messagesDefault = ArrayList::new;
 
     /**
-     * Creates a default empty instance.
+     * Creates a default instance with no {@link Message}s.
      */
     public Macro() {
         this(
@@ -122,7 +128,8 @@ public class Macro {
     }
 
     /**
-     * Not validated, only for use by self-validating deserializer.
+     * Not validated, only for use by default constructor and self-validating
+     * deserializer.
      */
     Macro(
             boolean addToHistory,
@@ -171,7 +178,7 @@ public class Macro {
         this.messages = macro.messages.stream().map(Message::new)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
-    
+
     // Control accessors
 
     public boolean getAddToHistory() {
@@ -221,25 +228,23 @@ public class Macro {
     public Keybind getAltKeybind() {
         return altKeybind;
     }
-    
+
     // Keybind utils
 
     /**
-     * @return {@code true} if {@code keybind} belongs to and is in active use
-     * by this macro, {@code false} otherwise.
+     * @return {@code true} if {@code keybind} belongs to this macro.
      */
-    public boolean usesKeybind(Keybind keybind) {
+    public boolean ownsKeybind(Keybind keybind) {
         return (keybind == this.keybind) || (keybind == this.altKeybind);
     }
 
     /**
-     * @return {@code true} if this macro is using its alternate keybind, 
-     * {@code false} otherwise.
+     * @return {@code true} if this macro is using its alternate keybind.
      */
     public boolean usesAltKeybind() {
         return sendMode.equals(SendMode.CYCLE);
     }
-    
+
     // Message management
 
     /**
@@ -262,9 +267,10 @@ public class Macro {
     }
 
     /**
-     * Moves the message at the source index to the destination index.
+     * Moves the {@link Message} at the source index to the destination index.
      * @param sourceIndex the index of the element to move.
      * @param destIndex the desired final index of the element.
+     * @return {@code true} if the list was modified.
      */
     public boolean moveMessage(int sourceIndex, int destIndex) {
         if (sourceIndex != destIndex) {
@@ -275,7 +281,7 @@ public class Macro {
     }
 
     // Activation
-    
+
     public void trigger(@Nullable Keybind trigger) {
         // Triggering a repeating macro stops it
         if (hasRepeating()) {
@@ -338,7 +344,7 @@ public class Macro {
                 for (Message msg : messages) {
                     totalDelay += msg.delayTicks;
                     if (!msg.string.isBlank()) {
-                        schedule(totalDelay, spaceTicks, msg.string, 
+                        schedule(totalDelay, spaceTicks, msg.string,
                                 addToHistoryStatus, showHudMessageStatus);
                     }
                 }
@@ -346,7 +352,7 @@ public class Macro {
         }
     }
 
-    // Scheduling
+    // Message scheduling
 
     private transient final List<ScheduledMessage> scheduledMessages = new ArrayList<>();
 
@@ -430,13 +436,13 @@ public class Macro {
 
     Macro validate() {
         if (spaceTicks < 0) spaceTicks = 0;
-        
+
         keybind.validate();
         altKeybind.validate();
-        
+
         messages.forEach(Message::validate);
         cleanupMessages();
-        
+
         return this;
     }
 
@@ -492,21 +498,21 @@ public class Macro {
 
             int spaceTicks = JsonUtil.getOrDefault(obj, "spaceTicks",
                     spaceTicksDefault, silent);
-            
+
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(ctx, obj, "keybind",
                     Keybind.class, new Keybind(), silent)
                     : new Keybind(
-                            JsonUtil.getOrDefault(obj, "keyName",
-                                    InputConstants.UNKNOWN, true),
-                            JsonUtil.getOrDefault(obj, "limitKeyName",
-                                    InputConstants.UNKNOWN, true)
-                    ).validate();
+                    JsonUtil.getOrDefault(obj, "keyName",
+                            InputConstants.UNKNOWN, true),
+                    JsonUtil.getOrDefault(obj, "limitKeyName",
+                            InputConstants.UNKNOWN, true)
+            ).validate();
 
             Keybind altKeybind = JsonUtil.getOrDefault(ctx, obj, "altKeybind",
                     Keybind.class, new Keybind(), silent);
-            
-            List<Message> messages = JsonUtil.getOrDefault(ctx, obj, "messages", 
+
+            List<Message> messages = JsonUtil.getOrDefault(ctx, obj, "messages",
                     Message.class, messagesDefault.get(), silent);
 
             return new Macro(
@@ -524,6 +530,9 @@ public class Macro {
             ).validate();
         }
 
+        /**
+         * Legacy format util.
+         */
         public static ConflictStrategy getConflictStrategy(String str) {
             return switch(str) {
                 case "ZERO" -> ConflictStrategy.SUBMIT;
@@ -534,6 +543,9 @@ public class Macro {
             };
         }
 
+        /**
+         * Legacy format util.
+         */
         public static SendMode getSendMode(String str) {
             return switch(str) {
                 case "ZERO" -> SendMode.SEND;
