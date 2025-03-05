@@ -15,9 +15,9 @@
 
   "entrypoints": {
     "main": [],
-    "client": ["${mod_group}.${mod_id}.${mod_name}Fabric"],
+    "client": ["dev.terminalmc.commandkeys.CommandKeysFabric"],
     "server": [],
-    "modmenu": ["${mod_group}.${mod_id}.gui.screen.ModMenuIntegration"]
+    "modmenu": ["dev.terminalmc.commandkeys.gui.screen.ModMenuIntegration"]
   },
 
   "mixins": [

@@ -68,6 +68,7 @@ public abstract class DragReorderList extends OptionList {
      *                     'trailers' to the primary entries.
      * @param hasTrailer whether {@code entry} has a trailer.
      */
+    @SuppressWarnings("SameParameterValue")
     protected void startDragging(Entry entry, @Nullable Class<? extends Entry> trailerClass,
                                  boolean hasTrailer) {
         if (validate(entry, trailerClass, hasTrailer)) {

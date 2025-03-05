@@ -70,8 +70,8 @@ public class MainOptionScreen extends OptionScreen {
                                         Minecraft.getInstance().setScreen(this);
                                     }
                                 },
-                                localized("option", "main.exit_without_saving"),
-                                localized("option", "main.exit_without_saving.confirm"))))
+                                localized("option", "main.exitWithoutSaving"),
+                                localized("option", "main.exitWithoutSaving.confirm"))))
                 .pos(x1, y)
                 .size(w, h)
                 .build());

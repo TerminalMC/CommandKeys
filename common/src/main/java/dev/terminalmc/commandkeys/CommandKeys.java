@@ -95,6 +95,7 @@ public class CommandKeys {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void onConfigSaved(Config config) {
         // Cache update event (not currently used)
     }

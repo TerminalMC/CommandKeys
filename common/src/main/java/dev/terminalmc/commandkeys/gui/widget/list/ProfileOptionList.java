@@ -42,6 +42,7 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
  * Contains widgets for editing options of a {@link Profile}, including adding,
  * editing, re-ordering and removing {@link Macro} instances.
  */
+@SuppressWarnings("UnnecessaryUnicodeEscape")
 public class ProfileOptionList extends MacroBindList {
     private OptionList.Entry.ActionButton addMacroEntry;
 
@@ -110,7 +111,7 @@ public class ProfileOptionList extends MacroBindList {
     }
 
     public void openMacroOptions(Macro macro) {
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "key"),
+        mc.setScreen(new OptionScreen(mc.screen, localized("option", "macro"),
                 new MacroOptionList(mc, width, height, getY(), entryWidth, entryHeight,
                         entrySpacing, profile, macro)));
     }
@@ -146,10 +147,10 @@ public class ProfileOptionList extends MacroBindList {
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getShowHudMessage())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "macro.hud.tooltip").append("\n")
+                                localized("option", "macro.control.hud.tooltip").append("\n")
                                         .append(localized("option", "profile.defer.tooltip"))))
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "macro.hud"),
+                                localized("option", "macro.control.hud"),
                                 (button, status) -> list.profile.setShowHudMessage(status));
                 hudButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(hudButton);
@@ -159,10 +160,10 @@ public class ProfileOptionList extends MacroBindList {
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getAddToHistory())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "macro.history.tooltip").append("\n")
+                                localized("option", "macro.control.history.tooltip").append("\n")
                                         .append(localized("option", "profile.defer.tooltip"))))
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "macro.history"),
+                                localized("option", "macro.control.history"),
                                 (button, status) -> list.profile.setAddToHistory(status));
                 historyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(historyButton);
@@ -172,10 +173,10 @@ public class ProfileOptionList extends MacroBindList {
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getResumeRepeating())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "macro.resume.tooltip").append("\n")
+                                localized("option", "macro.control.resume.tooltip").append("\n")
                                         .append(localized("option", "profile.defer.tooltip"))))
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "macro.resume"),
+                                localized("option", "macro.control.resume"),
                                 (button, status) -> list.profile.setResumeRepeating(status));
                 resumeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(resumeButton);
@@ -185,10 +186,10 @@ public class ProfileOptionList extends MacroBindList {
                         .withValues(Profile.Control.values())
                         .withInitialValue(list.profile.getUseRatelimit())
                         .withTooltip((status) -> Tooltip.create(
-                                localized("option", "macro.ratelimit.tooltip").append("\n")
+                                localized("option", "macro.control.ratelimit.tooltip").append("\n")
                                         .append(localized("option", "profile.defer.tooltip"))))
                         .create(movingX, 0, buttonWidth, height,
-                                localized("option", "macro.ratelimit"),
+                                localized("option", "macro.control.ratelimit"),
                                 (button, status) -> list.profile.setUseRatelimit(status));
                 ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(ratelimitButton);
@@ -214,11 +215,11 @@ public class ProfileOptionList extends MacroBindList {
                         ? Mth.clamp(width / 5, 90, 150)
                         : Mth.clamp(width / 3, 90, 150);
                 int messageFieldWidth = width - keyButtonWidth
-                        - (list.smallWidgetWidth * 2 + SPACE * 3);
+                        - (list.smallWidgetWidth * 2 + SPACE_SMALL * 3);
                 int modeButtonWidth = 0;
-                if (messageFieldWidth > 260) {
+                if (messageFieldWidth > 280) {
                     modeButtonWidth = 40;
-                    messageFieldWidth -= (modeButtonWidth + SPACE) * 2;
+                    messageFieldWidth -= (modeButtonWidth + SPACE_SMALL) * 3;
                 }
                 int movingX = x;
 
@@ -247,7 +248,22 @@ public class ProfileOptionList extends MacroBindList {
                         .pos(movingX, 0)
                         .size(keyButtonWidth, height)
                         .build());
-                movingX += keyButtonWidth + SPACE;
+                movingX += keyButtonWidth + SPACE_SMALL;
+
+                // Send button
+                Button sendButton = new ImageButton(movingX, 0,
+                        list.smallWidgetWidth, height, SEND_SPRITES,
+                        (button) -> {
+                            list.screen.onClose();
+                            Minecraft.getInstance().setScreen(null);
+                            macro.trigger(null);
+                        });
+                sendButton.setTooltip(Tooltip.create(
+                        localized("option", "profile.trigger.tooltip")));
+                sendButton.setTooltipDelay(Duration.ofMillis(500));
+                sendButton.active = CommandKeys.inGame();
+                elements.add(sendButton);
+                movingX += list.smallWidgetWidth + SPACE_SMALL;
 
                 // Field
                 EditBox messageField = new EditBox(Minecraft.getInstance().font, movingX, 0,
@@ -259,23 +275,9 @@ public class ProfileOptionList extends MacroBindList {
                 messageField.setResponder(editableField
                         ? (val) -> macro.setMessage(0, val.stripLeading())
                         : (val) -> list.openMacroOptions(macro));
+                if (!editableField) messageField.setTextColor(0xAAAAAA);
                 elements.add(messageField);
-                movingX += messageFieldWidth + SPACE;
-
-                // Send button
-                Button sendButton = new ImageButton(movingX, 0,
-                        list.smallWidgetWidth, height, SEND_SPRITES,
-                        (button) -> {
-                            list.screen.onClose();
-                            Minecraft.getInstance().setScreen(null);
-                            macro.trigger(null);
-                        });
-                sendButton.setTooltip(Tooltip.create(
-                        localized("option", "profile.send.tooltip")));
-                sendButton.setTooltipDelay(Duration.ofMillis(500));
-                sendButton.active = CommandKeys.inGame();
-                elements.add(sendButton);
-                movingX += list.smallWidgetWidth + SPACE;
+                movingX += messageFieldWidth + SPACE_SMALL;
 
                 // Edit button
                 ImageButton editButton = new ImageButton(movingX, 0,
@@ -287,38 +289,46 @@ public class ProfileOptionList extends MacroBindList {
                 editButton.setTooltip(Tooltip.create(localized("option", "profile.key.edit")));
                 editButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(editButton);
-                movingX += list.smallWidgetWidth + SPACE;
+                movingX += list.smallWidgetWidth + SPACE_SMALL;
 
                 if (modeButtonWidth != 0) {
                     // Conflict strategy button
-                    CycleButton<Macro.ConflictStrategy> conflictButton = CycleButton.builder(
-                                    KeybindUtil::localizeStrategy)
+                    elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
                             .displayOnlyValue()
                             .withValues(Macro.ConflictStrategy.values())
                             .withInitialValue(macro.getStrategy())
-                            .withTooltip((status) -> Tooltip.create(KeybindUtil.localizeStrategyTooltip(status)))
+                            .withTooltip((status) -> Tooltip.create(status.tooltip()))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
                                         profile.setConflictStrategy(macro, status);
                                         list.init();
-                                    });
-                    elements.add(conflictButton);
-                    movingX += modeButtonWidth + SPACE;
+                                    }));
+                    movingX += modeButtonWidth + SPACE_SMALL;
 
                     // Send mode button
-                    CycleButton<Macro.SendMode> modeButton = CycleButton.builder(
-                                    KeybindUtil::localizeMode)
+                    elements.add(CycleButton.builder(Macro.SendMode::title)
                             .displayOnlyValue()
                             .withValues(Macro.SendMode.values())
                             .withInitialValue(macro.getMode())
-                            .withTooltip((status) -> Tooltip.create(
-                                    KeybindUtil.localizeModeTooltip(status)))
+                            .withTooltip((status) -> Tooltip.create(status.tooltip()))
                             .create(movingX, 0, modeButtonWidth, height, Component.empty(),
                                     (button, status) -> {
                                         profile.setSendMode(macro, status);
                                         list.init();
-                                    });
-                    elements.add(modeButton);
+                                    }));
+                    movingX += modeButtonWidth + SPACE_SMALL;
+
+                    // Activation type button
+                    elements.add(CycleButton.builder(Macro.ActivationType::title)
+                            .displayOnlyValue()
+                            .withValues(Macro.ActivationType.values())
+                            .withInitialValue(macro.getActivationType())
+                            .withTooltip((status) -> Tooltip.create(status.tooltip()))
+                            .create(movingX, 0, modeButtonWidth, height, Component.empty(),
+                                    (button, status) -> {
+                                        profile.setActivationType(macro, status);
+                                        list.init();
+                                    }));
                 }
 
                 // Delete button

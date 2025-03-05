@@ -20,6 +20,7 @@ import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.util.JsonUtil;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.Type;
 import java.util.Objects;
@@ -90,17 +91,22 @@ public class Keybind {
     }
 
     public boolean isKeyDown() {
-        return !key.equals(InputConstants.UNKNOWN) && InputConstants.isKeyDown(
-                Minecraft.getInstance().getWindow().getWindow(), key.getValue());
+        return isKeyDown(key);
     }
 
     public boolean isLimitKeyDown() {
-        return !limitKey.equals(InputConstants.UNKNOWN) && InputConstants.isKeyDown(
-                Minecraft.getInstance().getWindow().getWindow(), limitKey.getValue());
+        return isKeyDown(limitKey);
     }
 
-    boolean isDown() {
-        return isKeyDown() && (limitKey.equals(InputConstants.UNKNOWN) || isLimitKeyDown());
+    public static boolean isKeyDown(InputConstants.Key key) {
+        if (key.equals(InputConstants.UNKNOWN)) return false;
+        if (key.getType().equals(InputConstants.Type.MOUSE)) {
+            return GLFW.glfwGetMouseButton(
+                    Minecraft.getInstance().getWindow().getWindow(), key.getValue()) == 1;
+        } else {
+            return GLFW.glfwGetKey(
+                    Minecraft.getInstance().getWindow().getWindow(), key.getValue()) == 1;
+        }
     }
 
     @Override

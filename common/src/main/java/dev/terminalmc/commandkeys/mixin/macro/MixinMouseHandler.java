@@ -20,6 +20,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,8 +40,12 @@ public class MixinMouseHandler {
             )
     )
     @SuppressWarnings("JavadocReference")
-    private void wrapClick(InputConstants.Key keymapping, Operation<Void> original) {
-        int cancel = KeybindUtil.handleKey(keymapping);
-        if (cancel != 2) original.call(keymapping);
+    private void wrapClick(InputConstants.Key key, Operation<Void> original) {
+        int cancel = KeybindUtil.handleKey(key);
+        if (cancel == 2) {
+            KeyMapping.set(key, false);
+        } else {
+            original.call(key);
+        }
     }
 }

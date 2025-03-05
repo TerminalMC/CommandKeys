@@ -22,7 +22,6 @@ import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
-import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
@@ -39,6 +38,7 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
  * Displays the list of {@link Profile} instances with various widgets for
  * management, as well as global control widgets.
  */
+@SuppressWarnings("UnnecessaryUnicodeEscape")
 public class MainOptionList extends OptionList {
     private @Nullable Profile editingProfile;
 
@@ -54,7 +54,7 @@ public class MainOptionList extends OptionList {
 
         // List title
         addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
-                inGame ? localized("option", "main.activateProfile")
+                inGame ? localized("option", "main.profiles.activate")
                         : localized("option", "main.profiles", "\u2139"),
                 inGame ? null : Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
 
@@ -74,7 +74,7 @@ public class MainOptionList extends OptionList {
             if (i++ == 0 && inGame) {
                 // Separate active profile and other profiles
                 addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
-                        localized("option", "main.otherProfiles", "\u2139"),
+                        localized("option", "main.profiles.other", "\u2139"),
                         Tooltip.create(localized("option", "main.profiles.tooltip")), 500));
             }
         }
@@ -89,7 +89,8 @@ public class MainOptionList extends OptionList {
         addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
                 localized("option", "main.default", "\u2139"),
                 Tooltip.create(localized("option", "main.default.tooltip")), 500));
-        addEntry(new Entry.DefaultOptions(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.DefaultOptions1(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.DefaultOptions2(dynEntryX, dynEntryWidth, entryHeight));
 
         // Ratelimit options
         addEntry(new OptionList.Entry.Text(dynEntryX, dynEntryWidth, entryHeight,
@@ -160,11 +161,11 @@ public class MainOptionList extends OptionList {
                                 });
                         if (profile.getLinks().contains(CommandKeys.lastConnection)) {
                             linkButton.setTooltip(Tooltip.create(
-                                    localized("option", "main.linked.tooltip")));
+                                    localized("option", "main.profiles.linked.tooltip")));
                             linkButton.active = false;
                         } else {
                             linkButton.setTooltip(Tooltip.create(
-                                    localized("option", "main.link.tooltip")));
+                                    localized("option", "main.profiles.link.tooltip")));
                         }
                         linkButton.setTooltipDelay(Duration.ofMillis(500));
                         elements.add(linkButton);
@@ -177,10 +178,10 @@ public class MainOptionList extends OptionList {
                                             list.init();
                                         })
                                 .pos(x, 0)
-                                .size(smallWidgetWidth, smallWidgetWidth)
+                                .size(smallWidgetWidth, height)
                                 .build();
                         activateButton.setTooltip(Tooltip.create(
-                                localized("option", "main.activate.tooltip")));
+                                localized("option", "main.profiles.activate.tooltip")));
                         activateButton.setTooltipDelay(Duration.ofMillis(500));
                         elements.add(activateButton);
                     }
@@ -193,10 +194,10 @@ public class MainOptionList extends OptionList {
                 if (numLinks != 0) {
                     name.append(" ");
                     if (numLinks == 1) {
-                        name.append(localized("option","main.links.one")
+                        name.append(localized("option","main.profiles.links.one")
                                 .withStyle(ChatFormatting.GRAY));
                     } else {
-                        name.append(localized("option","main.links.many", numLinks)
+                        name.append(localized("option","main.profiles.links.many", numLinks)
                                 .withStyle(ChatFormatting.GRAY));
                     }
                 }
@@ -205,7 +206,7 @@ public class MainOptionList extends OptionList {
                 elements.add(Button.builder(name, (button) ->
                                 list.openProfileOptions(profile))
                         .tooltip(Tooltip.create(
-                                localized("option", "main.editProfile.tooltip")))
+                                localized("option", "main.profile.edit.tooltip")))
                         .pos(mainButtonX, 0)
                         .size(mainButtonWidth, height)
                         .build());
@@ -230,14 +231,14 @@ public class MainOptionList extends OptionList {
                         },
                         Component.empty());
                 configureButton.setTooltip(Tooltip.create(
-                        localized("option", "main.editDetails.tooltip")));
+                        localized("option", "main.profile.details.tooltip")));
                 configureButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(configureButton);
                 movingX += smallWidgetWidth + SPACE;
 
                 // Singleplayer default button
                 Button setAsSpDefaultButton = Button.builder(
-                                localized("option", "main.defaultSingleplayer.set"),
+                                localized("option", "main.profiles.default.singleplayer.set"),
                                 (button) -> {
                                     Config.get().setSpDefault(index);
                                     list.init();
@@ -247,12 +248,12 @@ public class MainOptionList extends OptionList {
                         .build();
                 if (spDefault) {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.defaultSingleplayer.tooltip")));
+                            localized("option", "main.profiles.default.singleplayer.tooltip")));
                     setAsSpDefaultButton.setMessage(setAsSpDefaultButton.getMessage().copy()
                             .withStyle(ChatFormatting.GREEN));
                 } else {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.defaultSingleplayer.set.tooltip")));
+                            localized("option", "main.profiles.default.singleplayer.set.tooltip")));
                 }
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !spDefault;
@@ -261,7 +262,7 @@ public class MainOptionList extends OptionList {
 
                 // Multiplayer default button
                 Button setAsMpDefaultButton = Button.builder(
-                                localized("option", "main.defaultMultiplayer.set"),
+                                localized("option", "main.profiles.default.multiplayer.set"),
                                 (button) -> {
                                     Config.get().setMpDefault(index);
                                     list.init();
@@ -271,12 +272,12 @@ public class MainOptionList extends OptionList {
                         .build();
                 if (mpDefault) {
                     setAsMpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.defaultMultiplayer.tooltip")));
+                            localized("option", "main.profiles.default.multiplayer.tooltip")));
                     setAsMpDefaultButton.setMessage(setAsMpDefaultButton.getMessage().copy()
                             .withStyle(ChatFormatting.GREEN));
                 } else {
                     setAsMpDefaultButton.setTooltip(Tooltip.create(
-                            localized("option", "main.defaultMultiplayer.set.tooltip")
+                            localized("option", "main.profiles.default.multiplayer.set.tooltip")
                     ));
                 }
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
@@ -293,7 +294,7 @@ public class MainOptionList extends OptionList {
                         },
                         Component.empty());
                 copyButton.setTooltip(Tooltip.create(
-                        localized("option", "main.copy.tooltip")));
+                        localized("option", "main.profiles.copy.tooltip")));
                 copyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(copyButton);
                 movingX += smallWidgetWidth + SPACE;
@@ -310,13 +311,13 @@ public class MainOptionList extends OptionList {
                 if (spDefault || mpDefault) {
                     deleteButton.active = false;
                     deleteButton.setTooltip(Tooltip.create(
-                            localized("option", "main.delete.disabled.tooltip")
+                            localized("option", "main.profiles.delete.disabled.tooltip")
                     ));
                 } else {
                     deleteButton.setMessage(deleteButton.getMessage().copy()
                             .withStyle(ChatFormatting.RED));
                     deleteButton.setTooltip(Tooltip.create(
-                            localized("option", "main.delete.tooltip")
+                            localized("option", "main.profiles.delete.tooltip")
                     ));
                 }
                 deleteButton.setTooltipDelay(Duration.ofMillis(500));
@@ -331,7 +332,7 @@ public class MainOptionList extends OptionList {
                 int labelWidth = 50;
                 int nameBoxWidth = width - labelWidth - SPACE;
 
-                Button label = Button.builder(localized("option", "main.name"), (button -> {}))
+                Button label = Button.builder(localized("option", "main.profile.name"), (button -> {}))
                         .pos(x, 0)
                         .size(labelWidth, height)
                         .build();
@@ -354,7 +355,7 @@ public class MainOptionList extends OptionList {
                 int labelWidth = 50;
                 int addressBoxWidth = width - labelWidth - list.smallWidgetWidth - SPACE;
 
-                Button label = Button.builder(localized("option", "main.link"), (button -> {}))
+                Button label = Button.builder(localized("option", "main.profiles.link"), (button -> {}))
                         .pos(x, 0)
                         .size(labelWidth, height)
                         .build();
@@ -377,38 +378,53 @@ public class MainOptionList extends OptionList {
                         .size(list.smallWidgetWidth, height)
                         .build();
                 removeButton.setTooltip(Tooltip.create(
-                        localized("option", "main.removeLink.tooltip")));
+                        localized("option", "main.profile.link.remove.tooltip")));
                 removeButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(removeButton);
             }
         }
 
-        private static class DefaultOptions extends Entry {
-            DefaultOptions(int x, int width, int height) {
+        private static class DefaultOptions1 extends Entry {
+            DefaultOptions1(int x, int width, int height) {
                 super();
                 int buttonWidth = (width - SPACE) / 2;
 
                 // Conflict strategy button
-                elements.add(CycleButton.builder(KeybindUtil::localizeStrategy)
+                elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
                         .withValues(Macro.ConflictStrategy.values())
                         .withInitialValue(Config.get().defaultConflictStrategy)
-                        .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeStrategyTooltip(status)))
+                        .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(x, 0, buttonWidth, height,
-                                localized("option", "main.default.conflictStrategy"),
+                                localized("option", "macro.conflict"),
                                 (button, status) ->
                                         Config.get().defaultConflictStrategy = status));
 
                 // Send mode button
-                elements.add(CycleButton.builder(KeybindUtil::localizeMode)
+                elements.add(CycleButton.builder(Macro.SendMode::title)
                         .withValues(Macro.SendMode.values())
                         .withInitialValue(Config.get().defaultSendMode)
-                        .withTooltip((status) -> Tooltip.create(
-                                KeybindUtil.localizeModeTooltip(status)))
+                        .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(x + width - buttonWidth, 0, buttonWidth, height,
-                                localized("option", "main.default.sendMode"),
+                                localized("option", "macro.mode"),
                                 (button, status) ->
                                         Config.get().defaultSendMode = status));
+            }
+        }
+
+        private static class DefaultOptions2 extends Entry {
+            DefaultOptions2(int x, int width, int height) {
+                super();
+                int buttonWidth = (width - SPACE) / 2;
+
+                // Activation type button
+                elements.add(CycleButton.builder(Macro.ActivationType::title)
+                        .withValues(Macro.ActivationType.values())
+                        .withInitialValue(Config.get().defaultActivationType)
+                        .withTooltip((status) -> Tooltip.create(status.tooltip()))
+                        .create(x, 0, buttonWidth, height,
+                                localized("option", "macro.activation"),
+                                (button, status) ->
+                                        Config.get().defaultActivationType = status));
             }
         }
 

@@ -44,14 +44,14 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  *
  * <p>When a profile is activated it is automatically moved to the start of the
  * list, so the list maintains most-recently-used order and the current active
- * profile can be obtained using {@code getFirst()}.</p>
+ * profile can be obtained using {@link List#getFirst}.</p>
  *
  * <p>The profile list is guaranteed to contain at least one instance at all
  * times, and at least two if {@link Config#spDefault} is not equal to
  * {@link Config#mpDefault}.</p>
  */
 public class Config {
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
     public final int version = VERSION;
     private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
     public static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
@@ -78,6 +78,7 @@ public class Config {
     // Default options used by new macro instances
     public Macro.ConflictStrategy defaultConflictStrategy;
     public Macro.SendMode defaultSendMode;
+    public Macro.ActivationType defaultActivationType;
 
     // Ratelimit options
     private int ratelimitCount;
@@ -98,8 +99,9 @@ public class Config {
                 profilesDefault.get(),
                 defaultIndexDefault,
                 defaultIndexDefault,
-                Macro.ConflictStrategy.values()[0],
-                Macro.SendMode.values()[0],
+                Macro.conflictStrategyDefault,
+                Macro.sendModeDefault,
+                Macro.activationTypeDefault,
                 ratelimitCountDefault,
                 ratelimitTicksDefault,
                 ratelimitStrictDefault,
@@ -117,6 +119,7 @@ public class Config {
             int mpDefault,
             Macro.ConflictStrategy defaultConflictStrategy,
             Macro.SendMode defaultSendMode,
+            Macro.ActivationType defaultActivationType,
             int ratelimitCount,
             int ratelimitTicks,
             boolean ratelimitStrict,
@@ -127,6 +130,7 @@ public class Config {
         this.mpDefault = mpDefault;
         this.defaultConflictStrategy = defaultConflictStrategy;
         this.defaultSendMode = defaultSendMode;
+        this.defaultActivationType = defaultActivationType;
         this.ratelimitCount = ratelimitCount;
         this.ratelimitTicks = ratelimitTicks;
         this.ratelimitStrict = ratelimitStrict;
@@ -189,11 +193,11 @@ public class Config {
      * active.
      */
     public void activateProfile(int index) {
+        // Deactivate active profile if set to do so
+        profiles.getFirst().getMacros().forEach((macro) -> {
+            if (!macro.resumeRepeatingStatus) macro.deactivate();
+        });
         if (index != 0) {
-            // Stop all repeating macros of active profile (if set to do so)
-            profiles.getFirst().getMacros().forEach((macro) -> {
-                if (!macro.resumeRepeatingStatus) macro.stopRepeating();
-            });
             // Activate requested profile
             profiles.addFirst(profiles.remove(index));
             // Update default pointers
@@ -415,6 +419,9 @@ public class Config {
             Macro.SendMode defaultSendMode = JsonUtil.getOrDefault(obj, "defaultSendMode",
                     Macro.SendMode.class, Macro.sendModeDefault, silent);
 
+            Macro.ActivationType defaultActivationType = JsonUtil.getOrDefault(obj, "defaultActivationType",
+                    Macro.ActivationType.class, Macro.activationTypeDefault, silent);
+
             int ratelimitCount = JsonUtil.getOrDefault(obj, "ratelimitCount",
                     ratelimitCountDefault, silent);
 
@@ -433,6 +440,7 @@ public class Config {
                     mpDefault,
                     defaultConflictStrategy,
                     defaultSendMode,
+                    defaultActivationType,
                     ratelimitCount,
                     ratelimitTicks,
                     ratelimitStrict,

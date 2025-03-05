@@ -58,7 +58,7 @@ public class Profile {
     private final List<String> links;
     public static final Supplier<List<String>> linksDefault = ArrayList::new;
 
-    // Behavior controls
+    // Managed controls
     private Control addToHistory;
     public static final Control addToHistoryDefault = Control.OFF;
     private Control showHudMessage;
@@ -182,7 +182,7 @@ public class Profile {
         LINK_PROFILE_MAP.remove(link);
     }
 
-    // Behavior management
+    // Control management
 
     public Control getAddToHistory() {
         return addToHistory;
@@ -191,6 +191,15 @@ public class Profile {
     public void setAddToHistory(Control addToHistory) {
         this.addToHistory = addToHistory;
         macros.forEach((macro) -> setAddToHistory(macro, macro.addToHistory));
+    }
+
+    public void setAddToHistory(Macro macro, boolean value) {
+        macro.addToHistory = value;
+        macro.addToHistoryStatus = switch(this.addToHistory) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.addToHistory;
+        };
     }
 
     public Control getShowHudMessage() {
@@ -202,6 +211,15 @@ public class Profile {
         macros.forEach((macro) -> setShowHudMessage(macro, macro.showHudMessage));
     }
 
+    public void setShowHudMessage(Macro macro, boolean value) {
+        macro.showHudMessage = value;
+        macro.showHudMessageStatus = switch(this.showHudMessage) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.showHudMessage;
+        };
+    }
+
     public Control getResumeRepeating() {
         return resumeRepeating;
     }
@@ -211,6 +229,15 @@ public class Profile {
         macros.forEach((macro) -> setResumeRepeating(macro, macro.resumeRepeating));
     }
 
+    public void setResumeRepeating(Macro macro, boolean value) {
+        macro.resumeRepeating = value;
+        macro.resumeRepeatingStatus = switch(this.resumeRepeating) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.resumeRepeating;
+        };
+    }
+
     public Control getUseRatelimit() {
         return useRatelimit;
     }
@@ -218,6 +245,15 @@ public class Profile {
     public void setUseRatelimit(Control useRatelimit) {
         this.useRatelimit = useRatelimit;
         macros.forEach((macro) -> setUseRatelimit(macro, macro.useRatelimit));
+    }
+
+    public void setUseRatelimit(Macro macro, boolean value) {
+        macro.useRatelimit = value;
+        macro.useRatelimitStatus = switch(this.useRatelimit) {
+            case ON -> true;
+            case OFF -> false;
+            case DEFER -> macro.useRatelimit;
+        };
     }
 
     // Macro management
@@ -290,19 +326,25 @@ public class Profile {
 
     // Macro editing
 
+    public void setConflictStrategy(Macro macro, Macro.ConflictStrategy conflictStrategy) {
+        if (conflictStrategy.equals(macro.conflictStrategy)) return;
+        macro.deactivateAndCancel();
+        macro.conflictStrategy = conflictStrategy;
+    }
+
     public void setSendMode(Macro macro, Macro.SendMode sendMode) {
         if (sendMode.equals(macro.sendMode)) return;
-        macro.clearScheduled();
+        macro.deactivateAndCancel();
         macro.sendMode = sendMode;
         // Rebuilding maps is required as only certain types of macro use their
         // alternate keybind.
         rebuildMaps();
     }
 
-    public void setConflictStrategy(Macro macro, Macro.ConflictStrategy conflictStrategy) {
-        if (conflictStrategy.equals(macro.conflictStrategy)) return;
-        macro.clearScheduled();
-        macro.conflictStrategy = conflictStrategy;
+    public void setActivationType(Macro macro, Macro.ActivationType activationType) {
+        if (activationType.equals(macro.activationType)) return;
+        macro.deactivateAndCancel();
+        macro.activationType = activationType;
     }
 
     /**
@@ -313,7 +355,7 @@ public class Profile {
     public void setKey(Macro macro, Keybind keybind, InputConstants.Key key) {
         if (key.equals(keybind.getKey())) return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
-            macro.clearScheduled();
+            macro.deactivateAndCancel();
             keybind.setKey(key);
             rebuildMaps();
         }
@@ -322,51 +364,15 @@ public class Profile {
     /**
      * If {@code keybind} is the {@link Macro#keybind} or
      * {@link Macro#altKeybind} of {@code macro}, sets the limit key of the
-     * appropriate {@link Keybind} to {@code key}.
+     * appropriate {@link Keybind} to {@code limitKey}.
      */
-    public void setLimitKey(Macro macro, Keybind keybind, InputConstants.Key key) {
-        if (key.equals(keybind.getLimitKey())) return;
+    public void setLimitKey(Macro macro, Keybind keybind, InputConstants.Key limitKey) {
+        if (limitKey.equals(keybind.getLimitKey())) return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
-            macro.clearScheduled();
-            keybind.setLimitKey(key);
+            macro.deactivateAndCancel();
+            keybind.setLimitKey(limitKey);
             rebuildMaps();
         }
-    }
-
-    public void setAddToHistory(Macro macro, boolean value) {
-        macro.addToHistory = value;
-        macro.addToHistoryStatus = switch(this.addToHistory) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> macro.addToHistory;
-        };
-    }
-
-    public void setShowHudMessage(Macro macro, boolean value) {
-        macro.showHudMessage = value;
-        macro.showHudMessageStatus = switch(this.showHudMessage) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> macro.showHudMessage;
-        };
-    }
-
-    public void setResumeRepeating(Macro macro, boolean value) {
-        macro.resumeRepeating = value;
-        macro.resumeRepeatingStatus = switch(this.resumeRepeating) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> macro.resumeRepeating;
-        };
-    }
-
-    public void setUseRatelimit(Macro macro, boolean value) {
-        macro.useRatelimit = value;
-        macro.useRatelimitStatus = switch(this.useRatelimit) {
-            case ON -> true;
-            case OFF -> false;
-            case DEFER -> macro.useRatelimit;
-        };
     }
 
     // Validation

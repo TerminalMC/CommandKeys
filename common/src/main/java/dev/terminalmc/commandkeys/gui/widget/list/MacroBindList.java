@@ -46,7 +46,7 @@ public abstract class MacroBindList extends DragReorderList {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpace, clsFunMap);
         this.profile = profile;
     }
-    
+
     @Override
     public void init() {
         super.init();
@@ -55,7 +55,7 @@ public abstract class MacroBindList extends DragReorderList {
         heldKey = null;
         sendKey = null;
     }
-    
+
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
         if (!profile.getMacros().contains(macro)) throw new IllegalArgumentException(
                 "Specified macro does not exist in profile.");
@@ -69,6 +69,7 @@ public abstract class MacroBindList extends DragReorderList {
     public boolean keyPressed(InputConstants.Key key) {
         if (macro != null && keybind != null) {
             if (key.getValue() == InputConstants.KEY_ESCAPE) {
+                // Unbind key
                 profile.setKey(macro, keybind, InputConstants.UNKNOWN);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
                 init();
@@ -78,6 +79,7 @@ public abstract class MacroBindList extends DragReorderList {
                     heldKey = key;
                 }
                 else {
+                    // Already holding a key, bind both keys
                     if (key != heldKey) {
                         profile.setKey(macro, keybind, key);
                         profile.setLimitKey(macro, keybind, heldKey);
@@ -100,6 +102,7 @@ public abstract class MacroBindList extends DragReorderList {
     @Override
     public boolean keyReleased(InputConstants.Key key) {
         if (macro != null && keybind != null) {
+            // Bind key
             if (heldKey == key) {
                 profile.setKey(macro, keybind, key);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
@@ -108,6 +111,7 @@ public abstract class MacroBindList extends DragReorderList {
             }
         }
         else if (key.equals(sendKey)) {
+            // Trigger macro
             if (getSelected() == null && CommandKeys.inGame()) {
                 Collection<Keybind> keybinds = profile.keybindMap.get(key);
                 Keybind active1 = null;
@@ -132,7 +136,6 @@ public abstract class MacroBindList extends DragReorderList {
             }
             sendKey = null;
         }
-        // TODO null keys?
         return false;
     }
 

@@ -29,7 +29,6 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Locale;
 
 import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
@@ -48,6 +47,7 @@ public class KeybindUtil {
      * @param limitKey the limit key.
      * @return the number of macros activated.
      */
+    @SuppressWarnings("unused")
     public static int handleKeys(InputConstants.Key key, InputConstants.Key limitKey) {
         if (key.equals(InputConstants.UNKNOWN)) return 0;
         if (!profile().keybindMap.containsKey(key)) return 0;
@@ -77,57 +77,63 @@ public class KeybindUtil {
         if (Minecraft.getInstance().screen == null && profile().keybindMap.containsKey(key)) {
             // Get all keybinds matching the pressed key
             Collection<Keybind> keybinds = profile().keybindMap.get(key);
+            // The single keybind that we decide best matches the key
             Keybind triggerKb = null;
-            Keybind monoKb = null;
 
-            Collection<Macro> activeMacros = null;
+            // Search for a limited keybind for which the limit key is down
+            Collection<Macro> macros = null;
             for (Keybind kb : keybinds) {
                 if (kb.isLimitKeyDown()) {
-                    // Preference limited keybinds
+                    // Found a limited keybind with its limit key down, get all
+                    // macros that use this keybind and break if there are any
                     triggerKb = kb;
-                    activeMacros = profile().macroMap.get(triggerKb).stream()
+                    macros = profile().macroMap.get(triggerKb).stream()
                             .filter((macro) -> !macro.getStrategy().equals(AVOID))
                             .toList();
-                    if (!activeMacros.isEmpty()) break;
+                    if (!macros.isEmpty()) break;
                 } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                    // Save for use if no limited keybinds found
-                    monoKb = kb;
+                    // Save a backup in case no limited keybinds are found,
+                    // avoid iterating twice
+                    triggerKb = kb;
                 }
             }
-            if (activeMacros == null || activeMacros.isEmpty()) {
-                triggerKb = monoKb;
+            // If we didn't find any limited keybinds, we use the backup
+            if (macros == null || macros.isEmpty()) {
+                // If we don't have a backup, we exit
                 if (triggerKb == null) return cancel;
-                activeMacros = profile().macroMap.get(triggerKb).stream()
+                // Otherwise we get all macros matching the backup
+                macros = profile().macroMap.get(triggerKb).stream()
                         .filter((macro) -> !macro.getStrategy().equals(AVOID))
                         .toList();
-                if (activeMacros.isEmpty()) return cancel;
+                // If we don't have any matching macros, we exit
+                if (macros.isEmpty()) return cancel;
             }
-
-            boolean first = true;
+            
             boolean ratelimited = false;
 
-            for (Macro macro : activeMacros) {
+            // Trigger all matching macros
+            for (Macro macro : macros) {
                 boolean send = true;
 
                 switch(macro.getStrategy()) {
+                    // SUBMIT only allows sending if there's no conflict
                     case SUBMIT -> send = getConflict(key) == null;
+                    // VETO requires cancelling everything
                     case VETO -> cancel = 2;
                 }
 
                 if (send) {
-                    if (first) {
-                        ratelimited = macro.getUseRatelimitStatus() && !canTrigger(key);
-                        first = false;
+                    // On the first macro, check the ratelimiter
+                    ratelimited |= macro.getUseRatelimitStatus() && !canTrigger(key);
+                    
+                    if (!ratelimited || !macro.getUseRatelimitStatus()) {
+                        macro.trigger(triggerKb);
+                        // TYPE mode requires cancelling char
+                        if (cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
                     }
-                    // Always allow repeat-stop
-                    if (ratelimited && !macro.hasRepeating()) continue;
-
-                    macro.trigger(triggerKb);
-                    if (cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
                 }
             }
         }
-
         return cancel;
     }
 
@@ -172,13 +178,13 @@ public class KeybindUtil {
             // Check internal conflict
             if (profile.keybindMap.get(key).size() > 1) {
                 if (internalConflict || mcConflict) tooltip.append("\n");
-                tooltip.append(localized("option", "key.bind.tooltip.conflict.internal",
+                tooltip.append(localized("option", "macro.bind.tooltip.conflict.internal",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
                         .withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
             } else if (keybind != null && profile.macroMap.get(keybind).size() > 1) {
                 if (internalConflict || mcConflict) tooltip.append("\n");
-                tooltip.append(localized("option", "key.bind.tooltip.conflict.internal",
+                tooltip.append(localized("option", "macro.bind.tooltip.conflict.internal",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
                         .withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
@@ -188,7 +194,7 @@ public class KeybindUtil {
                 KeyMapping keyMapping = getConflict(key);
                 if (keyMapping != null) {
                     if (internalConflict || mcConflict) tooltip.append("\n");
-                    tooltip.append(localized("option", "key.bind.tooltip.conflict.external",
+                    tooltip.append(localized("option", "macro.bind.tooltip.conflict.external",
                                     key.getDisplayName().copy().withStyle(ChatFormatting.RED),
                                     Component.translatable(keyMapping.getName())
                                             .withStyle(ChatFormatting.GRAY)))
@@ -205,8 +211,8 @@ public class KeybindUtil {
                         .append(label.withStyle(ChatFormatting.WHITE))
                         .append(" ]").withStyle(ChatFormatting.RED);
                 tooltip.append("\n");
-                tooltip.append(localized("option", "key.bind.tooltip.conflictStrategy",
-                        localizeStrategy(macro.getStrategy())));
+                tooltip.append(localized("option", "macro.bind.tooltip.conflictStrategy",
+                        macro.getStrategy().tooltip()));
             }
             else if (internalConflict) {
                 // Apply orange brackets
@@ -219,38 +225,5 @@ public class KeybindUtil {
                 conflictLabel = label;
             }
         }
-    }
-
-    public static Component localizeStrategy(Macro.ConflictStrategy strategy) {
-        return localized("option", "key.conflict."
-                + strategy.toString().toLowerCase(Locale.ROOT))
-                .withStyle(switch(strategy) {
-                    case SUBMIT -> ChatFormatting.GREEN;
-                    case ASSERT -> ChatFormatting.GOLD;
-                    case VETO -> ChatFormatting.RED;
-                    case AVOID -> ChatFormatting.DARK_AQUA;
-                });
-    }
-
-    public static Component localizeStrategyTooltip(Macro.ConflictStrategy strategy) {
-        return localized("option", "key.conflict."
-                + strategy.toString().toLowerCase(Locale.ROOT) + ".tooltip");
-    }
-
-    public static Component localizeMode(Macro.SendMode mode) {
-        return localized("option", "key.mode."
-                + mode.toString().toLowerCase(Locale.ROOT))
-                .withStyle(switch(mode) {
-                    case SEND -> ChatFormatting.GREEN;
-                    case TYPE -> ChatFormatting.GOLD;
-                    case CYCLE -> ChatFormatting.DARK_AQUA;
-                    case RANDOM -> ChatFormatting.LIGHT_PURPLE;
-                    case REPEAT -> ChatFormatting.RED;
-                });
-    }
-
-    public static Component localizeModeTooltip(Macro.SendMode mode) {
-        return localized("option", "key.mode."
-                + mode.toString().toLowerCase(Locale.ROOT) + ".tooltip");
     }
 }

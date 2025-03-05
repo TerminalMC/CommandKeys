@@ -50,6 +50,7 @@ import java.util.List;
  * add them all to a single {@link Entry}'s list of widgets, which are all
  * rendered at the same list level.</p>
  */
+@SuppressWarnings("unused")
 public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
     protected OptionScreen screen;
 

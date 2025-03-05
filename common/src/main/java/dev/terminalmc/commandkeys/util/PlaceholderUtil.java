@@ -154,7 +154,7 @@ public class PlaceholderUtil {
 
     // Clipboard
 
-    private static String getClipboard(@Nullable String[] pattern) {
+    private static String getClipboard(String @Nullable [] pattern) {
         String clipboard = Minecraft.getInstance().keyboardHandler.getClipboard();
         if (clipboard.isEmpty()) {
             CommandKeys.LOG.warn("Clipboard placeholder failed: No data");
