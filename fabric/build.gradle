@@ -10,7 +10,7 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
     }
 
-    // Fabric loader and API
+    // Fabric Loader and API
     modImplementation("net.fabricmc:fabric-loader:${fabric_loader_version}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
 

@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    // Mixin and MixinExtras
     compileOnly("org.spongepowered:mixin:${mixin_version}")
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
 }
