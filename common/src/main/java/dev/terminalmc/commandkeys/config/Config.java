@@ -18,6 +18,7 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import dev.terminalmc.commandkeys.CommandKeys;
+import dev.terminalmc.commandkeys.platform.Services;
 import dev.terminalmc.commandkeys.util.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +53,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
 public class Config {
     public static final int VERSION = 5;
     public final int version = VERSION;
-    private static final Path DIR_PATH = Path.of("config");
+    private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
     public static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     public static final String UNREADABLE_FILE_NAME = CommandKeys.MOD_ID + ".unreadable.json";
     public static final String OLD_FILE_NAME = CommandKeys.MOD_ID + ".old.json";
@@ -305,7 +306,7 @@ public class Config {
     // Load and save
 
     public static @NotNull Config load() {
-        Path file = DIR_PATH.resolve(FILE_NAME);
+        Path file = CONFIG_DIR.resolve(FILE_NAME);
         Config config = null;
         if (Files.exists(file)) {
             JsonUtil.reset();
@@ -336,8 +337,8 @@ public class Config {
     private static void backup(String path) {
         try {
             CommandKeys.LOG.warn("Copying {} to {}", FILE_NAME, path);
-            if (!Files.isDirectory(DIR_PATH)) Files.createDirectories(DIR_PATH);
-            Path file = DIR_PATH.resolve(FILE_NAME);
+            if (!Files.isDirectory(CONFIG_DIR)) Files.createDirectories(CONFIG_DIR);
+            Path file = CONFIG_DIR.resolve(FILE_NAME);
             Path backupFile = file.resolveSibling(path);
             Files.move(file, backupFile, StandardCopyOption.ATOMIC_MOVE,
                     StandardCopyOption.REPLACE_EXISTING);
@@ -350,8 +351,8 @@ public class Config {
         if (instance == null) return;
         instance.validate();
         try {
-            if (!Files.isDirectory(DIR_PATH)) Files.createDirectories(DIR_PATH);
-            Path file = DIR_PATH.resolve(FILE_NAME);
+            if (!Files.isDirectory(CONFIG_DIR)) Files.createDirectories(CONFIG_DIR);
+            Path file = CONFIG_DIR.resolve(FILE_NAME);
             Path tempFile = file.resolveSibling(file.getFileName() + ".tmp");
             try (OutputStreamWriter writer = new OutputStreamWriter(
                     new FileOutputStream(tempFile.toFile()), StandardCharsets.UTF_8)) {
