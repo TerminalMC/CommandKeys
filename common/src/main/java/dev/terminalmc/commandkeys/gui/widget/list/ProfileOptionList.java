@@ -215,11 +215,11 @@ public class ProfileOptionList extends MacroBindList {
                         ? Mth.clamp(width / 5, 90, 150)
                         : Mth.clamp(width / 3, 90, 150);
                 int messageFieldWidth = width - keyButtonWidth
-                        - (list.smallWidgetWidth * 2 + SPACE_SMALL * 3);
+                        - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
                 int modeButtonWidth = 0;
                 if (messageFieldWidth > 280) {
                     modeButtonWidth = 40;
-                    messageFieldWidth -= (modeButtonWidth + SPACE_SMALL) * 3;
+                    messageFieldWidth -= modeButtonWidth * 3 + SPACE_SMALL;
                 }
                 int movingX = x;
 
@@ -248,7 +248,7 @@ public class ProfileOptionList extends MacroBindList {
                         .pos(movingX, 0)
                         .size(keyButtonWidth, height)
                         .build());
-                movingX += keyButtonWidth + SPACE_SMALL;
+                movingX += keyButtonWidth;
 
                 // Send button
                 Button sendButton = new ImageButton(movingX, 0,
@@ -303,7 +303,7 @@ public class ProfileOptionList extends MacroBindList {
                                         profile.setConflictStrategy(macro, status);
                                         list.init();
                                     }));
-                    movingX += modeButtonWidth + SPACE_SMALL;
+                    movingX += modeButtonWidth;
 
                     // Send mode button
                     elements.add(CycleButton.builder(Macro.SendMode::title)
@@ -316,7 +316,7 @@ public class ProfileOptionList extends MacroBindList {
                                         profile.setSendMode(macro, status);
                                         list.init();
                                     }));
-                    movingX += modeButtonWidth + SPACE_SMALL;
+                    movingX += modeButtonWidth;
 
                     // Activation type button
                     elements.add(CycleButton.builder(Macro.ActivationType::title)
