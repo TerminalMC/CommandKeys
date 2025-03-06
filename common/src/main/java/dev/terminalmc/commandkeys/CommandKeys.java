@@ -34,6 +34,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,7 @@ public class CommandKeys {
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
+    public static @Nullable InputConstants.Key ratelimitedKey = null;
 
     private static final List<TickCounter> rateLimiter = new ArrayList<>();
     private static class TickCounter {
@@ -120,7 +122,7 @@ public class CommandKeys {
     public static boolean canTrigger(InputConstants.Key key, boolean sendMessage) {
         if ((!inSingleplayer() || Config.get().ratelimitSp)
                 && rateLimiter.size() >= Config.get().getRatelimitCount()) {
-            if (sendMessage) {
+            if (sendMessage && ratelimitedKey != key) {
                 Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
                         localized("message", "sendBlocked",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
@@ -129,6 +131,7 @@ public class CommandKeys {
                                 Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
                                         .withStyle(ChatFormatting.GRAY))
                                 .withStyle(ChatFormatting.RED)));
+                ratelimitedKey = key;
             }
             if (Config.getAndSave().ratelimitStrict) rateLimiter.add(new TickCounter());
             return false;
@@ -146,6 +149,7 @@ public class CommandKeys {
     }
 
     public static void send(boolean type, String message, boolean addToHistory, boolean showHudMsg) {
+        ratelimitedKey = null;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         if (!mc.player.connection.isAcceptingMessages()) return;
