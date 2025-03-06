@@ -22,6 +22,8 @@ import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
+import dev.terminalmc.commandkeys.gui.widget.field.FakeTextField;
+import dev.terminalmc.commandkeys.gui.widget.field.TextField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.*;
@@ -339,11 +341,10 @@ public class MainOptionList extends OptionList {
                 label.active = false;
                 elements.add(label);
 
-                EditBox nameBox = new EditBox(Minecraft.getInstance().font, x + labelWidth, 0,
-                        nameBoxWidth, height, Component.empty());
+                TextField nameBox = new TextField( x + labelWidth, 0, nameBoxWidth, height);
                 nameBox.setMaxLength(64);
-                nameBox.setValue(profile.name);
                 nameBox.setResponder((value) -> profile.name = value.strip());
+                nameBox.setValue(profile.name);
                 elements.add(nameBox);
             }
         }
@@ -353,7 +354,7 @@ public class MainOptionList extends OptionList {
                         String address) {
                 super();
                 int labelWidth = 50;
-                int addressBoxWidth = width - labelWidth - list.smallWidgetWidth - SPACE;
+                int linkFieldWidth = width - labelWidth - list.smallWidgetWidth - SPACE;
 
                 Button label = Button.builder(localized("option", "main.profiles.link"), (button -> {}))
                         .pos(x, 0)
@@ -362,12 +363,12 @@ public class MainOptionList extends OptionList {
                 label.active = false;
                 elements.add(label);
 
-                EditBox addressBox = new EditBox(Minecraft.getInstance().font, x + labelWidth, 0,
-                        addressBoxWidth, height, Component.empty());
-                addressBox.setMaxLength(64);
-                addressBox.setValue(address);
-                addressBox.active = false;
-                elements.add(addressBox);
+                TextField linkField = new FakeTextField( x + labelWidth, 0,
+                        linkFieldWidth, height, () -> {});
+                linkField.setMaxLength(64);
+                linkField.setValue(address);
+                linkField.active = false;
+                elements.add(linkField);
 
                 Button removeButton = Button.builder(Component.literal("\u274C"),
                                 (button) -> {
@@ -436,19 +437,11 @@ public class MainOptionList extends OptionList {
                 int movingX = x;
 
                 // Message count field
-                EditBox countField = new EditBox(Minecraft.getInstance().font,
-                        movingX, 0, fieldWidth, height, Component.empty());
+                TextField countField = new TextField(movingX, 0, fieldWidth, height);
+                countField.posIntValidator().strict();
                 countField.setMaxLength(6);
-                countField.setResponder((val) -> {
-                    try {
-                        int space = Integer.parseInt(val.strip());
-                        if (space < 1) throw new NumberFormatException();
-                        Config.get().setRatelimitCount(space);
-                        countField.setTextColor(16777215);
-                    } catch (NumberFormatException ignored) {
-                        countField.setTextColor(16711680);
-                    }
-                });
+                countField.setResponder((val) ->
+                        Config.get().setRatelimitCount(Integer.parseInt(val.strip())));
                 countField.setValue(String.valueOf(Config.get().getRatelimitCount()));
                 countField.setTooltip(Tooltip.create(
                         localized("option", "main.ratelimit.count.tooltip")));
@@ -456,8 +449,8 @@ public class MainOptionList extends OptionList {
                 movingX += fieldWidth + SPACE;
 
                 // Time window field
-                EditBox ticksField = new EditBox(Minecraft.getInstance().font,
-                        movingX, 0, fieldWidth, height, Component.empty());
+                TextField ticksField = new TextField(movingX, 0, fieldWidth, height);
+                ticksField.posIntValidator().strict();
                 ticksField.setMaxLength(6);
                 ticksField.setResponder((val) -> {
                     try {

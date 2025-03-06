@@ -19,6 +19,8 @@ package dev.terminalmc.commandkeys.gui.widget.list;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.*;
 import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
+import dev.terminalmc.commandkeys.gui.widget.field.FakeTextField;
+import dev.terminalmc.commandkeys.gui.widget.field.TextField;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -268,16 +270,16 @@ public class ProfileOptionList extends MacroBindList {
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
 
                 // Field
-                EditBox messageField = new EditBox(Minecraft.getInstance().font, movingX, 0,
-                        messageFieldWidth, height, Component.empty());
+                TextField messageField = editableField
+                        ? new TextField(movingX, 0, messageFieldWidth, height)
+                        : new FakeTextField(movingX, 0, messageFieldWidth, height,
+                        () -> list.openMacroOptions(macro));
                 messageField.setMaxLength(512);
+                if (editableField) messageField.setResponder(
+                        (val) -> macro.setMessage(0, val.stripLeading()));
                 messageField.setValue(editableField
                         ? messages.getFirst().string
                         : getEditButtonLabel(macro, messageFieldWidth - 10));
-                messageField.setResponder(editableField
-                        ? (val) -> macro.setMessage(0, val.stripLeading())
-                        : (val) -> list.openMacroOptions(macro));
-                if (!editableField) messageField.setTextColor(0xAAAAAA);
                 elements.add(messageField);
                 movingX += messageFieldWidth + SPACE_SMALL;
 

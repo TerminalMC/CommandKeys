@@ -9,6 +9,10 @@
   "client": [
     "accessor.ChatComponentAccessor",
     "accessor.KeyMappingAccessor",
+    "accessor.MultiLineEditBoxAccessor",
+    "accessor.MultilineTextFieldAccessor",
+    "accessor.StringViewAccessor",
+    "gui.MixinMultiLineEditBox",
     "macro.MixinKeyboardHandler",
     "macro.MixinMouseHandler",
     "profile.MixinConnectScreen",

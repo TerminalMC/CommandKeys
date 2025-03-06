@@ -9,6 +9,7 @@
 - Added support for keeping macros activated while the keybind is held
 - Added support for delaying cycling messages
 - Improved macro activation via options screen
+- Added enhanced text fields from ChatNotify
 
 ## 2.3.7
 

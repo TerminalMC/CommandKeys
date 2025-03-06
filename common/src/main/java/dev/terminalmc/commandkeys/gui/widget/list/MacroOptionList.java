@@ -17,6 +17,8 @@
 package dev.terminalmc.commandkeys.gui.widget.list;
 
 import dev.terminalmc.commandkeys.config.*;
+import dev.terminalmc.commandkeys.gui.widget.field.MultiLineTextField;
+import dev.terminalmc.commandkeys.gui.widget.field.TextField;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -219,7 +221,7 @@ public class MacroOptionList extends MacroBindList {
         }
 
         private static class MacroMode1 extends Entry {
-            private EditBox delayField;
+            private TextField delayField;
 
             MacroMode1(int x, int width, int height, MacroOptionList list,
                        Profile profile, Macro macro) {
@@ -278,8 +280,8 @@ public class MacroOptionList extends MacroBindList {
                 }
                 else if (macro.getMode().equals(SEND) || macro.getMode().equals(REPEAT)) {
                     // Self-resizing delay field
-                    delayField = new EditBox(font, x + width - minDelayFieldWidth, 0,
-                            minDelayFieldWidth, height, Component.empty());
+                    delayField = new TextField(x + width - minDelayFieldWidth, 0,
+                            minDelayFieldWidth, height).posIntValidator().strict();
                     delayField.setMaxLength(8);
                     delayField.setResponder((val) -> {
                         // Resize
@@ -290,20 +292,13 @@ public class MacroOptionList extends MacroBindList {
                         delayField.setX(delayField.getX() + deltaWidth);
                         delayField.setWidth(delayField.getWidth() - deltaWidth);
                         // Actual responder
-                        try {
-                            int space = Integer.parseInt(val.strip());
-                            if (space < 0) throw new NumberFormatException();
-                            int oldSpace = macro.spaceTicks;
-                            macro.spaceTicks = space;
-                            // Show/hide per-message delay fields
-                            if (macro.getMode() == SEND
-                                    && ((space == 0 && oldSpace != 0) || (space != 0 && oldSpace == 0))) {
-                                list.refreshMessageSubList();
-                            } else {
-                                delayField.setTextColor(16777215);
-                            }
-                        } catch (NumberFormatException ignored) {
-                            delayField.setTextColor(16711680);
+                        int space = Integer.parseInt(val.strip());
+                        int oldSpace = macro.spaceTicks;
+                        macro.spaceTicks = space;
+                        // Show/hide per-message delay fields
+                        if (macro.getMode() == SEND
+                                && ((space == 0 && oldSpace != 0) || (space != 0 && oldSpace == 0))) {
+                            list.refreshMessageSubList();
                         }
                     });
                     delayField.setValue(String.valueOf(macro.spaceTicks));
@@ -362,19 +357,17 @@ public class MacroOptionList extends MacroBindList {
                         .build());
 
                 // Message field
-                MultiLineEditBox messageField = new MultiLineEditBox(font,
-                        x, 0, msgFieldWidth, height * 2,
-                        Component.empty(), Component.empty());
+                MultiLineTextField messageField = new MultiLineTextField(
+                        x, 0, msgFieldWidth, height * 2);
                 messageField.setCharacterLimit(512);
-                messageField.setValue(msg.string);
                 messageField.setValueListener((val) -> msg.string = val.stripLeading());
+                messageField.setValue(msg.string);
                 elements.add(messageField);
 
                 // Delay field
                 if (showDelayField) {
-                    EditBox delayField = new EditBox(font,
-                            x + width - minDelayFieldWidth, 0,
-                            minDelayFieldWidth, height, Component.empty());
+                    TextField delayField = new TextField(x + width - minDelayFieldWidth, 0,
+                            minDelayFieldWidth, height).posIntValidator().strict();
                     delayField.setTooltip(Tooltip.create(
                             localized("option", "macro.delay.individual.tooltip"
                                     + (index == 0 ? ".first" : ".subsequent"))));

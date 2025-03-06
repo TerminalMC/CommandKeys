@@ -94,5 +94,6 @@
   "option.commandkeys.profile.switch": "Profil wechseln",
   "option.commandkeys.profile.trigger.tooltip": "Diesen Makro auslösen",
   "toast.commandkeys.reset.message": "Backup saved to %s",
-  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error",
+  "ui.commandkeys.field.error.pos_int": "Positive integer required"
 }

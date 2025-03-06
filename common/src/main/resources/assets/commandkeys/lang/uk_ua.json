@@ -94,5 +94,6 @@
   "option.commandkeys.profile.switch": "Змінити профіль",
   "option.commandkeys.profile.trigger.tooltip": "Запустити цей макрос",
   "toast.commandkeys.reset.message": "Backup saved to %s",
-  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error",
+  "ui.commandkeys.field.error.pos_int": "Positive integer required"
 }

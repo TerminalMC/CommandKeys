@@ -94,5 +94,6 @@
   "option.commandkeys.profile.switch": "Сменить профиль",
   "option.commandkeys.profile.trigger.tooltip": "Активировать этот макрос",
   "toast.commandkeys.reset.message": "Резервная копия сохранена в %s",
-  "toast.commandkeys.reset.title": "Сброс параметров CommandKeys - Ошибка загрузки"
+  "toast.commandkeys.reset.title": "Сброс параметров CommandKeys - Ошибка загрузки",
+  "ui.commandkeys.field.error.pos_int": "Positive integer required"
 }

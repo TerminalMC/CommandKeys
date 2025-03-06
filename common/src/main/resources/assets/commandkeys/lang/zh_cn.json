@@ -94,5 +94,6 @@
   "option.commandkeys.profile.switch": "切换配置文件",
   "option.commandkeys.profile.trigger.tooltip": "Activate this Macro",
   "toast.commandkeys.reset.message": "Backup saved to %s",
-  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error"
+  "toast.commandkeys.reset.title": "CommandKeys Options Reset - Load Error",
+  "ui.commandkeys.field.error.pos_int": "Positive integer required"
 }
