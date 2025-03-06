@@ -430,8 +430,7 @@ public class Macro {
             case CYCLE -> {
                 if (altKeybind.equals(keybind)) {
                     // Alt keybind cycles backwards
-                    if (cycleIndex == 0) cycleIndex = messages.size() - 1;
-                    else cycleIndex--;
+                    if (--cycleIndex < 0) cycleIndex = messages.size() - 1;
                 } else {
                     // Main keybind cycles forwards
                     if (++cycleIndex >= messages.size()) cycleIndex = 0;
@@ -440,7 +439,8 @@ public class Macro {
                 for (String str : messages.get(cycleIndex).string.split(",,")) {
                     // Blank messages are treated as spacers
                     if (!str.isBlank()) {
-                        CommandKeys.send(str, addToHistoryStatus, showHudMessageStatus);
+                        schedule(messages.get(cycleIndex).delayTicks, str,
+                                addToHistoryStatus, showHudMessageStatus);
                     }
                 }
                 singleActionComplete();

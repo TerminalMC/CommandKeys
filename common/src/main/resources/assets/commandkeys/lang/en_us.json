@@ -30,7 +30,7 @@
   "option.commandkeys.macro.control.ratelimit.tooltip": "Apply the global ratelimit.",
   "option.commandkeys.macro.control.resume": "Resume",
   "option.commandkeys.macro.control.resume.tooltip": "Allow active macros to resume when their profile is reactivated.",
-  "option.commandkeys.macro.cycleIndex.tooltip": "The index of the next message to be sent.",
+  "option.commandkeys.macro.cycleIndex.tooltip": "The current cycle index.",
   "option.commandkeys.macro.delay.individual.tooltip.first": "Time in ticks to wait after the key-press, before sending.",
   "option.commandkeys.macro.delay.individual.tooltip.subsequent": "Time in ticks to wait after the previous message, before sending.",
   "option.commandkeys.macro.delay.tooltip": "Delay in ticks before each message after the first.\nSet to 0 to use per-message delays.",

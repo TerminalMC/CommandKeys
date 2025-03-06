@@ -346,6 +346,7 @@ public class MacroOptionList extends MacroBindList {
                                 || (macro.getMode() == SEND && macro.spaceTicks == 0)
                                 || macro.getMode() == REPEAT
                                 || macro.getMode() == RANDOM
+                                || macro.getMode() == CYCLE
                 );
                 int minDelayFieldWidth = font.width("0__") + 8;
                 int msgFieldWidth = width - (showDelayField ? minDelayFieldWidth + SPACE : 0);

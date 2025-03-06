@@ -7,7 +7,7 @@
 - Added support for reloading config file to revert edits
 - Enabled cancellation of movement keys
 - Added support for keeping macros activated while the keybind is held
-- Fixed a range of minor issues
+- Added support for delaying cycling messages
 
 ## 2.3.7
 
