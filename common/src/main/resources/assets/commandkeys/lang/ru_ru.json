@@ -4,11 +4,11 @@
   "message.commandkeys.placeholderFault": "Сообщение \"%s\" не может быть отправлено, так как не удалось применить один или несколько заполнителей.",
   "message.commandkeys.sendBlocked": "Превышен лимит для ключа %s. Лимит установлен на %s активаций за %s тиков.",
   "option.commandkeys.macro": "Параметры макросов",
-  "option.commandkeys.macro.activation": "Activation Type",
-  "option.commandkeys.macro.activation.HOLD": "Hold",
-  "option.commandkeys.macro.activation.HOLD.tooltip": "Macro will be activated once and remain active while its keybind is held.",
-  "option.commandkeys.macro.activation.VANILLA": "Vanilla",
-  "option.commandkeys.macro.activation.VANILLA.tooltip": "Macro will be activated once, then be repeatedly activated and deactivated while its keybind is held (excluding mouse keybinds).",
+  "option.commandkeys.macro.activation": "Тип активации",
+  "option.commandkeys.macro.activation.HOLD": "Удержание",
+  "option.commandkeys.macro.activation.HOLD.tooltip": "Макрос будет активирован один раз и останется активным, пока удерживается назначенная клавиша.",
+  "option.commandkeys.macro.activation.VANILLA": "Ванильный",
+  "option.commandkeys.macro.activation.VANILLA.tooltip": "Макрос будет активирован один раз, а затем будет повторно активироваться и деактивироваться, пока удерживается назначенная клавиша (не касается клавиш мыши).",
   "option.commandkeys.macro.bind.alt.tooltip": "Используйте это сочетание клавиш для переключения сообщений в обратном порядке.",
   "option.commandkeys.macro.bind.tooltip.conflict.external": "%s также используется для: %s",
   "option.commandkeys.macro.bind.tooltip.conflict.internal": "%s используется для другого макроса.",
@@ -30,7 +30,7 @@
   "option.commandkeys.macro.control.ratelimit.tooltip": "Применить глобальное ограничение скорости.",
   "option.commandkeys.macro.control.resume": "Возобновить",
   "option.commandkeys.macro.control.resume.tooltip": "Разрешить повторяющимся макросам возобновляться при активации их профиля.",
-  "option.commandkeys.macro.cycleIndex.tooltip": "Индекс следующего сообщения для отправки.",
+  "option.commandkeys.macro.cycleIndex.tooltip": "Текущий индекс цикла.",
   "option.commandkeys.macro.delay.individual.tooltip.first": "Время в тиках для ожидания после нажатия клавиши перед отправкой.",
   "option.commandkeys.macro.delay.individual.tooltip.subsequent": "Время в тиках для ожидания после предыдущего сообщения перед отправкой.",
   "option.commandkeys.macro.delay.tooltip": "Задержка в тиках перед каждым сообщением после первого.\nУстановите 0 для использования задержки для каждого сообщения.",
@@ -95,5 +95,5 @@
   "option.commandkeys.profile.trigger.tooltip": "Активировать этот макрос",
   "toast.commandkeys.reset.message": "Резервная копия сохранена в %s",
   "toast.commandkeys.reset.title": "Сброс параметров CommandKeys - Ошибка загрузки",
-  "ui.commandkeys.field.error.pos_int": "Positive integer required"
+  "ui.commandkeys.field.error.pos_int": "Требуется целое положительное число"
 }
