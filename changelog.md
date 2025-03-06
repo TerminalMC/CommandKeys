@@ -8,6 +8,7 @@
 - Enabled cancellation of movement keys
 - Added support for keeping macros activated while the keybind is held
 - Added support for delaying cycling messages
+- Improved macro activation via options screen
 
 ## 2.3.7
 

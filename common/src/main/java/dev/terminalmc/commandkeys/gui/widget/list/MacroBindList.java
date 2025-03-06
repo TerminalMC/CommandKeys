@@ -38,7 +38,7 @@ public abstract class MacroBindList extends DragReorderList {
     private @Nullable Macro macro;
     private @Nullable Keybind keybind;
     private @Nullable InputConstants.Key heldKey;
-    private @Nullable InputConstants.Key sendKey;
+    private @Nullable Keybind sendKeybind;
 
     public MacroBindList(Minecraft mc, int width, int height, int y, int entryWidth,
                          int entryHeight, int entrySpace, @NotNull Profile profile,
@@ -53,7 +53,7 @@ public abstract class MacroBindList extends DragReorderList {
         macro = null;
         keybind = null;
         heldKey = null;
-        sendKey = null;
+        sendKeybind = null;
     }
 
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
@@ -67,6 +67,7 @@ public abstract class MacroBindList extends DragReorderList {
 
     @Override
     public boolean keyPressed(InputConstants.Key key) {
+        // If we have a keybind widget selected
         if (macro != null && keybind != null) {
             if (key.getValue() == InputConstants.KEY_ESCAPE) {
                 // Unbind key
@@ -75,66 +76,64 @@ public abstract class MacroBindList extends DragReorderList {
                 init();
             }
             else {
+                // If we aren't already holding a key
                 if (heldKey == null) {
+                    // Mark the current key as held
                     heldKey = key;
                 }
-                else {
-                    // Already holding a key, bind both keys
-                    if (key != heldKey) {
-                        profile.setKey(macro, keybind, key);
-                        profile.setLimitKey(macro, keybind, heldKey);
-                        init();
-                    }
-                    else {
-                        return false;
-                    }
+                else if (key != heldKey) {
+                    // Bind the current key and held key
+                    profile.setKey(macro, keybind, key);
+                    profile.setLimitKey(macro, keybind, heldKey);
+                    init();
                 }
                 return false;
             }
             return true;
         }
-        else if (getSelected() == null && !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey())) {
-            sendKey = key;
+        // Else if we have no other widget selected
+        else if (getSelected() == null && CommandKeys.inGame() &&
+                !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey())) {
+            // Prepare to use the key to trigger macros on release
+            Collection<Keybind> keybinds = profile.keybindMap.get(key);
+            Keybind limitedKb = null;
+            Keybind monoKb = null;
+            for (Keybind kb : keybinds) {
+                if (kb.isLimitKeyDown()) {
+                    limitedKb = kb;
+                    break;
+                } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
+                    monoKb = kb;
+                }
+            }
+            sendKeybind = limitedKb != null ? limitedKb : monoKb;
         }
         return false;
     }
 
     @Override
     public boolean keyReleased(InputConstants.Key key) {
+        // If we have a keybind widget selected
         if (macro != null && keybind != null) {
-            // Bind key
+            // If key released with no other key held
             if (heldKey == key) {
+                // Bind single key
                 profile.setKey(macro, keybind, key);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
                 init();
                 return true;
             }
         }
-        else if (key.equals(sendKey)) {
+        else if (sendKeybind != null && sendKeybind.getKey().equals(key)) {
             // Trigger macro
-            if (getSelected() == null && CommandKeys.inGame()) {
-                Collection<Keybind> keybinds = profile.keybindMap.get(key);
-                Keybind active1 = null;
-                Keybind active2 = null;
-                for (Keybind kb : keybinds) {
-                    if (kb.isLimitKeyDown()) {
-                        active1 = kb;
-                        break;
-                    } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
-                        active2 = kb;
-                    }
-                }
-                if (active1 == null) active1 = active2;
-                Collection<Macro> macros = profile.macroMap.get(active1);
-                if (!macros.isEmpty()) {
-                    screen.onClose();
-                    minecraft.setScreen(null);
-                    Keybind trigger = active1;
-                    macros.forEach((macro) -> macro.trigger(trigger));
-                    return true;
-                }
+            Collection<Macro> macros = profile.macroMap.get(sendKeybind);
+            if (!macros.isEmpty()) {
+                screen.onClose();
+                minecraft.setScreen(null);
+                macros.forEach((macro) -> macro.trigger(sendKeybind));
+                return true;
             }
-            sendKey = null;
+            sendKeybind = null;
         }
         return false;
     }
