@@ -26,12 +26,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,9 +46,9 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 public class ProfileOptionList extends MacroBindList {
     private OptionList.Entry.ActionButton addMacroEntry;
 
-    public ProfileOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public ProfileOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                              int entryHeight, int entrySpace, @NotNull Profile profile) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpace, profile,
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpace, profile,
                 new HashMap<>(Map.of(Entry.MacroOptions.class, profile::moveMacro)));
 
         addMacroEntry = new OptionList.Entry.ActionButton(
@@ -96,20 +95,20 @@ public class ProfileOptionList extends MacroBindList {
             children().add(start, new Entry.MacroOptions(dynWideEntryX, dynWideEntryWidth,
                     entryHeight, this, profile, macro));
         }
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
 
     // Sub-screen opening
 
     public void openMainOptions() {
         mc.setScreen(new OptionScreen(screen, localized("option", "main"),
-                new MainOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new MainOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, null)));
     }
 
     public void openMacroOptions(Macro macro) {
         mc.setScreen(new OptionScreen(screen, localized("option", "macro"),
-                new MacroOptionList(mc, width, height, getY(), entryWidth, entryHeight,
+                new MacroOptionList(mc, width, height, y0, y1, entryWidth, entryHeight,
                         entrySpacing, profile, macro)));
     }
 
@@ -149,7 +148,7 @@ public class ProfileOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.control.hud"),
                                 (button, status) -> list.profile.setShowHudMessage(status));
-                hudButton.setTooltipDelay(Duration.ofMillis(500));
+                hudButton.setTooltipDelay(500);
                 elements.add(hudButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
@@ -162,7 +161,7 @@ public class ProfileOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.control.history"),
                                 (button, status) -> list.profile.setAddToHistory(status));
-                historyButton.setTooltipDelay(Duration.ofMillis(500));
+                historyButton.setTooltipDelay(500);
                 elements.add(historyButton);
                 movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
@@ -175,7 +174,7 @@ public class ProfileOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.control.resume"),
                                 (button, status) -> list.profile.setResumeRepeating(status));
-                resumeButton.setTooltipDelay(Duration.ofMillis(500));
+                resumeButton.setTooltipDelay(500);
                 elements.add(resumeButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
@@ -188,7 +187,7 @@ public class ProfileOptionList extends MacroBindList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "macro.control.ratelimit"),
                                 (button, status) -> list.profile.setUseRatelimit(status));
-                ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
+                ratelimitButton.setTooltipDelay(500);
                 elements.add(ratelimitButton);
             }
 
@@ -210,11 +209,11 @@ public class ProfileOptionList extends MacroBindList {
                 List<Message> messages = macro.getMessages();
                 boolean editableField = messages.size() == 1;
 
-                int keyButtonWidth = Math.clamp(font.width("> Right Control + W <") + 4, 90, 130);
+                int keyButtonWidth = Mth.clamp(font.width("> Right Control + W <") + 4, 90, 130);
                 KeybindUtil.KeybindInfo keybindInfo =
                         new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
                 int nominalWidth = font.width("> " + keybindInfo.label.getString() + " <") + 4;
-                if (nominalWidth > keyButtonWidth) keyButtonWidth = Math.clamp(nominalWidth, 90, 130);
+                if (nominalWidth > keyButtonWidth) keyButtonWidth = Mth.clamp(nominalWidth, 90, 130);
 
                 int messageFieldWidth = width - keyButtonWidth
                         - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
@@ -251,8 +250,8 @@ public class ProfileOptionList extends MacroBindList {
                 movingX += keyButtonWidth;
 
                 // Send button
-                Button sendButton = new ImageButton(movingX, 0,
-                        list.smallWidgetWidth, height, SEND_SPRITES,
+                Button sendButton = new ImageButton(movingX, 0, list.smallWidgetWidth, height,
+                        0, 0, 20, SEND_ICON, 32, 64,
                         (button) -> {
                             list.screen.onClose();
                             Minecraft.getInstance().setScreen(null);
@@ -260,7 +259,7 @@ public class ProfileOptionList extends MacroBindList {
                         });
                 sendButton.setTooltip(Tooltip.create(
                         localized("option", "profile.trigger.tooltip")));
-                sendButton.setTooltipDelay(Duration.ofMillis(500));
+                sendButton.setTooltipDelay(500);
                 sendButton.active = CommandKeys.inGame();
                 elements.add(sendButton);
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
@@ -274,20 +273,20 @@ public class ProfileOptionList extends MacroBindList {
                 if (editableField) messageField.setResponder(
                         (val) -> macro.setMessage(0, val.stripLeading()));
                 messageField.setValue(editableField
-                        ? messages.getFirst().string
+                        ? messages.get(0).string
                         : getEditButtonLabel(macro, messageFieldWidth - 10));
                 elements.add(messageField);
                 movingX += messageFieldWidth + SPACE_SMALL;
 
                 // Edit button
-                ImageButton editButton = new ImageButton(movingX, 0,
-                        list.smallWidgetWidth, height, OPTION_SPRITES,
+                ImageButton editButton = new ImageButton(movingX, 0, list.smallWidgetWidth, height,
+                        0, 0, 20, OPTIONS_ICON, 32, 64,
                         (button) -> {
                             list.openMacroOptions(macro);
                             list.init();
                         });
                 editButton.setTooltip(Tooltip.create(localized("option", "profile.key.edit")));
-                editButton.setTooltipDelay(Duration.ofMillis(500));
+                editButton.setTooltipDelay(500);
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
 
@@ -350,7 +349,7 @@ public class ProfileOptionList extends MacroBindList {
                 int excess = strings.size() - 1;
                 String tag = String.format(" [+%d]", excess);
                 String trimTag = String.format("... [+%d]", excess);
-                String first = strings.getFirst();
+                String first = strings.get(0);
 
                 if (first.isBlank()) {
                     return trimTag;

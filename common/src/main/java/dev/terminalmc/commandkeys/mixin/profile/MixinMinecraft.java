@@ -36,9 +36,9 @@ public class MixinMinecraft {
             method = "doWorldLoad",
             at = @At("HEAD")
     )
-    private void startIntegratedServer(LevelStorageSource.LevelStorageAccess levelStorage,
-                                       PackRepository packRepo, WorldStem worldStem,
-                                       boolean newWorld, CallbackInfo ci) {
+    private void startIntegratedServer(
+            String str, LevelStorageSource.LevelStorageAccess levelStorage,
+            PackRepository packRepo, WorldStem worldStem, boolean newWorld, CallbackInfo ci) {
         String world = worldStem.worldData().getLevelName();
         Config.get().activateSpProfile(world);
         CommandKeys.lastConnection = world;
