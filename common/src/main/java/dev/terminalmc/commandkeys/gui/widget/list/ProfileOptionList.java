@@ -102,17 +102,13 @@ public class ProfileOptionList extends MacroBindList {
     // Sub-screen opening
 
     public void openMainOptions() {
-        Screen lastScreen = screen.getLastScreen();
-        if (lastScreen instanceof OptionScreen lastOptionScreen) {
-            lastScreen = lastOptionScreen.getLastScreen();
-        }
-        mc.setScreen(new OptionScreen(lastScreen, localized("option", "main"),
+        mc.setScreen(new OptionScreen(screen, localized("option", "main"),
                 new MainOptionList(mc, width, height, getY(), entryWidth, entryHeight,
                         entrySpacing, null)));
     }
 
     public void openMacroOptions(Macro macro) {
-        mc.setScreen(new OptionScreen(mc.screen, localized("option", "macro"),
+        mc.setScreen(new OptionScreen(screen, localized("option", "macro"),
                 new MacroOptionList(mc, width, height, getY(), entryWidth, entryHeight,
                         entrySpacing, profile, macro)));
     }
