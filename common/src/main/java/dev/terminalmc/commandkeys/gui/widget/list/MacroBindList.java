@@ -130,7 +130,7 @@ public abstract class MacroBindList extends DragReorderList {
             if (!macros.isEmpty()) {
                 screen.onClose();
                 minecraft.setScreen(null);
-                macros.forEach((macro) -> macro.trigger(sendKeybind));
+                macros.forEach((macro) -> macro.trigger(sendKeybind, false));
                 return true;
             }
             sendKeybind = null;

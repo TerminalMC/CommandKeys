@@ -256,7 +256,7 @@ public class ProfileOptionList extends MacroBindList {
                         (button) -> {
                             list.screen.onClose();
                             Minecraft.getInstance().setScreen(null);
-                            macro.trigger(null);
+                            macro.trigger(null, false);
                         });
                 sendButton.setTooltip(Tooltip.create(
                         localized("option", "profile.trigger.tooltip")));

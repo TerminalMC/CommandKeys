@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
@@ -57,7 +56,7 @@ public class KeybindUtil {
         for (Keybind keybind : keybinds) {
             if (!keybind.getLimitKey().equals(limitKey)) continue;
             for (Macro macro : profile().macroMap.get(keybind)) {
-                macro.trigger(keybind);
+                macro.trigger(keybind, false);
                 i++;
             }
         }
@@ -108,7 +107,7 @@ public class KeybindUtil {
                 // If we don't have any matching macros, we exit
                 if (macros.isEmpty()) return cancel;
             }
-            
+
             boolean ratelimited = false;
 
             // Trigger all matching macros
@@ -123,14 +122,10 @@ public class KeybindUtil {
                 }
 
                 if (send) {
-                    // On the first macro, check the ratelimiter
-                    ratelimited |= macro.getUseRatelimitStatus() && !canTrigger(key);
-                    
-                    if (!ratelimited || !macro.getUseRatelimitStatus()) {
-                        macro.trigger(triggerKb);
-                        // TYPE mode requires cancelling char
-                        if (cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
-                    }
+                    boolean rl = macro.trigger(triggerKb, ratelimited);
+                    // TYPE mode requires cancelling char
+                    if (!rl && cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
+                    ratelimited |= rl;
                 }
             }
         }

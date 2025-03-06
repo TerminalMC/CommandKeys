@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
@@ -388,14 +389,20 @@ public class Macro {
         }
     }
 
-    public void trigger(@Nullable Keybind keybind) {
+    /**
+     * @return {@code true} if ratelimited.
+     */
+    public boolean trigger(@Nullable Keybind keybind, boolean ratelimited) {
         if (active) {
-            if (activationType != ActivationType.HOLD) {
-                deactivate();
-            }
+            singleActionComplete();
         } else {
+            // Only check ratelimiter if we've actually got something to do
+            if (keybind != null && useRatelimitStatus && !canTrigger(keybind.getKey(), !ratelimited)) {
+                return true;
+            }
             activate(keybind);
         }
+        return false;
     }
 
     public void deactivate() {
