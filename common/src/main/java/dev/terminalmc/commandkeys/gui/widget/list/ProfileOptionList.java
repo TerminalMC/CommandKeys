@@ -27,7 +27,6 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -209,11 +208,16 @@ public class ProfileOptionList extends MacroBindList {
             MacroOptions(int x, int width, int height, ProfileOptionList list,
                          Profile profile, Macro macro) {
                 super();
+                Font font = Minecraft.getInstance().font;
                 List<Message> messages = macro.getMessages();
                 boolean editableField = messages.size() == 1;
-                int keyButtonWidth = editableField
-                        ? Mth.clamp(width / 5, 90, 150)
-                        : Mth.clamp(width / 3, 90, 150);
+
+                int keyButtonWidth = Math.clamp(font.width("> Right Control + W <") + 4, 90, 130);
+                KeybindUtil.KeybindInfo keybindInfo =
+                        new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
+                int nominalWidth = font.width("> " + keybindInfo.label.getString() + " <") + 4;
+                if (nominalWidth > keyButtonWidth) keyButtonWidth = Math.clamp(nominalWidth, 90, 130);
+
                 int messageFieldWidth = width - keyButtonWidth
                         - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
                 int modeButtonWidth = 0;
@@ -234,17 +238,15 @@ public class ProfileOptionList extends MacroBindList {
                         .build());
 
                 // Keybind button
-                KeybindUtil.KeybindInfo info =
-                        new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
-                elements.add(Button.builder(info.conflictLabel,
+                elements.add(Button.builder(keybindInfo.conflictLabel,
                                 (button) -> {
                                     list.setSelected(macro, macro.getKeybind());
                                     button.setMessage(Component.literal("> ")
-                                            .append(info.label.withStyle(ChatFormatting.WHITE)
+                                            .append(keybindInfo.label.withStyle(ChatFormatting.WHITE)
                                                     .withStyle(ChatFormatting.UNDERLINE))
                                             .append(" <").withStyle(ChatFormatting.YELLOW));
                                 })
-                        .tooltip(Tooltip.create(info.tooltip))
+                        .tooltip(Tooltip.create(keybindInfo.tooltip))
                         .pos(movingX, 0)
                         .size(keyButtonWidth, height)
                         .build());
