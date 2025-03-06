@@ -32,8 +32,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
-
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
@@ -44,9 +42,9 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 public class MainOptionList extends OptionList {
     private @Nullable Profile editingProfile;
 
-    public MainOptionList(Minecraft mc, int width, int height, int y, int entryWidth,
+    public MainOptionList(Minecraft mc, int width, int height, int top, int bottom, int entryWidth,
                           int entryHeight, int entrySpace, @Nullable Profile editingProfile) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpace);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpace);
         this.editingProfile = editingProfile;
     }
 
@@ -106,7 +104,7 @@ public class MainOptionList extends OptionList {
     public void openProfileOptions(Profile profile) {
         mc.setScreen(new OptionScreen(screen, localized("option", "profile",
                 profile.getDisplayName()), new ProfileOptionList(mc, width, height,
-                getY(), entryWidth, entryHeight, entrySpacing, profile)));
+                y0, y1, entryWidth, entryHeight, entrySpacing, profile)));
     }
 
     // Input handling
@@ -155,8 +153,8 @@ public class MainOptionList extends OptionList {
                 if (inGame) {
                     if (index == 0) {
                         // Link button
-                        ImageButton linkButton = new ImageButton(
-                                x, 0, smallWidgetWidth, height, LINK_SPRITES,
+                        ImageButton linkButton = new ImageButton(x, 0, smallWidgetWidth, height,
+                                0, 0, 20, LINK_ICON, 32, 64,
                                 (button) -> {
                                     profile.forceAddLink(CommandKeys.lastConnection);
                                     list.init();
@@ -169,7 +167,7 @@ public class MainOptionList extends OptionList {
                             linkButton.setTooltip(Tooltip.create(
                                     localized("option", "main.profiles.link.tooltip")));
                         }
-                        linkButton.setTooltipDelay(Duration.ofMillis(500));
+                        linkButton.setTooltipDelay(500);
                         elements.add(linkButton);
                     }
                     else {
@@ -184,7 +182,7 @@ public class MainOptionList extends OptionList {
                                 .build();
                         activateButton.setTooltip(Tooltip.create(
                                 localized("option", "main.profiles.activate.tooltip")));
-                        activateButton.setTooltipDelay(Duration.ofMillis(500));
+                        activateButton.setTooltipDelay(500);
                         elements.add(activateButton);
                     }
                     mainButtonWidth -= (smallWidgetWidth + SPACE);
@@ -218,7 +216,7 @@ public class MainOptionList extends OptionList {
 
                 // Edit details button
                 ImageButton configureButton = new ImageButton(movingX, 0, smallWidgetWidth, height,
-                        OPTION_SPRITES,
+                        0, 0, 20, OPTIONS_ICON, 32, 64,
                         (button) -> {
                             if (list.editingProfile == null) {
                                 list.editingProfile = profile;
@@ -234,7 +232,7 @@ public class MainOptionList extends OptionList {
                         Component.empty());
                 configureButton.setTooltip(Tooltip.create(
                         localized("option", "main.profile.details.tooltip")));
-                configureButton.setTooltipDelay(Duration.ofMillis(500));
+                configureButton.setTooltipDelay(500);
                 elements.add(configureButton);
                 movingX += smallWidgetWidth + SPACE;
 
@@ -257,7 +255,7 @@ public class MainOptionList extends OptionList {
                     setAsSpDefaultButton.setTooltip(Tooltip.create(
                             localized("option", "main.profiles.default.singleplayer.set.tooltip")));
                 }
-                setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
+                setAsSpDefaultButton.setTooltipDelay(500);
                 setAsSpDefaultButton.active = !spDefault;
                 elements.add(setAsSpDefaultButton);
                 movingX += smallWidgetWidth + SPACE;
@@ -282,14 +280,14 @@ public class MainOptionList extends OptionList {
                             localized("option", "main.profiles.default.multiplayer.set.tooltip")
                     ));
                 }
-                setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
+                setAsMpDefaultButton.setTooltipDelay(500);
                 setAsMpDefaultButton.active = !mpDefault;
                 elements.add(setAsMpDefaultButton);
                 movingX += smallWidgetWidth + SPACE;
 
                 // Copy button
                 ImageButton copyButton = new ImageButton(movingX, 0, smallWidgetWidth, height,
-                        COPY_SPRITES,
+                        0, 0, 20, COPY_ICON, 32, 64,
                         (button) -> {
                             Config.get().addCopyProfile(profile);
                             list.init();
@@ -297,7 +295,7 @@ public class MainOptionList extends OptionList {
                         Component.empty());
                 copyButton.setTooltip(Tooltip.create(
                         localized("option", "main.profiles.copy.tooltip")));
-                copyButton.setTooltipDelay(Duration.ofMillis(500));
+                copyButton.setTooltipDelay(500);
                 elements.add(copyButton);
                 movingX += smallWidgetWidth + SPACE;
 
@@ -322,7 +320,7 @@ public class MainOptionList extends OptionList {
                             localized("option", "main.profiles.delete.tooltip")
                     ));
                 }
-                deleteButton.setTooltipDelay(Duration.ofMillis(500));
+                deleteButton.setTooltipDelay(500);
 
                 elements.add(deleteButton);
             }
@@ -380,7 +378,7 @@ public class MainOptionList extends OptionList {
                         .build();
                 removeButton.setTooltip(Tooltip.create(
                         localized("option", "main.profile.link.remove.tooltip")));
-                removeButton.setTooltipDelay(Duration.ofMillis(500));
+                removeButton.setTooltipDelay(500);
                 elements.add(removeButton);
             }
         }
@@ -477,7 +475,7 @@ public class MainOptionList extends OptionList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "main.ratelimit.strict"),
                                 (button, status) -> Config.get().ratelimitStrict = status);
-                strictButton.setTooltipDelay(Duration.ofMillis(500));
+                strictButton.setTooltipDelay(500);
                 elements.add(strictButton);
                 movingX = x + width - buttonWidth;
 
@@ -490,7 +488,7 @@ public class MainOptionList extends OptionList {
                         .create(movingX, 0, buttonWidth, height,
                                 localized("option", "main.ratelimit.sp"),
                                 (button, status) -> Config.get().ratelimitSp = status);
-                spButton.setTooltipDelay(Duration.ofMillis(500));
+                spButton.setTooltipDelay(500);
                 elements.add(spButton);
             }
         }
