@@ -41,10 +41,10 @@ public class MainOptionScreen extends OptionScreen {
                         : localized("option", "main"),
                 inGame
                         ? new ProfileOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                        HEADER_MARGIN, BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
                         CommandKeys.profile())
                         : new MainOptionList(Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, null));
+                        HEADER_MARGIN, BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, null));
     }
 
     @Override

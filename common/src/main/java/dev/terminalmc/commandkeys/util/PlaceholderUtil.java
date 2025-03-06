@@ -25,7 +25,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.util.ArrayListDeque;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -33,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -177,18 +177,19 @@ public class PlaceholderUtil {
     // Message history
 
     private static String getLastMessage() {
-        String lastMsg = Minecraft.getInstance().gui.getChat().getRecentChat().peekLast();
-        if (lastMsg == null) return fault();
+        List<String> recentChat = Minecraft.getInstance().gui.getChat().getRecentChat();
+        String lastMsg = recentChat.isEmpty() ? null : recentChat.get(recentChat.size() - 1);
+        if (lastMsg == null) return "?";
         return lastMsg;
     }
 
     private static String getLastCommand() {
-        if (Minecraft.getInstance().commandHistory().history() instanceof ArrayListDeque<String> deque) {
-            String lastCmd = deque.peekLast();
-            if (lastCmd != null) return lastCmd;
-        } else {
-            CommandKeys.LOG.error("Command history not ArrayListDeque");
+        List<String> recentChat = Minecraft.getInstance().gui.getChat().getRecentChat();
+        for (int i = recentChat.size() - 1; i >= 0; i--) {
+            String lastCmd = recentChat.get(i);
+            if (lastCmd.startsWith("/")) return lastCmd;
         }
+        CommandKeys.LOG.error("LastCommand placeholder failed: No command found.");
         return fault();
     }
 
@@ -251,7 +252,7 @@ public class PlaceholderUtil {
     private static String getPlayerBlockPos(String[] args) {
         if (updatePlayerBlockPos() == null || updateLookAngle() == null) return fault();
         int offset = Integer.parseInt(args[1]);
-        Vec3 playerPos = playerBlockPos.getBottomCenter();
+        Vec3 playerPos = playerBlockPos.getCenter();
         if (offset != 0) playerPos = offsetCardinalDirection(
                 playerPos, lookAngle, args[0], offset);
         return String.format("%d %d %d", Mth.floor(playerPos.x),
@@ -276,7 +277,7 @@ public class PlaceholderUtil {
     private static String getLookBlockPos(String[] args) {
         if (updateLookBlockPos() == null || updateLookAngle() == null) return fault();
         int offset = Integer.parseInt(args[1]);
-        Vec3 playerPos = lookBlockPos.getBottomCenter();
+        Vec3 playerPos = lookBlockPos.getCenter();
         if (offset != 0) playerPos = offsetCardinalDirection(
                 playerPos, lookAngle, args[0], offset);
         return String.format("%d %d %d", Mth.floor(playerPos.x),
