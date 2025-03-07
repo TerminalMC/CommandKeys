@@ -103,7 +103,7 @@ public class MacroOptionList extends MacroBindList {
             children().add(start, new OptionList.Entry.Space(msgEntry));
             children().add(start, msgEntry);
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     // Custom entries

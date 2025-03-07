@@ -91,7 +91,7 @@ public class CommandKeys {
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
+            mc.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
                     localized("toast", "reset.title"), localized("toast", "reset.message",
                     Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
         }

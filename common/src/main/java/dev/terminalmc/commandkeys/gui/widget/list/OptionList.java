@@ -105,7 +105,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      * Initializes the {@link OptionList}.
      */
     protected void init() {
-        double scrollAmount = getScrollAmount();
+        double scrollAmount = scrollAmount();
 
         clearEntries();
         setFocused(null);
@@ -161,7 +161,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     @Override
-    protected int getScrollbarPosition() {
+    protected int scrollBarX() {
         return width / 2 + rowWidth / 2;
     }
 
