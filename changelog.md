@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.9
+
+- Updated German translations (Lucanoria)
+
 ## 2.3.8
 
 - Improved stability of deserializers
