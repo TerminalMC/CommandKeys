@@ -26,7 +26,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -96,7 +95,7 @@ public class ProfileOptionList extends MacroBindList {
             children().add(start, new Entry.MacroOptions(dynWideEntryX, dynWideEntryWidth,
                     entryHeight, this, profile, macro));
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     // Sub-screen opening
