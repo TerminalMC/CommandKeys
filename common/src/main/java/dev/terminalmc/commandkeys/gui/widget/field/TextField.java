@@ -42,10 +42,10 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 @SuppressWarnings("UnusedReturnValue")
 public class TextField extends EditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
-    public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
-    public static final int TEXT_COLOR_ERROR = 0xFF5555;
-    public static final int TEXT_COLOR_HINT = 0x555555;
-    public static final int TEXT_COLOR_PREVIEW = 0xAAAAAA;
+    public static final int TEXT_COLOR_DEFAULT = 0xFFE0E0E0;
+    public static final int TEXT_COLOR_ERROR = 0xFFFF5555;
+    public static final int TEXT_COLOR_HINT = 0xFF555555;
+    public static final int TEXT_COLOR_PREVIEW = 0xFFAAAAAA;
 
     private final Font font;
 

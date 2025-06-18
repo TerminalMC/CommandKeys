@@ -38,15 +38,15 @@ import java.util.function.Consumer;
 
 /**
  * A custom {@link MultiLineEditBox} which supports double-clicking to select
- * words and triple-clicking to select all (with 
+ * words and triple-clicking to select all (with
  * {@link MultilineTextFieldAccessor}), resizing (with
- * {@link MultiLineEditBoxAccessor}), and content validation with warning text 
+ * {@link MultiLineEditBoxAccessor}), and content validation with warning text
  * color and tooltip (with {@link MixinMultiLineEditBox}).
  */
 public class MultiLineTextField extends MultiLineEditBox {
     public static final long CLICK_CHAIN_TIME = 250L;
-    public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
-    public static final int TEXT_COLOR_ERROR = 0xFF5555;
+    public static final int TEXT_COLOR_DEFAULT = 0xFFE0E0E0;
+    public static final int TEXT_COLOR_ERROR = 0xFFFF5555;
 
     // Validation
     public final List<TextField.@NotNull Validator> validators = new ArrayList<>();
@@ -77,7 +77,7 @@ public class MultiLineTextField extends MultiLineEditBox {
     public MultiLineTextField(Font font, int x, int y, int width, int height,
                               Component placeholder, Component message,
                               @Nullable TextField.Validator validator) {
-        super(font, x, y, width, height, placeholder, message);
+        super(font, x, y, width, height, placeholder, message, -2039584, true, -3092272, true, true);
         if (validator != null) {
             this.validators.add(validator);
         }
