@@ -474,7 +474,11 @@ public class Macro {
      * Schedules the message to send after {@code delay} ticks.
      */
     private void schedule(int delay, String message, boolean addToHistory, boolean showHudMessage) {
-        scheduledMessages.add(new ScheduledMessage(delay, message, addToHistory, showHudMessage));
+        if (delay > 0) {
+            scheduledMessages.add(new ScheduledMessage(delay, message, addToHistory, showHudMessage));
+        } else {
+            CommandKeys.send(message, showHudMessage, addToHistory);
+        }
     }
 
     private void scheduleAll(boolean standardDelay) {
