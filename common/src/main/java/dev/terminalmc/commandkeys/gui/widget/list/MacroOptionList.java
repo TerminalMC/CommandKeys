@@ -386,9 +386,9 @@ public class MacroOptionList extends MacroBindList {
                             int delay = Integer.parseInt(val.strip());
                             if (delay < 0) throw new NumberFormatException();
                             msg.delayTicks = delay;
-                            delayField.setTextColor(16777215);
+                            delayField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
                         } catch (NumberFormatException ignored) {
-                            delayField.setTextColor(16711680);
+                            delayField.setTextColor(TextField.TEXT_COLOR_ERROR);
                         }
                     });
                     delayField.setValue(String.valueOf(msg.delayTicks));
