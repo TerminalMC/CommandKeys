@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.10
+
+- Execute non-delayed macros immediately to preserve relative ordering (Starjon)
+
 ## 2.3.9
 
 - Updated German translations (Lucanoria)
