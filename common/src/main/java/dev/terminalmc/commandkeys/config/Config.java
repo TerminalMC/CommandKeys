@@ -20,6 +20,7 @@ import com.google.gson.*;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.platform.Services;
 import dev.terminalmc.commandkeys.util.JsonUtil;
+import net.minecraft.SharedConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,6 +91,10 @@ public class Config {
     public boolean ratelimitSp;
     public static final boolean ratelimitSpDefault = false;
 
+    // Length limit options
+    private int lengthLimitLength;
+    public static final int lengthLimitLengthDefault = SharedConstants.MAX_CHAT_LENGTH;
+
     /**
      * Creates a profile list with a single profile, set as both singleplayer and multiplayer
      * default.
@@ -105,7 +110,8 @@ public class Config {
                 ratelimitCountDefault,
                 ratelimitTicksDefault,
                 ratelimitStrictDefault,
-                ratelimitSpDefault
+                ratelimitSpDefault,
+                lengthLimitLengthDefault
         );
     }
 
@@ -122,7 +128,8 @@ public class Config {
             int ratelimitCount,
             int ratelimitTicks,
             boolean ratelimitStrict,
-            boolean ratelimitSp
+            boolean ratelimitSp,
+            int lengthLimitLength
     ) {
         this.profiles = profiles;
         this.spDefault = spDefault;
@@ -134,6 +141,7 @@ public class Config {
         this.ratelimitTicks = ratelimitTicks;
         this.ratelimitStrict = ratelimitStrict;
         this.ratelimitSp = ratelimitSp;
+        this.lengthLimitLength = lengthLimitLength;
     }
 
     // Default profile pointer management
@@ -178,6 +186,18 @@ public class Config {
         if (ticks < 1)
             throw new IllegalArgumentException();
         this.ratelimitTicks = ticks;
+    }
+
+    // Length limit management
+
+    public int getLengthLimitLength() {
+        return lengthLimitLength;
+    }
+
+    public void setLengthLimitLength(int length) {
+        if (length < 1)
+            throw new IllegalArgumentException();
+        this.lengthLimitLength = length;
     }
 
     // Profile activation handling
@@ -422,6 +442,10 @@ public class Config {
         if (ratelimitTicks < 1)
             ratelimitTicks = ratelimitTicksDefault;
 
+        // Validate length limit
+        if (lengthLimitLength < 1)
+            lengthLimitLength = lengthLimitLengthDefault;
+
         return this;
     }
 
@@ -485,6 +509,9 @@ public class Config {
             boolean ratelimitSp =
                     JsonUtil.getOrDefault(obj, "ratelimitSp", ratelimitSpDefault, silent);
 
+            int lengthLimitLength =
+                    JsonUtil.getOrDefault(obj, "lengthLimitLength", lengthLimitLengthDefault, silent);
+
             return new Config(
                     profiles,
                     spDefault,
@@ -495,7 +522,8 @@ public class Config {
                     ratelimitCount,
                     ratelimitTicks,
                     ratelimitStrict,
-                    ratelimitSp
+                    ratelimitSp,
+                    lengthLimitLength
             ).validate();
         }
     }

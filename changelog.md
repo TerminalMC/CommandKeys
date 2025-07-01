@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.11
+
+- Added a configurable message length limit to mitigate being kicked when sending overlength messages
+
 ## 2.3.10
 
 - Execute non-delayed macros immediately to preserve relative ordering (Starjon)

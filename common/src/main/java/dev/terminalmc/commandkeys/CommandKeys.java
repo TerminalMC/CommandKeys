@@ -137,14 +137,13 @@ public class CommandKeys {
             if (sendMessage && ratelimitedKey != key) {
                 Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
                         localized(
-                                "message", "sendBlocked",
+                                "message", "blocked.ratelimit",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
                                 Component.literal(String.valueOf(Config.get().getRatelimitCount()))
                                         .withStyle(ChatFormatting.GRAY),
                                 Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
                                         .withStyle(ChatFormatting.GRAY)
-                        )
-                                .withStyle(ChatFormatting.RED)));
+                        ).withStyle(ChatFormatting.RED)));
                 ratelimitedKey = key;
             }
             if (Config.getAndSave().ratelimitStrict)
@@ -181,6 +180,16 @@ public class CommandKeys {
         if (faults == 0) {
             if (type) {
                 mc.setScreen(new ChatScreen(message));
+            } else if (message.length() > Config.get().getLengthLimitLength()) {
+                MutableComponent msg = PREFIX.copy();
+                msg.append(localized(
+                        "message", "blocked.lengthlimit",
+                        Component.literal(String.valueOf(message.length()))
+                                .withStyle(ChatFormatting.GRAY),
+                        Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
+                                .withStyle(ChatFormatting.GRAY)
+                ).withStyle(ChatFormatting.RED));
+                mc.gui.getChat().addMessage(msg);
             } else {
                 // new ChatScreen("").handleChatInput(message, addToHistory)
                 // could be slightly better for compat but costs performance.
@@ -202,8 +211,7 @@ public class CommandKeys {
             msg.append(localized(
                     "message", "placeholderFault",
                     Component.literal(message).withStyle(ChatFormatting.GRAY)
-            )
-                    .withStyle(ChatFormatting.RED));
+            ).withStyle(ChatFormatting.RED));
             mc.gui.getChat().addMessage(msg);
         }
     }

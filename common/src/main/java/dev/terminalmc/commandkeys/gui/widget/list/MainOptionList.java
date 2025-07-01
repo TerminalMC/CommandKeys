@@ -119,6 +119,14 @@ public class MainOptionList extends OptionList {
                 Tooltip.create(localized("option", "main.ratelimit.tooltip")), 500
         ));
         addEntry(new Entry.Ratelimit(dynEntryX, dynEntryWidth, entryHeight));
+
+        // Length limit options
+        addEntry(new OptionList.Entry.Text(
+                dynEntryX, dynEntryWidth, entryHeight,
+                localized("option", "main.lengthlimit", "\u2139"),
+                Tooltip.create(localized("option", "main.lengthlimit.tooltip")), 500
+        ));
+        addEntry(new Entry.LengthLimit(dynEntryX, dynEntryWidth, entryHeight));
     }
 
     // Sub-screen opening
@@ -562,6 +570,38 @@ public class MainOptionList extends OptionList {
                         );
                 spButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(spButton);
+            }
+        }
+
+        private static class LengthLimit extends Entry {
+
+            LengthLimit(int x, int width, int height) {
+                super();
+
+                // Max length field
+                TextField lengthField = new TextField(x, 0, width, height);
+                lengthField.posIntValidator().strict();
+                lengthField.setMaxLength(6);
+                lengthField.setResponder((val) -> {
+                    try {
+                        int space = Integer.parseInt(val.strip());
+                        if (space < 1)
+                            throw new NumberFormatException();
+                        Config.get().setLengthLimitLength(space);
+                        lengthField.setTextColor(16777215);
+                    } catch (NumberFormatException ignored) {
+                        lengthField.setTextColor(16711680);
+                    }
+                });
+                lengthField.setValue(String.valueOf(Config.get().getLengthLimitLength()));
+                lengthField.setTooltip(Tooltip.create(
+                        localized("option", "main.lengthlimit.length.tooltip")
+                                .append("\n")
+                                .append(localized(
+                                        "option",
+                                        "main.lengthlimit.length.tooltip.warning"
+                                ).withStyle(ChatFormatting.RED))));
+                elements.add(lengthField);
             }
         }
     }
