@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package dev.terminalmc.commandkeys.platform.services;
+package dev.terminalmc.commandkeys.compat.modmenu;
 
-import java.nio.file.Path;
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import com.terraformersmc.modmenu.api.ModMenuApi;
+import dev.terminalmc.commandkeys.CommandKeys;
 
-public interface IPlatformInfo {
-    /**
-     * @return the configuration directory of the instance.
-     */
-    Path getConfigDir();
+public class ModMenuImpl implements ModMenuApi {
+
+    @Override
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return CommandKeys::getConfigScreen;
+    }
 }

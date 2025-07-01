@@ -12,11 +12,11 @@
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",
     "accessor.StringViewAccessor",
-    "gui.MixinMultiLineEditBox",
-    "macro.MixinKeyboardHandler",
-    "macro.MixinMouseHandler",
-    "profile.MixinConnectScreen",
-    "profile.MixinMinecraft"
+    "gui.MultiLineEditBoxMixin",
+    "macro.KeyboardHandlerMixin",
+    "macro.MouseHandlerMixin",
+    "profile.ConnectScreenMixin",
+    "profile.MinecraftMixin"
   ],
   "server": [
   ],

@@ -21,15 +21,16 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 
 public class CommandKeysFabric implements ClientModInitializer {
+
     @Override
     public void onInitializeClient() {
-        // Keybindings
-        KeyBindingHelper.registerKeyBinding(CommandKeys.CONFIG_KEY);
+        // Register keybinds
+        CommandKeys.KEYBINDS.forEach(KeyBindingHelper::registerKeyBinding);
 
-        // Tick events
-        ClientTickEvents.END_CLIENT_TICK.register(CommandKeys::onEndTick);
+        // Register client after-tick event
+        ClientTickEvents.END_CLIENT_TICK.register(CommandKeys::afterClientTick);
 
-        // Main initialization
+        // Initialize client
         CommandKeys.init();
     }
 }

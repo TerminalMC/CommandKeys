@@ -30,16 +30,17 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Contains one tightly-coupled {@link OptionList}, which is used to display
- * all option control widgets.
+ * Contains one tightly-coupled {@link OptionList}, which is used to display all option control
+ * widgets.
  */
 public class OptionScreen extends OptionsSubScreen {
+
     public static final int HEADER_MARGIN = 32;
     public static final int FOOTER_MARGIN = 32;
     /**
-     * If the Minecraft window is less than this width, it will attempt to
-     * reduce the GUI scale. Thus, if the option list width does not exceed this
-     * value, the widths of entry elements can be safely hardcoded.
+     * If the Minecraft window is less than this width, it will attempt to reduce the GUI scale.
+     * Thus, if the option list width does not exceed this value, the widths of entry elements can
+     * be safely hardcoded.
      */
     public static final int BASE_ROW_WIDTH = Window.BASE_WIDTH;
     /**
@@ -61,13 +62,12 @@ public class OptionScreen extends OptionsSubScreen {
      */
     public static final int LIST_ENTRY_SPACING = 5;
     /**
-     * Space on either side of list entries for hanging elements. Normally used
-     * by drag-and-drop reposition buttons (left) and delete buttons (right).
+     * Space on either side of list entries for hanging elements. Normally used by drag-and-drop
+     * reposition buttons (left) and delete buttons (right).
      */
     public static final int HANGING_WIDGET_MARGIN = LIST_ENTRY_HEIGHT + ELEMENT_SPACING;
     /**
-     * The maximum safe cumulative width for hardcoding list entry element
-     * widths and SPACE.
+     * The maximum safe cumulative width for hardcoding list entry element widths and SPACE.
      */
     public static final int BASE_LIST_ENTRY_WIDTH = BASE_ROW_WIDTH
             - (SCROLL_BAR_MARGIN * 2)
@@ -76,8 +76,8 @@ public class OptionScreen extends OptionsSubScreen {
     protected OptionList list;
 
     /**
-     * The {@link OptionList} passed here is not required to have the correct 
-     * bounds as it will be resized and initialized prior to being displayed.
+     * The {@link OptionList} passed here is not required to have the correct bounds as it will be
+     * resized and initialized prior to being displayed.
      */
     public OptionScreen(Screen lastScreen, Component title, OptionList list) {
         super(lastScreen, Minecraft.getInstance().options, title);
@@ -114,7 +114,7 @@ public class OptionScreen extends OptionsSubScreen {
                 0, // Top of screen
                 (HEADER_MARGIN / 2) - (h / 2) // Center of margin
         );
-        addRenderableWidget(new StringWidget(x, y , w, h, title, font).alignLeft());
+        addRenderableWidget(new StringWidget(x, y, w, h, title, font).alignLeft());
     }
 
     @Override
@@ -161,25 +161,29 @@ public class OptionScreen extends OptionsSubScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (list.keyPressed(InputConstants.getKey(keyCode, scanCode))) return true;
+        if (list.keyPressed(InputConstants.getKey(keyCode, scanCode)))
+            return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (list.keyReleased(InputConstants.getKey(keyCode, scanCode))) return true;
+        if (list.keyReleased(InputConstants.getKey(keyCode, scanCode)))
+            return true;
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int delta) {
-        if (list.mouseClicked(InputConstants.Type.MOUSE.getOrCreate(delta))) return true;
+        if (list.mouseClicked(InputConstants.Type.MOUSE.getOrCreate(delta)))
+            return true;
         return super.mouseClicked(mouseX, mouseY, delta);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int delta) {
-        if (list.mouseReleased(InputConstants.Type.MOUSE.getOrCreate(delta))) return true;
+        if (list.mouseReleased(InputConstants.Type.MOUSE.getOrCreate(delta)))
+            return true;
         return super.mouseReleased(mouseX, mouseY, delta);
     }
 }

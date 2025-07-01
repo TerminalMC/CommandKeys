@@ -1,26 +1,57 @@
+import util.PropUtil
+
 plugins {
     id("multiloader-common")
     id("net.neoforged.moddev")
 }
 
+// Configure common dependencies
 dependencies {
-    // Mixin and MixinExtras
+    // Mixin
     compileOnly("org.spongepowered:mixin:${mixin_version}")
+
+    // MixinExtras
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+
+    // Apply property-defined dependencies
+    final selector = (String type, dep) -> {
+        switch (type) {
+            case "anp": //noinspection DependencyNotationArgument
+                return annotationProcessor(dep)
+                break
+            case "api": //noinspection DependencyNotationArgument
+                return api(dep)
+                break
+            case "con": //noinspection DependencyNotationArgument
+                return compileOnly(dep)
+                break
+            case "imp": //noinspection DependencyNotationArgument
+                return implementation(dep)
+                break
+            case "-":
+                return dep
+                break
+            default:
+                throw new IllegalArgumentException("Unrecognized dependency type: ${type}")
+        }
+    }
+    new PropUtil(project).applyDependencies(project.name, selector)
 }
 
+// Configure ModDevGradle
 neoForge {
-    version = neoforge_version // Shut up
     neoFormVersion = neoform_version
-    // Automatically enable AccessTransformers if the file exists
+    // Apply common AccessTransformer if it exists
     def at = file("src/main/resources/META-INF/accesstransformer.cfg")
     if (at.exists()) accessTransformers.from(at.absolutePath)
+    // Apply Parchment mappings
     parchment {
         minecraftVersion = parchment_minecraft_version
         mappingsVersion = parchment_version
     }
 }
 
+// Set up access to common files
 configurations {
     commonJava {
         canBeResolved = false
@@ -31,7 +62,6 @@ configurations {
         canBeConsumed = true
     }
 }
-
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
     commonResources sourceSets.main.resources.sourceDirectories.singleFile

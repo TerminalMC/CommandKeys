@@ -16,14 +16,35 @@
 
 package dev.terminalmc.commandkeys.platform;
 
-import dev.terminalmc.commandkeys.platform.services.IPlatformInfo;
+import dev.terminalmc.commandkeys.platform.services.IPlatformServices;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
-public class FabricPlatformInfo implements IPlatformInfo {
+public class FabricServices implements IPlatformServices {
+
+    @Override
+    public String getPlatformName() {
+        return "Fabric";
+    }
+
+    @Override
+    public boolean isModLoaded(String modId) {
+        return FabricLoader.getInstance().isModLoaded(modId);
+    }
+
+    @Override
+    public Path getGameDir() {
+        return FabricLoader.getInstance().getGameDir();
+    }
+
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
+    }
+
+    @Override
+    public boolean isDevEnv() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

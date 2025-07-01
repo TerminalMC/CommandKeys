@@ -23,19 +23,21 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * Allows {@link MultiLineTextField} instances to edit their text color, which
- * is normally hardcoded as ARGB 0xFFE0E0E0.
+ * Allows {@link MultiLineTextField} instances to edit their text color, which is normally hardcoded
+ * as ARGB 0xFFE0E0E0.
  */
 @Mixin(MultiLineEditBox.class)
-public class MixinMultiLineEditBox {
+public class MultiLineEditBoxMixin {
+
     @ModifyExpressionValue(
             method = "renderContents",
             at = @At(
                     value = "CONSTANT",
-                    args = "intValue=-2039584")
+                    args = "intValue=-2039584"
+            )
     )
     private int modifyColor(int original) {
-        if ((Object)this instanceof MultiLineTextField multiLineTextField) {
+        if ((Object) this instanceof MultiLineTextField multiLineTextField) {
             return multiLineTextField.getTextColor();
         }
         return original;

@@ -36,22 +36,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tightly coupled to {@link OptionScreen}, allowing many unique options 
- * 'screens' to use a single screen implementation while displaying different 
- * options.
+ * Tightly coupled to {@link OptionScreen}, allowing many unique options 'screens' to use a single
+ * screen implementation while displaying different options.
  *
  * <p>Contains list of {@link Entry} objects, which are drawn onto the screen
- * top-down in the order that they are stored, with each entry being allocated
- * a standard amount of space specified by {@link OptionList#itemHeight}. The
- * actual height of list entries, specified by {@link OptionList#entryHeight},
- * can be less but should not be more.</p>
+ * top-down in the order that they are stored, with each entry being allocated a standard amount of
+ * space specified by {@link OptionList#itemHeight}. The actual height of list entries, specified by
+ * {@link OptionList#entryHeight}, can be less but should not be more.</p>
  *
  * <p><b>Note:</b> If you want multiple widgets to appear side-by-side, you must
- * add them all to a single {@link Entry}'s list of widgets, which are all
- * rendered at the same list level.</p>
+ * add them all to a single {@link Entry}'s list of widgets, which are all rendered at the same list
+ * level.</p>
  */
 @SuppressWarnings("unused")
 public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
+
     protected OptionScreen screen;
 
     // Standard positional and dimensional values used by entries
@@ -71,8 +70,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     protected int smallWidgetWidth;
     protected int tinyWidgetWidth;
 
-    public OptionList(Minecraft mc, int width, int height, int y, int entryWidth,
-                      int entryHeight, int entrySpacing) {
+    public OptionList(
+            Minecraft mc, int width, int height, int y, int entryWidth,
+            int entryHeight, int entrySpacing
+    ) {
         super(mc, width, height, y, entryHeight + entrySpacing);
         this.mc = mc;
         this.entryWidth = entryWidth;
@@ -82,15 +83,15 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     /**
-     * Re-calculates all dimensional and positional base parameters used by
-     * list entries and their sub-elements.
+     * Re-calculates all dimensional and positional base parameters used by list entries and their
+     * sub-elements.
      *
      * <p>Should be called whenever the size of the {@link OptionList} is
      * changed.</p>
      */
     protected void updateElementBounds() {
-        this.dynWideEntryWidth = Math.max(entryWidth, (int)(width / 100F * 70F));
-        this.dynEntryWidth = Math.max(entryWidth, (int)(width / 100F * 50F));
+        this.dynWideEntryWidth = Math.max(entryWidth, (int) (width / 100F * 70F));
+        this.dynEntryWidth = Math.max(entryWidth, (int) (width / 100F * 50F));
         this.entryX = width / 2 - (entryWidth / 2);
         this.dynWideEntryX = width / 2 - (dynWideEntryWidth / 2);
         this.dynEntryX = width / 2 - (dynEntryWidth / 2);
@@ -139,12 +140,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     protected abstract void addEntries();
 
     /**
-     * Updates the size and position of the {@link OptionList}, then initializes
-     * it to update list entries.
+     * Updates the size and position of the {@link OptionList}, then initializes it to update list
+     * entries.
      *
      * <p>It would be more efficient to iterate over list entries and resize and
-     * reposition each, rather than re-creating them, but that would add 
-     * significant complexity and yield minimal observable performance benefit.
+     * reposition each, rather than re-creating them, but that would add significant complexity and
+     * yield minimal observable performance benefit.
      * </p>
      */
     @Override
@@ -166,34 +167,66 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     }
 
     public abstract boolean keyPressed(InputConstants.Key key);
+
     public abstract boolean keyReleased(InputConstants.Key key);
+
     public abstract boolean mouseClicked(InputConstants.Key key);
+
     public abstract boolean mouseReleased(InputConstants.Key key);
 
     /**
      * Base implementation of {@link Entry}, with common entries.
      */
     public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
+
         public static final int SPACE = OptionScreen.ELEMENT_SPACING;
         public static final int SPACE_SMALL = OptionScreen.ELEMENT_SPACING_NARROW;
         public static final int SPACE_TINY = OptionScreen.ELEMENT_SPACING_FINE;
 
         public static final WidgetSprites COPY_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button_highlighted"));
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/copy_button_disabled"
+                ),
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/copy_button_highlighted"
+                )
+        );
         public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button_highlighted"));
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/options_button_disabled"
+                ),
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/options_button_highlighted"
+                )
+        );
         public static final WidgetSprites LINK_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button_highlighted"));
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/link_button_disabled"
+                ),
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/link_button_highlighted"
+                )
+        );
         public static final WidgetSprites SEND_SPRITES = new WidgetSprites(
                 ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_disabled"),
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button_highlighted"));
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/send_button_disabled"
+                ),
+                ResourceLocation.fromNamespaceAndPath(
+                        CommandKeys.MOD_ID,
+                        "widget/send_button_highlighted"
+                )
+        );
 
         public final List<AbstractWidget> elements;
 
@@ -212,9 +245,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void render(@NotNull GuiGraphics graphics, int index, int y, int x,
-                           int entryWidth, int entryHeight, int mouseX, int mouseY,
-                           boolean hovered, float tickDelta) {
+        public void render(
+                @NotNull GuiGraphics graphics, int index, int y, int x,
+                int entryWidth, int entryHeight, int mouseX, int mouseY,
+                boolean hovered, float tickDelta
+        ) {
             elements.forEach((button) -> {
                 button.setY(y);
                 button.render(graphics, mouseX, mouseY, tickDelta);
@@ -224,39 +259,56 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         // Generic entry implementations
 
         public static class Text extends Entry {
-            public Text(int x, int width, int height, Component message,
-                        @Nullable Tooltip tooltip, int tooltipDelay) {
+
+            public Text(
+                    int x, int width, int height, Component message,
+                    @Nullable Tooltip tooltip, int tooltipDelay
+            ) {
                 super();
 
                 AbstractStringWidget widget;
                 if (Minecraft.getInstance().font.width(message.getString()) <= width) {
-                    widget = new StringWidget(x, 0, width, height, message, Minecraft.getInstance().font);
+                    widget = new StringWidget(
+                            x,
+                            0,
+                            width,
+                            height,
+                            message,
+                            Minecraft.getInstance().font
+                    );
                 } else {
                     widget = new MultiLineTextWidget(x, 0, message, Minecraft.getInstance().font)
                             .setMaxWidth(width)
                             .setCentered(true);
                 }
-                if (tooltip != null) widget.setTooltip(tooltip);
-                if (tooltipDelay >= 0) widget.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                if (tooltip != null)
+                    widget.setTooltip(tooltip);
+                if (tooltipDelay >= 0)
+                    widget.setTooltipDelay(Duration.ofMillis(tooltipDelay));
 
                 elements.add(widget);
             }
         }
 
         public static class ActionButton extends Entry {
+
             private final Button button;
 
-            public ActionButton(int x, int width, int height, Component message,
-                                @Nullable Tooltip tooltip, int tooltipDelay,
-                                Button.OnPress onPress) {
+            public ActionButton(
+                    int x, int width, int height, Component message,
+                    @Nullable Tooltip tooltip, int tooltipDelay,
+                    Button.OnPress onPress
+            ) {
                 super();
 
                 button = Button.builder(message, onPress)
                         .pos(x, 0)
                         .size(width, height)
                         .build();
-                if (tooltip != null) button.setTooltip(tooltip);
-                if (tooltipDelay >= 0) button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
+                if (tooltip != null)
+                    button.setTooltip(tooltip);
+                if (tooltipDelay >= 0)
+                    button.setTooltipDelay(Duration.ofMillis(tooltipDelay));
 
                 elements.add(button);
             }
@@ -268,13 +320,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         /**
-         * The {@link AbstractSelectionList} class (second-degree superclass of
-         * {@link OptionList}) is hard-coded to only support fixed spacing of
-         * entries. This is an invisible entry which defers all actions to the
-         * given {@link Entry}, thereby allowing that entry to span multiple 
-         * slots of the {@link OptionList}.
+         * The {@link AbstractSelectionList} class (second-degree superclass of {@link OptionList})
+         * is hard-coded to only support fixed spacing of entries. This is an invisible entry which
+         * defers all actions to the given {@link Entry}, thereby allowing that entry to span
+         * multiple slots of the {@link OptionList}.
          */
         public static class Space extends Entry {
+
             private final Entry entry;
 
             public Space(Entry entry) {
@@ -298,8 +350,10 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
 
             @Override
-            public boolean mouseDragged(double mouseX, double mouseY, int button,
-                                        double deltaX, double deltaY) {
+            public boolean mouseDragged(
+                    double mouseX, double mouseY, int button,
+                    double deltaX, double deltaY
+            ) {
                 return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
             }
 

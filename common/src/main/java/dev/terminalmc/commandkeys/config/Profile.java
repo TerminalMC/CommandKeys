@@ -28,20 +28,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Consists of behavioral options, a list of {@link Macro} instances, and a list
- * of strings identifying worlds and/or servers to which the instance is linked,
- * collectively referred to as 'links'.
+ * Consists of behavioral options, a list of {@link Macro} instances, and a list of strings
+ * identifying worlds and/or servers to which the instance is linked, collectively referred to as
+ * 'links'.
  *
  * <p>A static {@link Map} {@link Profile#LINK_PROFILE_MAP} is maintained to
- * ensure no overlap of links across different {@link Profile}s, and to improve
- * link lookup time. Note that as such, no two {@link Profile}s can be allowed
- * to contain the same link.</p>
+ * ensure no overlap of links across different {@link Profile}s, and to improve link lookup time.
+ * Note that as such, no two {@link Profile}s can be allowed to contain the same link.</p>
  *
  * <p>A pair of transient {@link Multimap} instances ({@link Profile#keybindMap}
- * and {@link Profile#macroMap}) are maintained to improve {@link Macro} lookup
- * time.</p>
+ * and {@link Profile#macroMap}) are maintained to improve {@link Macro} lookup time.</p>
  */
 public class Profile {
+
     public static final int VERSION = 4;
     public final int version = VERSION;
 
@@ -67,6 +66,7 @@ public class Profile {
     public static final Control resumeRepeatingDefault = Control.OFF;
     private Control useRatelimit;
     public static final Control useRatelimitDefault = Control.ON;
+
     public enum Control {
         ON,
         OFF,
@@ -97,8 +97,7 @@ public class Profile {
     }
 
     /**
-     * Not validated, only for use by default constructor and self-validating
-     * deserializer.
+     * Not validated, only for use by default constructor and self-validating deserializer.
      */
     private Profile(
             String name,
@@ -125,9 +124,8 @@ public class Profile {
      * Custom copy constructor.
      *
      * <p><b>Note:</b> all fields are copied except for {@link Profile#name}
-     * (which has is set to the value of {@link Profile#getDisplayName()} with
-     * {@code " (Copy)"} appended), and {@link Profile#links} (which is set to
-     * default).</p>
+     * (which has is set to the value of {@link Profile#getDisplayName()} with {@code " (Copy)"}
+     * appended), and {@link Profile#links} (which is set to default).</p>
      */
     Profile(Profile profile) {
         this.name = profile.getDisplayName() + " (Copy)";
@@ -143,14 +141,15 @@ public class Profile {
     // Display name util
 
     /**
-     * @return the first non-blank of the following: {@link Profile#name}, 
-     * the first element of {@link Profile#links}, the string 
-     * {@code "[Unnamed]"}.
+     * @return the first non-blank of the following: {@link Profile#name}, the first element of
+     * {@link Profile#links}, the string {@code "[Unnamed]"}.
      */
     public String getDisplayName() {
         String name = this.name;
-        if (name.isBlank()) name = this.getLinks().stream().findFirst().orElse("");
-        if (name.isBlank()) name = "[Unnamed]";
+        if (name.isBlank())
+            name = this.getLinks().stream().findFirst().orElse("");
+        if (name.isBlank())
+            name = "[Unnamed]";
         return name;
     }
 
@@ -164,18 +163,18 @@ public class Profile {
     }
 
     /**
-     * Adds the link to this profile and to {@link Profile#LINK_PROFILE_MAP},
-     * after removing it from any other profile.
+     * Adds the link to this profile and to {@link Profile#LINK_PROFILE_MAP}, after removing it from
+     * any other profile.
      */
     public void forceAddLink(String link) {
-        if (LINK_PROFILE_MAP.containsKey(link)) LINK_PROFILE_MAP.get(link).removeLink(link);
+        if (LINK_PROFILE_MAP.containsKey(link))
+            LINK_PROFILE_MAP.get(link).removeLink(link);
         links.add(link);
         LINK_PROFILE_MAP.put(link, this);
     }
 
     /**
-     * Removes the link from this profile and from
-     * {@link Profile#LINK_PROFILE_MAP}.
+     * Removes the link from this profile and from {@link Profile#LINK_PROFILE_MAP}.
      */
     public void removeLink(String link) {
         links.remove(link);
@@ -195,7 +194,7 @@ public class Profile {
 
     public void setAddToHistory(Macro macro, boolean value) {
         macro.addToHistory = value;
-        macro.addToHistoryStatus = switch(this.addToHistory) {
+        macro.addToHistoryStatus = switch (this.addToHistory) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.addToHistory;
@@ -213,7 +212,7 @@ public class Profile {
 
     public void setShowHudMessage(Macro macro, boolean value) {
         macro.showHudMessage = value;
-        macro.showHudMessageStatus = switch(this.showHudMessage) {
+        macro.showHudMessageStatus = switch (this.showHudMessage) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.showHudMessage;
@@ -231,7 +230,7 @@ public class Profile {
 
     public void setResumeRepeating(Macro macro, boolean value) {
         macro.resumeRepeating = value;
-        macro.resumeRepeatingStatus = switch(this.resumeRepeating) {
+        macro.resumeRepeatingStatus = switch (this.resumeRepeating) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.resumeRepeating;
@@ -249,7 +248,7 @@ public class Profile {
 
     public void setUseRatelimit(Macro macro, boolean value) {
         macro.useRatelimit = value;
-        macro.useRatelimitStatus = switch(this.useRatelimit) {
+        macro.useRatelimitStatus = switch (this.useRatelimit) {
             case ON -> true;
             case OFF -> false;
             case DEFER -> macro.useRatelimit;
@@ -283,8 +282,9 @@ public class Profile {
 
     /**
      * Moves the {@link Macro} at the source index to the destination index.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveMacro(int sourceIndex, int destIndex) {
@@ -299,9 +299,8 @@ public class Profile {
     // Macro map management
 
     /**
-     * Adds the keybind key and, if appropriate, the alternate keybind key of 
-     * {@code macro} to {@link Profile#keybindMap}, and adds {@code macro} to
-     * {@link Profile#macroMap}. 
+     * Adds the keybind key and, if appropriate, the alternate keybind key of {@code macro} to
+     * {@link Profile#keybindMap}, and adds {@code macro} to {@link Profile#macroMap}.
      */
     public void addToMaps(Macro macro) {
         keybindMap.put(macro.keybind.getKey(), macro.keybind);
@@ -313,8 +312,7 @@ public class Profile {
     }
 
     /**
-     * Clears and repopulates {@link Profile#keybindMap} and 
-     * {@link Profile#macroMap}.
+     * Clears and repopulates {@link Profile#keybindMap} and {@link Profile#macroMap}.
      */
     public void rebuildMaps() {
         keybindMap.clear();
@@ -327,13 +325,15 @@ public class Profile {
     // Macro editing
 
     public void setConflictStrategy(Macro macro, Macro.ConflictStrategy conflictStrategy) {
-        if (conflictStrategy.equals(macro.conflictStrategy)) return;
+        if (conflictStrategy.equals(macro.conflictStrategy))
+            return;
         macro.deactivateAndCancel();
         macro.conflictStrategy = conflictStrategy;
     }
 
     public void setSendMode(Macro macro, Macro.SendMode sendMode) {
-        if (sendMode.equals(macro.sendMode)) return;
+        if (sendMode.equals(macro.sendMode))
+            return;
         macro.deactivateAndCancel();
         macro.sendMode = sendMode;
         // Rebuilding maps is required as only certain types of macro use their
@@ -342,18 +342,19 @@ public class Profile {
     }
 
     public void setActivationType(Macro macro, Macro.ActivationType activationType) {
-        if (activationType.equals(macro.activationType)) return;
+        if (activationType.equals(macro.activationType))
+            return;
         macro.deactivateAndCancel();
         macro.activationType = activationType;
     }
 
     /**
-     * If {@code keybind} is the {@link Macro#keybind} or
-     * {@link Macro#altKeybind} of {@code macro}, sets the primary key of the
-     * appropriate {@link Keybind} to {@code key}.
+     * If {@code keybind} is the {@link Macro#keybind} or {@link Macro#altKeybind} of {@code macro},
+     * sets the primary key of the appropriate {@link Keybind} to {@code key}.
      */
     public void setKey(Macro macro, Keybind keybind, InputConstants.Key key) {
-        if (key.equals(keybind.getKey())) return;
+        if (key.equals(keybind.getKey()))
+            return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
             macro.deactivateAndCancel();
             keybind.setKey(key);
@@ -362,12 +363,12 @@ public class Profile {
     }
 
     /**
-     * If {@code keybind} is the {@link Macro#keybind} or
-     * {@link Macro#altKeybind} of {@code macro}, sets the limit key of the
-     * appropriate {@link Keybind} to {@code limitKey}.
+     * If {@code keybind} is the {@link Macro#keybind} or {@link Macro#altKeybind} of {@code macro},
+     * sets the limit key of the appropriate {@link Keybind} to {@code limitKey}.
      */
     public void setLimitKey(Macro macro, Keybind keybind, InputConstants.Key limitKey) {
-        if (limitKey.equals(keybind.getLimitKey())) return;
+        if (limitKey.equals(keybind.getLimitKey()))
+            return;
         if (keybind == macro.keybind || keybind == macro.altKeybind) {
             macro.deactivateAndCancel();
             keybind.setLimitKey(limitKey);
@@ -396,6 +397,7 @@ public class Profile {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Profile> {
+
         @Override
         public Profile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
@@ -403,32 +405,50 @@ public class Profile {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
             boolean silent = version != VERSION;
 
-            String name = JsonUtil.getOrDefault(obj, "name",
-                    nameDefault, silent);
+            String name = JsonUtil.getOrDefault(
+                    obj, "name",
+                    nameDefault, silent
+            );
 
             List<String> links = version >= 3 // Since 2.3.0-beta.2
-                    ? JsonUtil.getOrDefault(obj, "links",
-                    linksDefault.get(), silent)
-                    : JsonUtil.getOrDefault(obj, "addresses",
-                    linksDefault.get(), true);
+                    ? JsonUtil.getOrDefault(
+                    obj, "links",
+                    linksDefault.get(), silent
+            )
+                    : JsonUtil.getOrDefault(
+                            obj, "addresses",
+                            linksDefault.get(), true
+                    );
 
-            Control addToHistory = JsonUtil.getOrDefault(obj, "addToHistory",
-                    Control.class, addToHistoryDefault, silent);
+            Control addToHistory = JsonUtil.getOrDefault(
+                    obj, "addToHistory",
+                    Control.class, addToHistoryDefault, silent
+            );
 
-            Control showHudMessage = JsonUtil.getOrDefault(obj, "showHudMessage",
-                    Control.class, showHudMessageDefault, silent);
+            Control showHudMessage = JsonUtil.getOrDefault(
+                    obj, "showHudMessage",
+                    Control.class, showHudMessageDefault, silent
+            );
 
-            Control resumeRepeating = JsonUtil.getOrDefault(obj, "resumeRepeating",
-                    Control.class, resumeRepeatingDefault, silent);
+            Control resumeRepeating = JsonUtil.getOrDefault(
+                    obj, "resumeRepeating",
+                    Control.class, resumeRepeatingDefault, silent
+            );
 
-            Control useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
-                    Control.class, useRatelimitDefault, silent);
+            Control useRatelimit = JsonUtil.getOrDefault(
+                    obj, "useRatelimit",
+                    Control.class, useRatelimitDefault, silent
+            );
 
             List<Macro> macros = version >= 2 // Since 2.1.0-beta.2
-                    ? JsonUtil.getOrDefault(ctx, obj, "macros",
-                    Macro.class, macrosDefault.get(), silent)
-                    : JsonUtil.getOrDefault(ctx, obj, "commandKeys",
-                    Macro.class, macrosDefault.get(), true);
+                    ? JsonUtil.getOrDefault(
+                    ctx, obj, "macros",
+                    Macro.class, macrosDefault.get(), silent
+            )
+                    : JsonUtil.getOrDefault(
+                            ctx, obj, "commandKeys",
+                            Macro.class, macrosDefault.get(), true
+                    );
 
             return new Profile(
                     name,

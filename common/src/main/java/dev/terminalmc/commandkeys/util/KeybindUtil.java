@@ -31,8 +31,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
-import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.*;
-import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
+import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.AVOID;
+import static dev.terminalmc.commandkeys.config.Macro.SendMode.TYPE;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 public class KeybindUtil {
@@ -42,19 +42,23 @@ public class KeybindUtil {
      *
      * <p>{@link InputConstants#getKey(String)} can be used to get a key from
      * a string of the format key.keyboard.h</p>
-     * @param key the primary key.
+     *
+     * @param key      the primary key.
      * @param limitKey the limit key.
      * @return the number of macros activated.
      */
     @SuppressWarnings("unused")
     public static int handleKeys(InputConstants.Key key, InputConstants.Key limitKey) {
-        if (key.equals(InputConstants.UNKNOWN)) return 0;
-        if (!profile().keybindMap.containsKey(key)) return 0;
+        if (key.equals(InputConstants.UNKNOWN))
+            return 0;
+        if (!profile().keybindMap.containsKey(key))
+            return 0;
 
         int i = 0;
         Collection<Keybind> keybinds = profile().keybindMap.get(key);
         for (Keybind keybind : keybinds) {
-            if (!keybind.getLimitKey().equals(limitKey)) continue;
+            if (!keybind.getLimitKey().equals(limitKey))
+                continue;
             for (Macro macro : profile().macroMap.get(keybind)) {
                 macro.trigger(keybind, false);
                 i++;
@@ -65,10 +69,8 @@ public class KeybindUtil {
     }
 
     /**
-     * @return the number of operations to cancel.
-     * 0 -> None.
-     * 1 -> KeyboardHandler#charTyped.
-     * 2 -> KeyboardHandler#charTyped and KeyMapping#click.
+     * @return the number of operations to cancel. 0 -> None. 1 -> KeyboardHandler#charTyped. 2 ->
+     * KeyboardHandler#charTyped and KeyMapping#click.
      */
     public static int handleKey(InputConstants.Key key) {
         int cancel = 0;
@@ -89,7 +91,8 @@ public class KeybindUtil {
                     macros = profile().macroMap.get(triggerKb).stream()
                             .filter((macro) -> !macro.getStrategy().equals(AVOID))
                             .toList();
-                    if (!macros.isEmpty()) break;
+                    if (!macros.isEmpty())
+                        break;
                 } else if (kb.getLimitKey().equals(InputConstants.UNKNOWN)) {
                     // Save a backup in case no limited keybinds are found,
                     // avoid iterating twice
@@ -99,13 +102,15 @@ public class KeybindUtil {
             // If we didn't find any limited keybinds, we use the backup
             if (macros == null || macros.isEmpty()) {
                 // If we don't have a backup, we exit
-                if (triggerKb == null) return cancel;
+                if (triggerKb == null)
+                    return cancel;
                 // Otherwise we get all macros matching the backup
                 macros = profile().macroMap.get(triggerKb).stream()
                         .filter((macro) -> !macro.getStrategy().equals(AVOID))
                         .toList();
                 // If we don't have any matching macros, we exit
-                if (macros.isEmpty()) return cancel;
+                if (macros.isEmpty())
+                    return cancel;
             }
 
             boolean ratelimited = false;
@@ -114,7 +119,7 @@ public class KeybindUtil {
             for (Macro macro : macros) {
                 boolean send = true;
 
-                switch(macro.getStrategy()) {
+                switch (macro.getStrategy()) {
                     // SUBMIT only allows sending if there's no conflict
                     case SUBMIT -> send = getConflict(key) == null;
                     // VETO requires cancelling everything
@@ -124,7 +129,8 @@ public class KeybindUtil {
                 if (send) {
                     boolean rl = macro.trigger(triggerKb, ratelimited);
                     // TYPE mode requires cancelling char
-                    if (!rl && cancel == 0 && macro.getMode().equals(TYPE)) cancel = 1;
+                    if (!rl && cancel == 0 && macro.getMode().equals(TYPE))
+                        cancel = 1;
                     ratelimited |= rl;
                 }
             }
@@ -134,7 +140,7 @@ public class KeybindUtil {
 
     public static @Nullable KeyMapping getConflict(InputConstants.Key key) {
         for (KeyMapping keyMapping : Minecraft.getInstance().options.keyMappings) {
-            if (((KeyMappingAccessor)keyMapping).getKey().equals(key)) {
+            if (((KeyMappingAccessor) keyMapping).getKey().equals(key)) {
                 return keyMapping;
             }
         }
@@ -142,6 +148,7 @@ public class KeybindUtil {
     }
 
     public static class KeybindInfo {
+
         private final Profile profile;
         private final Macro macro;
         public MutableComponent label;
@@ -156,31 +163,37 @@ public class KeybindUtil {
             this.label = keybind.getLimitKey().equals(InputConstants.UNKNOWN)
                     ? keybind.getKey().getDisplayName().copy()
                     : keybind.getLimitKey().getDisplayName().copy().append(" + ")
-                    .append(keybind.getKey().getDisplayName());
+                            .append(keybind.getKey().getDisplayName());
             checkConflict(keybind.getLimitKey(), null);
             checkConflict(keybind.getKey(), keybind);
             createConflictLabel();
         }
 
         /**
-         * Checks {@code key} against the keys used by other {@link Macro}
-         * instances, and optionally against Minecraft keybinds, updating
-         * {@link KeybindInfo#internalConflict}, {@link KeybindInfo#mcConflict}
-         * and {@code KeybindInfo#tooltip} accordingly.
+         * Checks {@code key} against the keys used by other {@link Macro} instances, and optionally
+         * against Minecraft keybinds, updating {@link KeybindInfo#internalConflict},
+         * {@link KeybindInfo#mcConflict} and {@code KeybindInfo#tooltip} accordingly.
          */
         private void checkConflict(InputConstants.Key key, Keybind keybind) {
-            if (key.equals(InputConstants.UNKNOWN)) return;
+            if (key.equals(InputConstants.UNKNOWN))
+                return;
             // Check internal conflict
             if (profile.keybindMap.get(key).size() > 1) {
-                if (internalConflict || mcConflict) tooltip.append("\n");
-                tooltip.append(localized("option", "macro.bind.tooltip.conflict.internal",
-                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
+                if (internalConflict || mcConflict)
+                    tooltip.append("\n");
+                tooltip.append(localized(
+                                "option", "macro.bind.tooltip.conflict.internal",
+                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
+                        ))
                         .withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
             } else if (keybind != null && profile.macroMap.get(keybind).size() > 1) {
-                if (internalConflict || mcConflict) tooltip.append("\n");
-                tooltip.append(localized("option", "macro.bind.tooltip.conflict.internal",
-                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)))
+                if (internalConflict || mcConflict)
+                    tooltip.append("\n");
+                tooltip.append(localized(
+                                "option", "macro.bind.tooltip.conflict.internal",
+                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
+                        ))
                         .withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
             }
@@ -188,11 +201,14 @@ public class KeybindUtil {
                 // Check MC conflict
                 KeyMapping keyMapping = getConflict(key);
                 if (keyMapping != null) {
-                    if (internalConflict || mcConflict) tooltip.append("\n");
-                    tooltip.append(localized("option", "macro.bind.tooltip.conflict.external",
+                    if (internalConflict || mcConflict)
+                        tooltip.append("\n");
+                    tooltip.append(localized(
+                                    "option", "macro.bind.tooltip.conflict.external",
                                     key.getDisplayName().copy().withStyle(ChatFormatting.RED),
                                     Component.translatable(keyMapping.getName())
-                                            .withStyle(ChatFormatting.GRAY)))
+                                            .withStyle(ChatFormatting.GRAY)
+                            ))
                             .withStyle(ChatFormatting.WHITE);
                     mcConflict = true;
                 }
@@ -206,16 +222,16 @@ public class KeybindUtil {
                         .append(label.withStyle(ChatFormatting.WHITE))
                         .append(" ]").withStyle(ChatFormatting.RED);
                 tooltip.append("\n");
-                tooltip.append(localized("option", "macro.bind.tooltip.conflictStrategy",
-                        macro.getStrategy().tooltip()));
-            }
-            else if (internalConflict) {
+                tooltip.append(localized(
+                        "option", "macro.bind.tooltip.conflictStrategy",
+                        macro.getStrategy().tooltip()
+                ));
+            } else if (internalConflict) {
                 // Apply orange brackets
                 conflictLabel = Component.literal("[ ")
                         .append(label.withStyle(ChatFormatting.WHITE))
                         .append(" ]").withStyle(ChatFormatting.GOLD);
-            }
-            else {
+            } else {
                 // No conflict, so we use the plain label
                 conflictLabel = label;
             }

@@ -26,31 +26,48 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-
-@Mod(value = CommandKeys.MOD_ID, dist = Dist.CLIENT)
-@EventBusSubscriber(modid = CommandKeys.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@Mod(
+        value = CommandKeys.MOD_ID,
+        dist = Dist.CLIENT
+)
+@EventBusSubscriber(
+        modid = CommandKeys.MOD_ID,
+        bus = EventBusSubscriber.Bus.MOD,
+        value = Dist.CLIENT
+)
 public class CommandKeysNeoForge {
-    public CommandKeysNeoForge() {
-        // Config screen
-        ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
-                () -> (mc, parent) -> CommandKeys.getConfigScreen(parent));
 
-        // Main initialization
+    public CommandKeysNeoForge() {
+        // Register config screen
+        ModLoadingContext.get().registerExtensionPoint(
+                IConfigScreenFactory.class,
+                () -> (mc, parent) -> CommandKeys.getConfigScreen(parent)
+        );
+
+        // Initialize client
         CommandKeys.init();
     }
 
-    // Keybindings
+    /**
+     * Registers all keybinds.
+     */
     @SubscribeEvent
     static void registerKeyMappingsEvent(RegisterKeyMappingsEvent event) {
-        event.register(CommandKeys.CONFIG_KEY);
+        CommandKeys.KEYBINDS.forEach(event::register);
     }
 
-    @EventBusSubscriber(modid = CommandKeys.MOD_ID, value = Dist.CLIENT)
+    @EventBusSubscriber(
+            modid = CommandKeys.MOD_ID,
+            value = Dist.CLIENT
+    )
     static class ClientEventHandler {
-        // Tick events
+
+        /**
+         * Registers client after-tick event.
+         */
         @SubscribeEvent
-        public static void clientTickEvent(ClientTickEvent.Post event) {
-            CommandKeys.onEndTick(Minecraft.getInstance());
+        public static void registerAfterClientTick(ClientTickEvent.Post event) {
+            CommandKeys.afterClientTick(Minecraft.getInstance());
         }
     }
 }

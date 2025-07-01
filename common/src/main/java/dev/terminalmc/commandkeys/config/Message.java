@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public class Message {
+
     public static final int VERSION = 1;
     public final int version = VERSION;
 
@@ -37,8 +38,7 @@ public class Message {
     }
 
     /**
-     * Not validated, only for use by default constructor and self-validating
-     * deserializer.
+     * Not validated, only for use by default constructor and self-validating deserializer.
      */
     Message(String string, int delayTicks) {
         this.string = string;
@@ -56,26 +56,37 @@ public class Message {
     // Validation
 
     Message validate() {
-        if (string == null) string = "";
-        if (delayTicks < 0) delayTicks = 0;
+        if (string == null)
+            string = "";
+        if (delayTicks < 0)
+            delayTicks = 0;
         return this;
     }
 
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Message> {
+
         @Override
-        public @Nullable Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
+        public @Nullable Message deserialize(
+                JsonElement json,
+                Type typeOfT,
+                JsonDeserializationContext ctx
+        )
                 throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            String string = JsonUtil.getOrDefault(obj, "string",
-                    "", silent);
+            String string = JsonUtil.getOrDefault(
+                    obj, "string",
+                    "", silent
+            );
 
-            int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks",
-                    0, silent);
+            int delayTicks = JsonUtil.getOrDefault(
+                    obj, "delayTicks",
+                    0, silent
+            );
 
             return new Message(
                     string,

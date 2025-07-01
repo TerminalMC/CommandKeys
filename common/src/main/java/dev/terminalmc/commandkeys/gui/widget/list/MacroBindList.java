@@ -18,7 +18,9 @@ package dev.terminalmc.commandkeys.gui.widget.list;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
-import dev.terminalmc.commandkeys.config.*;
+import dev.terminalmc.commandkeys.config.Keybind;
+import dev.terminalmc.commandkeys.config.Macro;
+import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
@@ -30,19 +32,22 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
- * Extends {@link DragReorderList} to add support for handling of key presses
- * and mouse button clicks for setting keybinds and triggering macros.
+ * Extends {@link DragReorderList} to add support for handling of key presses and mouse button
+ * clicks for setting keybinds and triggering macros.
  */
 public abstract class MacroBindList extends DragReorderList {
+
     protected @NotNull Profile profile;
     private @Nullable Macro macro;
     private @Nullable Keybind keybind;
     private @Nullable InputConstants.Key heldKey;
     private @Nullable Keybind sendKeybind;
 
-    public MacroBindList(Minecraft mc, int width, int height, int y, int entryWidth,
-                         int entryHeight, int entrySpace, @NotNull Profile profile,
-                         Map<Class<? extends Entry>, BiFunction<Integer,Integer,Boolean>> clsFunMap) {
+    public MacroBindList(
+            Minecraft mc, int width, int height, int y, int entryWidth,
+            int entryHeight, int entrySpace, @NotNull Profile profile,
+            Map<Class<? extends Entry>, BiFunction<Integer, Integer, Boolean>> clsFunMap
+    ) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpace, clsFunMap);
         this.profile = profile;
     }
@@ -57,10 +62,12 @@ public abstract class MacroBindList extends DragReorderList {
     }
 
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
-        if (!profile.getMacros().contains(macro)) throw new IllegalArgumentException(
-                "Specified macro does not exist in profile.");
-        if (!macro.ownsKeybind(keybind)) throw new IllegalArgumentException(
-                "Specified keybind not used by specified macro.");
+        if (!profile.getMacros().contains(macro))
+            throw new IllegalArgumentException(
+                    "Specified macro does not exist in profile.");
+        if (!macro.ownsKeybind(keybind))
+            throw new IllegalArgumentException(
+                    "Specified keybind not used by specified macro.");
         this.macro = macro;
         this.keybind = keybind;
     }
@@ -74,14 +81,12 @@ public abstract class MacroBindList extends DragReorderList {
                 profile.setKey(macro, keybind, InputConstants.UNKNOWN);
                 profile.setLimitKey(macro, keybind, InputConstants.UNKNOWN);
                 init();
-            }
-            else {
+            } else {
                 // If we aren't already holding a key
                 if (heldKey == null) {
                     // Mark the current key as held
                     heldKey = key;
-                }
-                else if (key != heldKey) {
+                } else if (key != heldKey) {
                     // Bind the current key and held key
                     profile.setKey(macro, keybind, key);
                     profile.setLimitKey(macro, keybind, heldKey);
@@ -123,8 +128,7 @@ public abstract class MacroBindList extends DragReorderList {
                 init();
                 return true;
             }
-        }
-        else if (sendKeybind != null && sendKeybind.getKey().equals(key)) {
+        } else if (sendKeybind != null && sendKeybind.getKey().equals(key)) {
             // Trigger macro
             Collection<Macro> macros = profile.macroMap.get(sendKeybind);
             if (!macros.isEmpty()) {

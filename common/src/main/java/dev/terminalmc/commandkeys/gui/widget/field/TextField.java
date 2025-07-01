@@ -29,18 +29,21 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
- * A custom {@link EditBox} which supports click-dragging to select text,
- * double-clicking to select words, triple-clicking to select all, and content
- * validation with warning text color and tooltip.
+ * A custom {@link EditBox} which supports click-dragging to select text, double-clicking to select
+ * words, triple-clicking to select all, and content validation with warning text color and
+ * tooltip.
  */
 @SuppressWarnings("UnusedReturnValue")
 public class TextField extends EditBox {
+
     public static final long CLICK_CHAIN_TIME = 250L;
     public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
     public static final int TEXT_COLOR_ERROR = 0xFF5555;
@@ -76,8 +79,10 @@ public class TextField extends EditBox {
         this(Minecraft.getInstance().font, x, y, width, height, Component.empty(), validator);
     }
 
-    public TextField(Font font, int x, int y, int width, int height, Component msg,
-                     @Nullable Validator validator) {
+    public TextField(
+            Font font, int x, int y, int width, int height, Component msg,
+            @Nullable Validator validator
+    ) {
         super(font, x, y, width, height, msg);
         this.font = font;
         if (validator != null) {
@@ -165,7 +170,7 @@ public class TextField extends EditBox {
                         // double-click: select word
                         int pos = getCursorPosition();
                         int start = pos;
-                        // If next char is space or previous char is not space, 
+                        // If next char is space or previous char is not space,
                         // go backwards to the start of the word.
                         if (pos < 0) {
                             start = 0;
@@ -205,20 +210,30 @@ public class TextField extends EditBox {
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (button != 0) return false;
+    public boolean mouseDragged(
+            double mouseX,
+            double mouseY,
+            int button,
+            double dragX,
+            double dragY
+    ) {
+        if (button != 0)
+            return false;
         String str = getValue();
 
         if (mouseX < dragOriginX) { // Dragging left
             String subLeft = str.substring(0, dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(subLeft,
-                    Mth.floor(dragOriginX - mouseX), true).length();
+            int offsetChars = font.plainSubstrByWidth(
+                    subLeft,
+                    Mth.floor(dragOriginX - mouseX), true
+            ).length();
             moveCursorTo(dragOriginPos - offsetChars, true);
-        }
-        else { // Dragging right
+        } else { // Dragging right
             String subRight = str.substring(dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(subRight,
-                    Mth.floor(mouseX - dragOriginX), false).length();
+            int offsetChars = font.plainSubstrByWidth(
+                    subRight,
+                    Mth.floor(mouseX - dragOriginX), false
+            ).length();
             moveCursorTo(dragOriginPos + offsetChars, true);
         }
 
@@ -246,8 +261,7 @@ public class TextField extends EditBox {
             if (isUndo(keyCode)) {
                 undo();
                 return true;
-            }
-            else if (isRedo(keyCode)) {
+            } else if (isRedo(keyCode)) {
                 redo();
                 return true;
             }
@@ -272,15 +286,18 @@ public class TextField extends EditBox {
 
     @FunctionalInterface
     public interface Validator {
+
         Optional<Component> validate(String str);
 
         // Implementations
 
         class PosInt implements Validator {
+
             @Override
             public Optional<Component> validate(String str) {
                 try {
-                    if (Integer.parseInt(str) < 0) throw new NumberFormatException();
+                    if (Integer.parseInt(str) < 0)
+                        throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
                     return Optional.of(localized("ui", "field.error.pos_int")

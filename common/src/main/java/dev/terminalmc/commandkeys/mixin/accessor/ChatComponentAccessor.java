@@ -25,6 +25,7 @@ import java.util.List;
 
 @Mixin(ChatComponent.class)
 public interface ChatComponentAccessor {
+
     @Accessor
     List<GuiMessage> getAllMessages();
 }

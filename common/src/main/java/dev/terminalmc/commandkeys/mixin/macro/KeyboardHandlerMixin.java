@@ -28,14 +28,16 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(KeyboardHandler.class)
-public class MixinKeyboardHandler {
+public class KeyboardHandlerMixin {
+
     @Unique
     private static boolean commandKeys$cancelCharTyped;
 
     /**
-     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it
-     * to be cancelled before being passed to the Minecraft callback.
-     * @see MixinMouseHandler#wrapClick
+     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be cancelled
+     * before being passed to the Minecraft callback.
+     *
+     * @see MouseHandlerMixin#wrapClick
      */
     @WrapOperation(
             method = "keyPress",
@@ -56,13 +58,15 @@ public class MixinKeyboardHandler {
     }
 
     /**
-     * Allows cancellation of the call to {@link KeyboardHandler#charTyped}
-     * corresponding to a call cancelled by {@link MixinMouseHandler#wrapClick}.
+     * Allows cancellation of the call to {@link KeyboardHandler#charTyped} corresponding to a call
+     * cancelled by {@link MouseHandlerMixin#wrapClick}.
      */
     @WrapMethod(method = "charTyped")
     @SuppressWarnings("JavadocReference")
-    private void wrapCharTyped(long windowPointer, int codePoint, int modifiers,
-                               Operation<Void> original) {
+    private void wrapCharTyped(
+            long windowPointer, int codePoint, int modifiers,
+            Operation<Void> original
+    ) {
         if (commandKeys$cancelCharTyped) {
             commandKeys$cancelCharTyped = false;
         } else {

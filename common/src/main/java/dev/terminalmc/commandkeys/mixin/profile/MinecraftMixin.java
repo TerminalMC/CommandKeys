@@ -19,28 +19,31 @@ package dev.terminalmc.commandkeys.mixin.profile;
 import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Config;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.TransferState;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.server.WorldStem;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ConnectScreen.class)
-public class MixinConnectScreen {
+@Mixin(Minecraft.class)
+public class MinecraftMixin {
+
     /**
-     * Automatic profile switching for multiplayer.
+     * Automatic profile switching for singleplayer.
      */
     @Inject(
-            method = "connect",
+            method = "doWorldLoad",
             at = @At("HEAD")
     )
-    private void selectMultiplayerProfile(Minecraft mc, ServerAddress address, ServerData data,
-                                          TransferState state, CallbackInfo ci) {
-        String server = address.getHost();
-        Config.get().activateMpProfile(server);
-        CommandKeys.lastConnection = server;
+    private void startIntegratedServer(
+            LevelStorageSource.LevelStorageAccess levelStorage,
+            PackRepository packRepo, WorldStem worldStem,
+            boolean newWorld, CallbackInfo ci
+    ) {
+        String world = worldStem.worldData().getLevelName();
+        Config.get().activateSpProfile(world);
+        CommandKeys.lastConnection = world;
     }
 }

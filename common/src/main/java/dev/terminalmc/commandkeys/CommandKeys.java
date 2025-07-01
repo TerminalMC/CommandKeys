@@ -43,25 +43,33 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
 import static dev.terminalmc.commandkeys.util.Localization.translationKey;
 
 public class CommandKeys {
+
     public static final String MOD_ID = "commandkeys";
     public static final String MOD_NAME = "CommandKeys";
     public static final ModLogger LOG = new ModLogger(MOD_NAME);
-    public static final KeyMapping CONFIG_KEY = new KeyMapping(
-            translationKey("key", "main.edit"), InputConstants.Type.KEYSYM,
-            InputConstants.KEY_K, translationKey("key", "main"));
     public static final Component PREFIX = Component.empty()
             .append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    public static final KeyMapping CONFIG_KEY = new KeyMapping(
+            translationKey("key", "main.edit"), InputConstants.Type.KEYSYM,
+            InputConstants.KEY_K, translationKey("key", "main")
+    );
+    public static final List<KeyMapping> KEYBINDS = List.of(
+            CONFIG_KEY
+    );
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
     public static @Nullable InputConstants.Key ratelimitedKey = null;
 
     private static final List<TickCounter> rateLimiter = new ArrayList<>();
+
     private static class TickCounter {
+
         int time = 0;
+
         int tick() {
             return time++;
         }
@@ -71,7 +79,7 @@ public class CommandKeys {
         Config.getAndSave();
     }
 
-    public static void onEndTick(Minecraft mc) {
+    public static void afterClientTick(Minecraft mc) {
         // Open config screen via keybind
         while (CONFIG_KEY.consumeClick()) {
             mc.setScreen(new MainOptionScreen(mc.screen, true));
@@ -84,16 +92,20 @@ public class CommandKeys {
         if (mc.player != null && mc.level != null && !mc.isPaused()) {
             Config.get().activeProfile().getMacros().forEach(Macro::tick);
             // Note: If multiple macros are triggered in the same tick, the
-            // message order will be based on their list positions, not the 
+            // message order will be based on their list positions, not the
             // order in which they were triggered.
         }
 
         // Config reset warning toast
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToasts().addToast(new SystemToast(new SystemToast.SystemToastId(15000L),
-                    localized("toast", "reset.title"), localized("toast", "reset.message",
-                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD))));
+            mc.getToasts().addToast(new SystemToast(
+                    new SystemToast.SystemToastId(15000L),
+                    localized("toast", "reset.title"), localized(
+                    "toast", "reset.message",
+                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD)
+            )
+            ));
         }
     }
 
@@ -124,16 +136,19 @@ public class CommandKeys {
                 && rateLimiter.size() >= Config.get().getRatelimitCount()) {
             if (sendMessage && ratelimitedKey != key) {
                 Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
-                        localized("message", "sendBlocked",
+                        localized(
+                                "message", "sendBlocked",
                                 key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
                                 Component.literal(String.valueOf(Config.get().getRatelimitCount()))
                                         .withStyle(ChatFormatting.GRAY),
                                 Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
-                                        .withStyle(ChatFormatting.GRAY))
+                                        .withStyle(ChatFormatting.GRAY)
+                        )
                                 .withStyle(ChatFormatting.RED)));
                 ratelimitedKey = key;
             }
-            if (Config.getAndSave().ratelimitStrict) rateLimiter.add(new TickCounter());
+            if (Config.getAndSave().ratelimitStrict)
+                rateLimiter.add(new TickCounter());
             return false;
         }
         rateLimiter.add(new TickCounter());
@@ -148,12 +163,19 @@ public class CommandKeys {
         send(true, message, false, false);
     }
 
-    public static void send(boolean type, String message, boolean addToHistory, boolean showHudMsg) {
+    public static void send(
+            boolean type,
+            String message,
+            boolean addToHistory,
+            boolean showHudMsg
+    ) {
         ratelimitedKey = null;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (!mc.player.connection.isAcceptingMessages()) return;
-        Pair<String,Integer> result = PlaceholderUtil.replace(message);
+        if (mc.player == null)
+            return;
+        if (!mc.player.connection.isAcceptingMessages())
+            return;
+        Pair<String, Integer> result = PlaceholderUtil.replace(message);
         message = result.getFirst();
         int faults = result.getSecond();
         if (faults == 0) {
@@ -167,14 +189,20 @@ public class CommandKeys {
                 } else {
                     mc.player.connection.sendChat(message);
                 }
-                if (addToHistory) mc.gui.getChat().addRecentChat(message);
-                if (showHudMsg) mc.gui.setOverlayMessage(Component.literal(message)
-                        .withStyle(ChatFormatting.GRAY), false);
+                if (addToHistory)
+                    mc.gui.getChat().addRecentChat(message);
+                if (showHudMsg)
+                    mc.gui.setOverlayMessage(
+                            Component.literal(message)
+                                    .withStyle(ChatFormatting.GRAY), false
+                    );
             }
         } else {
             MutableComponent msg = PREFIX.copy();
-            msg.append(localized("message", "placeholderFault",
-                    Component.literal(message).withStyle(ChatFormatting.GRAY))
+            msg.append(localized(
+                    "message", "placeholderFault",
+                    Component.literal(message).withStyle(ChatFormatting.GRAY)
+            )
                     .withStyle(ChatFormatting.RED));
             mc.gui.getChat().addMessage(msg);
         }

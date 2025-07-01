@@ -66,25 +66,36 @@ public class PlaceholderUtil {
     private static final Placeholder[] REGEX_PLACEHOLDERS = {
             new Placeholder(Pattern.compile("%#(.*)%"), 1, PlaceholderUtil::getRecentChat),
             new Placeholder(Pattern.compile("%clipboard#(.*)%"), 1, PlaceholderUtil::getClipboard),
-            new Placeholder(Pattern.compile("%pos([FBLR])(\\d+)%"), 2, PlaceholderUtil::getPlayerBlockPos),
+            new Placeholder(
+                    Pattern.compile("%pos([FBLR])(\\d+)%"),
+                    2,
+                    PlaceholderUtil::getPlayerBlockPos
+            ),
             new Placeholder(Pattern.compile("%x([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockX),
             new Placeholder(Pattern.compile("%y([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockY),
             new Placeholder(Pattern.compile("%z([+-]\\d+)%"), 1, PlaceholderUtil::getPlayerBlockZ),
-            new Placeholder(Pattern.compile("%lpos([FBLR])(\\d+)%"), 2, PlaceholderUtil::getLookBlockPos),
+            new Placeholder(
+                    Pattern.compile("%lpos([FBLR])(\\d+)%"),
+                    2,
+                    PlaceholderUtil::getLookBlockPos
+            ),
             new Placeholder(Pattern.compile("%lx([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockX),
             new Placeholder(Pattern.compile("%ly([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockY),
             new Placeholder(Pattern.compile("%lz([+-]\\d+)%"), 1, PlaceholderUtil::getLookBlockZ),
     };
 
     /**
-     * Breaks if player is not in-game. Does not self-check for performance
-     * reasons, but expects caller to validate.
+     * Breaks if player is not in-game. Does not self-check for performance reasons, but expects
+     * caller to validate.
      */
-    public static Pair<String,Integer> replace(String message) {
-        if (!message.contains("%")) return new Pair<>(message, 0);
+    public static Pair<String, Integer> replace(String message) {
+        if (!message.contains("%"))
+            return new Pair<>(message, 0);
         reset();
-        for (SimplePlaceholder p : SIMPLE_PLACEHOLDERS) message = p.process(message);
-        for (Placeholder p : REGEX_PLACEHOLDERS) message = p.process(message);
+        for (SimplePlaceholder p : SIMPLE_PLACEHOLDERS)
+            message = p.process(message);
+        for (Placeholder p : REGEX_PLACEHOLDERS)
+            message = p.process(message);
 
         return new Pair<>(message, faults);
     }
@@ -103,20 +114,25 @@ public class PlaceholderUtil {
     }
 
     private record SimplePlaceholder(String string, Supplier<String> supplier) {
+
         public String process(String message) {
-            if (!message.contains(string)) return message;
+            if (!message.contains(string))
+                return message;
             String replacement = supplier.get();
             return message.replaceAll(string, replacement);
         }
     }
 
     private record Placeholder(Pattern pattern, int groups, Function<String[], String> operator) {
+
         public String process(String message) {
             Matcher matcher = pattern.matcher(message);
             while (true) {
-                if (!matcher.find()) return message;
+                if (!matcher.find())
+                    return message;
                 String[] args = new String[groups];
-                for (int i = 0; i < args.length; i++) args[i] = matcher.group(i + 1);
+                for (int i = 0; i < args.length; i++)
+                    args[i] = matcher.group(i + 1);
                 message = matcher.replaceFirst(operator.apply(args));
             }
         }
@@ -131,14 +147,16 @@ public class PlaceholderUtil {
             int i = 0;
             for (GuiMessage guiMsg : ((ChatComponentAccessor)
                     Minecraft.getInstance().gui.getChat()).getAllMessages()) {
-                if (++i > 50) break;
+                if (++i > 50)
+                    break;
 
                 Matcher matcher = regex.matcher(guiMsg.content().getString());
                 if (matcher.find()) {
                     try {
                         return matcher.group(1);
                     } catch (IndexOutOfBoundsException e) {
-                        CommandKeys.LOG.error("Recent chat placeholder failed: Group 1 not available: " + e);
+                        CommandKeys.LOG.error(
+                                "Recent chat placeholder failed: Group 1 not available: " + e);
                         return fault();
                     }
                 }
@@ -178,14 +196,18 @@ public class PlaceholderUtil {
 
     private static String getLastMessage() {
         String lastMsg = Minecraft.getInstance().gui.getChat().getRecentChat().peekLast();
-        if (lastMsg == null) return fault();
+        if (lastMsg == null)
+            return fault();
         return lastMsg;
     }
 
     private static String getLastCommand() {
-        if (Minecraft.getInstance().commandHistory().history() instanceof ArrayListDeque<String> deque) {
+        if (Minecraft.getInstance()
+                .commandHistory()
+                .history() instanceof ArrayListDeque<String> deque) {
             String lastCmd = deque.peekLast();
-            if (lastCmd != null) return lastCmd;
+            if (lastCmd != null)
+                return lastCmd;
         } else {
             CommandKeys.LOG.error("Command history not ArrayListDeque");
         }
@@ -201,15 +223,17 @@ public class PlaceholderUtil {
     // Incoming private message sender
 
     private static String getPmSenderName() {
-        if (pmSenderName != null) return pmSenderName;
+        if (pmSenderName != null)
+            return pmSenderName;
         int i = 0;
         for (GuiMessage guiMsg : ((ChatComponentAccessor)
                 Minecraft.getInstance().gui.getChat()).getAllMessages()) {
-            if (++i > 50) break;
+            if (++i > 50)
+                break;
             Component msg = guiMsg.content();
             if (msg.getContents() instanceof TranslatableContents tc
                     && tc.getKey().contains("commands.message.display.incoming")) {
-                pmSenderName = ((MutableComponent)tc.getArgs()[0]).getString();
+                pmSenderName = ((MutableComponent) tc.getArgs()[0]).getString();
                 break;
             }
         }
@@ -233,10 +257,14 @@ public class PlaceholderUtil {
         if (lookBlockPos == null) {
             Minecraft mc = Minecraft.getInstance();
             // Distance is arbitrary but will do for now
-            HitResult result = mc.player.pick(Math.max(384,
-                    (mc.levelRenderer.getLastViewDistance() + 1D) * 16), 0.0F, false);
+            HitResult result = mc.player.pick(
+                    Math.max(
+                            384,
+                            (mc.levelRenderer.getLastViewDistance() + 1D) * 16
+                    ), 0.0F, false
+            );
             if (result.getType().equals(HitResult.Type.BLOCK)) {
-                lookBlockPos = ((BlockHitResult)result).getBlockPos();
+                lookBlockPos = ((BlockHitResult) result).getBlockPos();
             }
         }
         return lookBlockPos;
@@ -249,52 +277,66 @@ public class PlaceholderUtil {
     }
 
     private static String getPlayerBlockPos(String[] args) {
-        if (updatePlayerBlockPos() == null || updateLookAngle() == null) return fault();
+        if (updatePlayerBlockPos() == null || updateLookAngle() == null)
+            return fault();
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = playerBlockPos.getBottomCenter();
-        if (offset != 0) playerPos = offsetCardinalDirection(
-                playerPos, lookAngle, args[0], offset);
-        return String.format("%d %d %d", Mth.floor(playerPos.x),
-                Mth.floor(playerPos.y), Mth.floor(playerPos.z));
+        if (offset != 0)
+            playerPos = offsetCardinalDirection(
+                    playerPos, lookAngle, args[0], offset);
+        return String.format(
+                "%d %d %d", Mth.floor(playerPos.x),
+                Mth.floor(playerPos.y), Mth.floor(playerPos.z)
+        );
     }
 
     private static String getPlayerBlockX(String[] offset) {
-        if (updatePlayerBlockPos() == null) return fault();
+        if (updatePlayerBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getX()) + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockY(String[] offset) {
-        if (updatePlayerBlockPos() == null) return fault();
+        if (updatePlayerBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getY()) + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockZ(String[] offset) {
-        if (updatePlayerBlockPos() == null) return fault();
+        if (updatePlayerBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(playerBlockPos.getZ()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockPos(String[] args) {
-        if (updateLookBlockPos() == null || updateLookAngle() == null) return fault();
+        if (updateLookBlockPos() == null || updateLookAngle() == null)
+            return fault();
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = lookBlockPos.getBottomCenter();
-        if (offset != 0) playerPos = offsetCardinalDirection(
-                playerPos, lookAngle, args[0], offset);
-        return String.format("%d %d %d", Mth.floor(playerPos.x),
-                Mth.floor(playerPos.y), Mth.floor(playerPos.z));
+        if (offset != 0)
+            playerPos = offsetCardinalDirection(
+                    playerPos, lookAngle, args[0], offset);
+        return String.format(
+                "%d %d %d", Mth.floor(playerPos.x),
+                Mth.floor(playerPos.y), Mth.floor(playerPos.z)
+        );
     }
 
     private static String getLookBlockX(String[] offset) {
-        if (updateLookBlockPos() == null) return fault();
+        if (updateLookBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getX()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockY(String[] offset) {
-        if (updateLookBlockPos() == null) return fault();
+        if (updateLookBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getY()) + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockZ(String[] offset) {
-        if (updateLookBlockPos() == null) return fault();
+        if (updateLookBlockPos() == null)
+            return fault();
         return String.valueOf(Mth.floor(lookBlockPos.getZ()) + Integer.parseInt(offset[0]));
     }
 
@@ -304,7 +346,7 @@ public class PlaceholderUtil {
             Vec3 pos, Vec3 facingAngle, String offsetDir, int offset) {
         if (Math.abs(facingAngle.x) >= Math.abs(facingAngle.z)) {
             if (facingAngle.x >= 0) { // East
-                return switch(offsetDir) {
+                return switch (offsetDir) {
                     case "F" -> new Vec3(pos.x + offset, pos.y, pos.z);
                     case "B" -> new Vec3(pos.x - offset, pos.y, pos.z);
                     case "L" -> new Vec3(pos.x, pos.y, pos.z - offset);
@@ -312,7 +354,7 @@ public class PlaceholderUtil {
                     default -> throw new IllegalArgumentException("Disallowed value " + offsetDir);
                 };
             } else {
-                return switch(offsetDir) { // West
+                return switch (offsetDir) { // West
                     case "F" -> new Vec3(pos.x - offset, pos.y, pos.z);
                     case "B" -> new Vec3(pos.x + offset, pos.y, pos.z);
                     case "L" -> new Vec3(pos.x, pos.y, pos.z + offset);
@@ -322,7 +364,7 @@ public class PlaceholderUtil {
             }
         } else {
             if (facingAngle.z >= 0) {
-                return switch(offsetDir) { // South
+                return switch (offsetDir) { // South
                     case "F" -> new Vec3(pos.x, pos.y, pos.z + offset);
                     case "B" -> new Vec3(pos.x, pos.y, pos.z - offset);
                     case "L" -> new Vec3(pos.x + offset, pos.y, pos.z);
@@ -330,7 +372,7 @@ public class PlaceholderUtil {
                     default -> throw new IllegalArgumentException("Disallowed value " + offsetDir);
                 };
             } else {
-                return switch(offsetDir) { // North
+                return switch (offsetDir) { // North
                     case "F" -> new Vec3(pos.x, pos.y, pos.z - offset);
                     case "B" -> new Vec3(pos.x, pos.y, pos.z + offset);
                     case "L" -> new Vec3(pos.x - offset, pos.y, pos.z);

@@ -36,10 +36,11 @@ import static dev.terminalmc.commandkeys.CommandKeys.canTrigger;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
 /**
- * Consists of behavioral controls, a primary and alternate {@link Keybind}, and 
- * a list of {@link Message} instances.
+ * Consists of behavioral controls, a primary and alternate {@link Keybind}, and a list of
+ * {@link Message} instances.
  */
 public class Macro {
+
     public static final int VERSION = 6;
     public final int version = VERSION;
 
@@ -67,6 +68,7 @@ public class Macro {
 
     ConflictStrategy conflictStrategy;
     public static final ConflictStrategy conflictStrategyDefault = ConflictStrategy.SUBMIT;
+
     public enum ConflictStrategy {
         SUBMIT(ChatFormatting.GREEN),
         ASSERT(ChatFormatting.GOLD),
@@ -90,6 +92,7 @@ public class Macro {
 
     SendMode sendMode;
     public static final SendMode sendModeDefault = SendMode.SEND;
+
     public enum SendMode {
         SEND(ChatFormatting.GREEN),
         TYPE(ChatFormatting.GOLD),
@@ -114,6 +117,7 @@ public class Macro {
 
     ActivationType activationType;
     public static final ActivationType activationTypeDefault = ActivationType.HOLD;
+
     public enum ActivationType {
         HOLD(ChatFormatting.GREEN),
         VANILLA(ChatFormatting.GOLD);
@@ -185,8 +189,7 @@ public class Macro {
     }
 
     /**
-     * Not validated, only for use by default constructor and self-validating
-     * deserializer.
+     * Not validated, only for use by default constructor and self-validating deserializer.
      */
     Macro(
             boolean addToHistory,
@@ -334,8 +337,9 @@ public class Macro {
 
     /**
      * Moves the {@link Message} at the source index to the destination index.
+     *
      * @param sourceIndex the index of the element to move.
-     * @param destIndex the desired final index of the element.
+     * @param destIndex   the desired final index of the element.
      * @return {@code true} if the list was modified.
      */
     public boolean moveMessage(int sourceIndex, int destIndex) {
@@ -349,18 +353,18 @@ public class Macro {
     // Activation
 
     /**
-     * A macro is considered to be 'active' when it should perform its action on
-     * an ongoing basis, if it is capable of doing so.
+     * A macro is considered to be 'active' when it should perform its action on an ongoing basis,
+     * if it is capable of doing so.
      *
      * <p>{@link ActivationType#HOLD} requires that macros are activated when
-     * initially triggered, and deactivated only when the {@link Macro#tick}
-     * method finds the keybind to be released. Attempting to trigger this type
-     * of macro when active does nothing.</p>
+     * initially triggered, and deactivated only when the {@link Macro#tick} method finds the
+     * keybind to be released. Attempting to trigger this type of macro when active does
+     * nothing.</p>
      *
      * <p>{@link ActivationType#VANILLA} requires that macros are activated when
-     * initially triggered, but instead of remaining active until the keybind is
-     * released, they are either immediately deactivated if they have no
-     * ongoing action, or remain active until triggered again otherwise.</p>
+     * initially triggered, but instead of remaining active until the keybind is released, they are
+     * either immediately deactivated if they have no ongoing action, or remain active until
+     * triggered again otherwise.</p>
      */
     private transient boolean active = false;
     private transient int activeTicks = 0;
@@ -377,7 +381,7 @@ public class Macro {
             // Tick ongoing actions
             else {
                 //noinspection SwitchStatementWithTooFewBranches
-                switch(sendMode) {
+                switch (sendMode) {
                     case REPEAT -> {
                         if (spaceTicks == 0 || activeTicks > 0 && activeTicks % spaceTicks == 0) {
                             scheduleAll(false);
@@ -397,7 +401,10 @@ public class Macro {
             singleActionComplete();
         } else {
             // Only check ratelimiter if we've actually got something to do
-            if (keybind != null && useRatelimitStatus && !canTrigger(keybind.getKey(), !ratelimited)) {
+            if (keybind != null && useRatelimitStatus && !canTrigger(
+                    keybind.getKey(),
+                    !ratelimited
+            )) {
                 return true;
             }
             activate(keybind);
@@ -415,13 +422,14 @@ public class Macro {
     }
 
     private void singleActionComplete() {
-        if (activationType != ActivationType.HOLD) deactivate();
+        if (activationType != ActivationType.HOLD)
+            deactivate();
     }
 
     private void activate(@Nullable Keybind keybind) {
         active = true;
         activeTicks = -1; // trigger is processed prior to tick
-        switch(sendMode) {
+        switch (sendMode) {
             case SEND -> {
                 scheduleAll(spaceTicks != 0);
                 singleActionComplete();
@@ -437,17 +445,21 @@ public class Macro {
             case CYCLE -> {
                 if (altKeybind.equals(keybind)) {
                     // Alt keybind cycles backwards
-                    if (--cycleIndex < 0) cycleIndex = messages.size() - 1;
+                    if (--cycleIndex < 0)
+                        cycleIndex = messages.size() - 1;
                 } else {
                     // Main keybind cycles forwards
-                    if (++cycleIndex >= messages.size()) cycleIndex = 0;
+                    if (++cycleIndex >= messages.size())
+                        cycleIndex = 0;
                 }
                 // Split to allow multiple messages per press
                 for (String str : messages.get(cycleIndex).string.split(",,")) {
                     // Blank messages are treated as spacers
                     if (!str.isBlank()) {
-                        schedule(messages.get(cycleIndex).delayTicks, str,
-                                addToHistoryStatus, showHudMessageStatus);
+                        schedule(
+                                messages.get(cycleIndex).delayTicks, str,
+                                addToHistoryStatus, showHudMessageStatus
+                        );
                     }
                 }
                 singleActionComplete();
@@ -457,8 +469,10 @@ public class Macro {
                 if (!messages.isEmpty()) {
                     Message msg = messages.get(RANDOM.nextInt(messages.size()));
                     if (!msg.string.isBlank()) {
-                        schedule(msg.delayTicks, msg.string,
-                                addToHistoryStatus, showHudMessageStatus);
+                        schedule(
+                                msg.delayTicks, msg.string,
+                                addToHistoryStatus, showHudMessageStatus
+                        );
                     }
                 }
                 singleActionComplete();
@@ -475,7 +489,12 @@ public class Macro {
      */
     private void schedule(int delay, String message, boolean addToHistory, boolean showHudMessage) {
         if (delay > 0) {
-            scheduledMessages.add(new ScheduledMessage(delay, message, addToHistory, showHudMessage));
+            scheduledMessages.add(new ScheduledMessage(
+                    delay,
+                    message,
+                    addToHistory,
+                    showHudMessage
+            ));
         } else {
             CommandKeys.send(message, showHudMessage, addToHistory);
         }
@@ -499,13 +518,16 @@ public class Macro {
     }
 
     private static class ScheduledMessage {
+
         private int delay;
         final String message;
         final boolean showHudMessage;
         final boolean addToHistory;
 
-        public ScheduledMessage(int delay, String message,
-                                boolean showHudMessage, boolean addToHistory) {
+        public ScheduledMessage(
+                int delay, String message,
+                boolean showHudMessage, boolean addToHistory
+        ) {
             this.delay = delay;
             this.message = message;
             this.showHudMessage = showHudMessage;
@@ -513,8 +535,8 @@ public class Macro {
         }
 
         /**
-         * @return {@code true} if this {@link ScheduledMessage} has finished
-         * ticking, {@code false} otherwise.
+         * @return {@code true} if this {@link ScheduledMessage} has finished ticking, {@code false}
+         * otherwise.
          */
         private boolean tick() {
             if (--delay <= 0) {
@@ -528,7 +550,8 @@ public class Macro {
     // Validation
 
     Macro validate() {
-        if (spaceTicks < 0) spaceTicks = 0;
+        if (spaceTicks < 0)
+            spaceTicks = 0;
 
         keybind.validate();
         altKeybind.validate();
@@ -558,6 +581,7 @@ public class Macro {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Macro> {
+
         @Override
         public Macro deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
@@ -565,51 +589,81 @@ public class Macro {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
             boolean silent = version != VERSION;
 
-            boolean addToHistory = JsonUtil.getOrDefault(obj, "addToHistory",
-                    addToHistoryDefault, silent);
+            boolean addToHistory = JsonUtil.getOrDefault(
+                    obj, "addToHistory",
+                    addToHistoryDefault, silent
+            );
 
-            boolean showHudMessage = JsonUtil.getOrDefault(obj, "showHudMessage",
-                    showHudMessageDefault, silent);
+            boolean showHudMessage = JsonUtil.getOrDefault(
+                    obj, "showHudMessage",
+                    showHudMessageDefault, silent
+            );
 
-            boolean resumeRepeating = JsonUtil.getOrDefault(obj, "resumeRepeating",
-                    resumeRepeatingDefault, silent);
+            boolean resumeRepeating = JsonUtil.getOrDefault(
+                    obj, "resumeRepeating",
+                    resumeRepeatingDefault, silent
+            );
 
-            boolean useRatelimit = JsonUtil.getOrDefault(obj, "useRatelimit",
-                    useRatelimitDefault, silent);
+            boolean useRatelimit = JsonUtil.getOrDefault(
+                    obj, "useRatelimit",
+                    useRatelimitDefault, silent
+            );
 
             ConflictStrategy conflictStrategy = version >= 3 // Since 2.1.0-beta.2
-                    ? JsonUtil.getOrDefault(obj, "conflictStrategy",
-                    ConflictStrategy.class, conflictStrategyDefault, silent)
-                    : getConflictStrategy(JsonUtil.getOrDefault(obj, "conflictStrategy",
-                    "", true));
+                    ? JsonUtil.getOrDefault(
+                    obj, "conflictStrategy",
+                    ConflictStrategy.class, conflictStrategyDefault, silent
+            )
+                    : getConflictStrategy(JsonUtil.getOrDefault(
+                            obj, "conflictStrategy",
+                            "", true
+                    ));
 
             SendMode sendMode = version >= 3 // Since 2.1.0-beta.2
-                    ? JsonUtil.getOrDefault(obj, "sendMode",
-                    SendMode.class, sendModeDefault, silent)
-                    : getSendMode(JsonUtil.getOrDefault(obj, "sendMode",
-                    "", true));
+                    ? JsonUtil.getOrDefault(
+                    obj, "sendMode",
+                    SendMode.class, sendModeDefault, silent
+            )
+                    : getSendMode(JsonUtil.getOrDefault(
+                            obj, "sendMode",
+                            "", true
+                    ));
 
-            ActivationType activationType = JsonUtil.getOrDefault(obj, "activationType",
-                    ActivationType.class, activationTypeDefault, silent);
+            ActivationType activationType = JsonUtil.getOrDefault(
+                    obj, "activationType",
+                    ActivationType.class, activationTypeDefault, silent
+            );
 
-            int spaceTicks = JsonUtil.getOrDefault(obj, "spaceTicks",
-                    spaceTicksDefault, silent);
+            int spaceTicks = JsonUtil.getOrDefault(
+                    obj, "spaceTicks",
+                    spaceTicksDefault, silent
+            );
 
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
-                    ? JsonUtil.getOrDefault(ctx, obj, "keybind",
-                    Keybind.class, new Keybind(), silent)
+                    ? JsonUtil.getOrDefault(
+                    ctx, obj, "keybind",
+                    Keybind.class, new Keybind(), silent
+            )
                     : new Keybind(
-                    JsonUtil.getOrDefault(obj, "keyName",
-                            InputConstants.UNKNOWN, true),
-                    JsonUtil.getOrDefault(obj, "limitKeyName",
-                            InputConstants.UNKNOWN, true)
-            ).validate();
+                            JsonUtil.getOrDefault(
+                                    obj, "keyName",
+                                    InputConstants.UNKNOWN, true
+                            ),
+                            JsonUtil.getOrDefault(
+                                    obj, "limitKeyName",
+                                    InputConstants.UNKNOWN, true
+                            )
+                    ).validate();
 
-            Keybind altKeybind = JsonUtil.getOrDefault(ctx, obj, "altKeybind",
-                    Keybind.class, new Keybind(), silent);
+            Keybind altKeybind = JsonUtil.getOrDefault(
+                    ctx, obj, "altKeybind",
+                    Keybind.class, new Keybind(), silent
+            );
 
-            List<Message> messages = JsonUtil.getOrDefault(ctx, obj, "messages",
-                    Message.class, messagesDefault.get(), silent);
+            List<Message> messages = JsonUtil.getOrDefault(
+                    ctx, obj, "messages",
+                    Message.class, messagesDefault.get(), silent
+            );
 
             return new Macro(
                     addToHistory,
@@ -631,7 +685,7 @@ public class Macro {
          * Legacy format util.
          */
         public static ConflictStrategy getConflictStrategy(String str) {
-            return switch(str) {
+            return switch (str) {
                 case "ZERO" -> ConflictStrategy.SUBMIT;
                 case "ONE" -> ConflictStrategy.ASSERT;
                 case "TWO" -> ConflictStrategy.VETO;
@@ -644,7 +698,7 @@ public class Macro {
          * Legacy format util.
          */
         public static SendMode getSendMode(String str) {
-            return switch(str) {
+            return switch (str) {
                 case "ZERO" -> SendMode.SEND;
                 case "ONE" -> SendMode.TYPE;
                 case "TWO" -> SendMode.CYCLE;

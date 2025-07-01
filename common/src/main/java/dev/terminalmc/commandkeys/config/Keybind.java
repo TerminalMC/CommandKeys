@@ -26,15 +26,15 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 /**
- * Consists of two {@link InputConstants.Key} instances, allowing both single
- * and dual-key activation independent of Minecraft's keybinds.
+ * Consists of two {@link InputConstants.Key} instances, allowing both single and dual-key
+ * activation independent of Minecraft's keybinds.
  *
  * <p><b>Note:</b> rather than implementing a custom serializer and deserializer
- * for {@link InputConstants.Key}, we simply serialize
- * {@link InputConstants.Key#getName} and deserialize using
- * {@link InputConstants#getKey(String)}.</p>
+ * for {@link InputConstants.Key}, we simply serialize {@link InputConstants.Key#getName} and
+ * deserialize using {@link InputConstants#getKey(String)}.</p>
  */
 public class Keybind {
+
     public static final int VERSION = 0;
     public final int version = VERSION;
 
@@ -52,8 +52,7 @@ public class Keybind {
     }
 
     /**
-     * Not validated. Only for use by default constructor or self-validating
-     * deserializer.
+     * Not validated. Only for use by default constructor or self-validating deserializer.
      */
     Keybind(InputConstants.Key key, InputConstants.Key limitKey) {
         this.key = key;
@@ -99,7 +98,8 @@ public class Keybind {
     }
 
     public static boolean isKeyDown(InputConstants.Key key) {
-        if (key.equals(InputConstants.UNKNOWN)) return false;
+        if (key.equals(InputConstants.UNKNOWN))
+            return false;
         if (key.getType().equals(InputConstants.Type.MOUSE)) {
             return GLFW.glfwGetMouseButton(
                     Minecraft.getInstance().getWindow().getWindow(), key.getValue()) == 1;
@@ -111,8 +111,10 @@ public class Keybind {
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) return true;
-        if (!(other instanceof Keybind keybind)) return false;
+        if (this == other)
+            return true;
+        if (!(other instanceof Keybind keybind))
+            return false;
         return key.equals(keybind.key) && limitKey.equals(keybind.limitKey);
     }
 
@@ -139,6 +141,7 @@ public class Keybind {
     // Deserialization
 
     public static class Deserializer implements JsonDeserializer<Keybind> {
+
         @Override
         public Keybind deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx)
                 throws JsonParseException {
@@ -146,11 +149,15 @@ public class Keybind {
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            InputConstants.Key key = JsonUtil.getOrDefault(obj, "keyName",
-                    InputConstants.UNKNOWN, silent);
+            InputConstants.Key key = JsonUtil.getOrDefault(
+                    obj, "keyName",
+                    InputConstants.UNKNOWN, silent
+            );
 
-            InputConstants.Key limitKey = JsonUtil.getOrDefault(obj, "limitKeyName",
-                    InputConstants.UNKNOWN, silent);
+            InputConstants.Key limitKey = JsonUtil.getOrDefault(
+                    obj, "limitKeyName",
+                    InputConstants.UNKNOWN, silent
+            );
 
             return new Keybind(
                     key,
