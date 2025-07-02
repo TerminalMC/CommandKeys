@@ -142,7 +142,7 @@ public class KeybindUtil {
 
     public static @Nullable KeyMapping getConflict(InputConstants.Key key) {
         for (KeyMapping keyMapping : Minecraft.getInstance().options.keyMappings) {
-            if (((KeyMappingAccessor) keyMapping).getKey().equals(key)) {
+            if (((KeyMappingAccessor) keyMapping).commandkeys$getKey().equals(key)) {
                 return keyMapping;
             }
         }

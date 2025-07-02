@@ -102,7 +102,7 @@ public abstract class MacroBindList extends DragReorderList {
         }
         // Else if we have no other widget selected
         else if (getSelected() == null && CommandKeys.inGame()
-                && !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey())) {
+                && !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).commandkeys$getKey())) {
             // Prepare to use the key to trigger macros on release
             Collection<Keybind> keybinds = profile.keybindMap.get(key);
             Keybind limitedKb = null;

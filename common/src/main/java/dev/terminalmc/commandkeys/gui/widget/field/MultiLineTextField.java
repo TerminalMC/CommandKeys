@@ -161,7 +161,7 @@ public class MultiLineTextField extends MultiLineEditBox {
     @Override
     public void setWidth(int width) {
         super.setWidth(width);
-        ((MultilineTextFieldAccessor) ((MultiLineEditBoxAccessor) this).getTextField()).setWidth(
+        ((MultilineTextFieldAccessor) ((MultiLineEditBoxAccessor) this).commandkeys$getTextField()).commandkeys$setWidth(
                 width);
     }
 
@@ -173,33 +173,34 @@ public class MultiLineTextField extends MultiLineEditBox {
             // Double-click to select all
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
-                MultilineTextField field = ((MultiLineEditBoxAccessor) this).getTextField();
+                MultilineTextField field =
+                        ((MultiLineEditBoxAccessor) this).commandkeys$getTextField();
                 MultilineTextFieldAccessor fieldAcc = (MultilineTextFieldAccessor) field;
                 switch (++chainedClicks) {
                     case 1 -> {
                         // double-click: select word
                         field.seekCursor(
                                 Whence.ABSOLUTE,
-                                ((StringViewAccessor) (Object) field.getNextWord()).getBeginIndex()
+                                ((StringViewAccessor) (Object) field.getNextWord()).commandkeys$getBeginIndex()
                         );
-                        int pos = fieldAcc.getCursor();
+                        int pos = fieldAcc.commandkeys$getCursor();
                         //noinspection DataFlowIssue
                         field.seekCursor(
                                 Whence.ABSOLUTE,
-                                ((StringViewAccessor) (Object) field.getPreviousWord()).getBeginIndex()
+                                ((StringViewAccessor) (Object) field.getPreviousWord()).commandkeys$getBeginIndex()
                         );
-                        fieldAcc.setSelectCursor(pos);
+                        fieldAcc.commandkeys$setSelectCursor(pos);
                     }
                     case 2, 3 -> {
                         // triple-click: select all
                         // duplicated for quadruple to inhibit overshoot
-                        fieldAcc.setCursor(this.getValue().length());
-                        fieldAcc.setSelectCursor(0);
+                        fieldAcc.commandkeys$setCursor(this.getValue().length());
+                        fieldAcc.commandkeys$setSelectCursor(0);
                     }
                     case 4 -> {
                         // quintuple-click: reset chain and deselect all
                         chainedClicks = 0;
-                        fieldAcc.setSelectCursor(fieldAcc.getCursor());
+                        fieldAcc.commandkeys$setSelectCursor(fieldAcc.commandkeys$getCursor());
                     }
                 }
             } else {

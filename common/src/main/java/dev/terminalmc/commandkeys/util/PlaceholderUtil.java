@@ -145,7 +145,7 @@ public class PlaceholderUtil {
             Pattern regex = Pattern.compile(pattern[0]);
 
             int i = 0;
-            for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).getAllMessages()) {
+            for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).commandkeys$getAllMessages()) {
                 if (++i > 50)
                     break;
 
@@ -225,7 +225,7 @@ public class PlaceholderUtil {
         if (pmSenderName != null)
             return pmSenderName;
         int i = 0;
-        for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).getAllMessages()) {
+        for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).commandkeys$getAllMessages()) {
             if (++i > 50)
                 break;
             Component msg = guiMsg.content();
