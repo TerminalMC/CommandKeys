@@ -34,19 +34,18 @@ public class FakeTextField extends TextField {
     }
 
     @Override
-    public boolean clicked(double mouseX, double mouseY) {
+    public boolean isMouseOver(double mouseX, double mouseY) {
         // Skip the 'active' requirement
         return (visible
                 && mouseX >= (double) getX()
                 && mouseY >= (double) getY()
-                && mouseX < (double) (getX() + getWidth())
-                && mouseY < (double) (getY()
-                + getHeight()));
+                && mouseX < (double) getRight()
+                && mouseY < (double) getBottom());
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (clicked(mouseX, mouseY)) {
+        if (isMouseOver(mouseX, mouseY)) {
             onClick(mouseX, mouseY);
             return true;
         }
