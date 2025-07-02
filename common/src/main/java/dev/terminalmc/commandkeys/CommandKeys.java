@@ -53,12 +53,12 @@ public class CommandKeys {
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
-            translationKey("key", "main.edit"), InputConstants.Type.KEYSYM,
-            InputConstants.KEY_K, translationKey("key", "main")
+            translationKey("key", "main.edit"),
+            InputConstants.Type.KEYSYM,
+            InputConstants.KEY_K,
+            translationKey("key", "main")
     );
-    public static final List<KeyMapping> KEYBINDS = List.of(
-            CONFIG_KEY
-    );
+    public static final List<KeyMapping> KEYBINDS = List.of(CONFIG_KEY);
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
@@ -101,10 +101,13 @@ public class CommandKeys {
             hasResetConfig = false;
             mc.getToasts().addToast(new SystemToast(
                     new SystemToast.SystemToastId(15000L),
-                    localized("toast", "reset.title"), localized(
-                    "toast", "reset.message",
-                    Component.literal(Config.UNREADABLE_FILE_NAME).withStyle(ChatFormatting.GOLD)
-            )
+                    localized("toast", "reset.title"),
+                    localized(
+                            "toast",
+                            "reset.message",
+                            Component.literal(Config.UNREADABLE_FILE_NAME)
+                                    .withStyle(ChatFormatting.GOLD)
+                    )
             ));
         }
     }
@@ -132,18 +135,18 @@ public class CommandKeys {
     }
 
     public static boolean canTrigger(InputConstants.Key key, boolean sendMessage) {
-        if ((!inSingleplayer() || Config.get().ratelimitSp)
-                && rateLimiter.size() >= Config.get().getRatelimitCount()) {
+        if ((!inSingleplayer() || Config.get().ratelimitSp) && rateLimiter.size() >= Config.get()
+                .getRatelimitCount()) {
             if (sendMessage && ratelimitedKey != key) {
-                Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(
-                        localized(
-                                "message", "blocked.ratelimit",
-                                key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
-                                Component.literal(String.valueOf(Config.get().getRatelimitCount()))
-                                        .withStyle(ChatFormatting.GRAY),
-                                Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
-                                        .withStyle(ChatFormatting.GRAY)
-                        ).withStyle(ChatFormatting.RED)));
+                Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(localized(
+                        "message",
+                        "blocked.ratelimit",
+                        key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
+                        Component.literal(String.valueOf(Config.get().getRatelimitCount()))
+                                .withStyle(ChatFormatting.GRAY),
+                        Component.literal(String.valueOf(Config.get().getRatelimitTicks()))
+                                .withStyle(ChatFormatting.GRAY)
+                ).withStyle(ChatFormatting.RED)));
                 ratelimitedKey = key;
             }
             if (Config.getAndSave().ratelimitStrict)
@@ -183,7 +186,8 @@ public class CommandKeys {
             } else if (message.length() > Config.get().getLengthLimitLength()) {
                 MutableComponent msg = PREFIX.copy();
                 msg.append(localized(
-                        "message", "blocked.lengthlimit",
+                        "message",
+                        "blocked.lengthlimit",
                         Component.literal(String.valueOf(message.length()))
                                 .withStyle(ChatFormatting.GRAY),
                         Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
@@ -209,7 +213,8 @@ public class CommandKeys {
         } else {
             MutableComponent msg = PREFIX.copy();
             msg.append(localized(
-                    "message", "placeholderFault",
+                    "message",
+                    "placeholderFault",
                     Component.literal(message).withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
             mc.gui.getChat().addMessage(msg);

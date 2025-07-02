@@ -72,26 +72,16 @@ public class Message {
                 JsonElement json,
                 Type typeOfT,
                 JsonDeserializationContext ctx
-        )
-                throws JsonParseException {
+        ) throws JsonParseException {
             JsonObject obj = json.getAsJsonObject();
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            String string = JsonUtil.getOrDefault(
-                    obj, "string",
-                    "", silent
-            );
+            String string = JsonUtil.getOrDefault(obj, "string", "", silent);
 
-            int delayTicks = JsonUtil.getOrDefault(
-                    obj, "delayTicks",
-                    0, silent
-            );
+            int delayTicks = JsonUtil.getOrDefault(obj, "delayTicks", 0, silent);
 
-            return new Message(
-                    string,
-                    delayTicks
-            ).validate();
+            return new Message(string, delayTicks).validate();
         }
     }
 }

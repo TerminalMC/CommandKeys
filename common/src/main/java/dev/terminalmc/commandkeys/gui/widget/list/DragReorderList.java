@@ -48,8 +48,13 @@ public abstract class DragReorderList extends OptionList {
     boolean hasTrailer;
 
     public DragReorderList(
-            Minecraft mc, int width, int height, int y, int entryWidth,
-            int entryHeight, int entrySpacing,
+            Minecraft mc,
+            int width,
+            int height,
+            int y,
+            int entryWidth,
+            int entryHeight,
+            int entrySpacing,
             Map<Class<? extends Entry>, BiFunction<Integer, Integer, Boolean>> clsFunMap
     ) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
@@ -73,7 +78,8 @@ public abstract class DragReorderList extends OptionList {
      */
     @SuppressWarnings("SameParameterValue")
     protected void startDragging(
-            Entry entry, @Nullable Class<? extends Entry> trailerClass,
+            Entry entry,
+            @Nullable Class<? extends Entry> trailerClass,
             boolean hasTrailer
     ) {
         if (validate(entry, trailerClass, hasTrailer)) {
@@ -88,7 +94,8 @@ public abstract class DragReorderList extends OptionList {
      * Determines whether the list structure is valid for the given dragging parameters.
      */
     private boolean validate(
-            Entry entry, @Nullable Class<? extends Entry> trailerClass,
+            Entry entry,
+            @Nullable Class<? extends Entry> trailerClass,
             boolean hasTrailer
     ) {
         Class<? extends Entry> cls = entry.getClass();
@@ -103,8 +110,9 @@ public abstract class DragReorderList extends OptionList {
         // Verify that entry's class is not the same as trailerClass
         if (cls.equals(trailerClass)) {
             CommandKeys.LOG.error(
-                    "Cannot drag entry of type '{}' at index {}. " +
-                            "Identical trailer class.", cls, index
+                    "Cannot drag entry of type '{}' at index {}. " + "Identical trailer class.",
+                    cls,
+                    index
             );
             return false;
         }
@@ -113,7 +121,11 @@ public abstract class DragReorderList extends OptionList {
         if (!clsFunMap.containsKey(entry.getClass())) {
             CommandKeys.LOG.error(
                     "Cannot drag entry of type '{}' at index {}. Allowed types: {}",
-                    cls, index, clsFunMap.keySet().stream().map((Class::getName))
+                    cls,
+                    index,
+                    clsFunMap.keySet()
+                            .stream()
+                            .map((Class::getName))
                             .collect(Collectors.joining(", "))
             );
             return false;
@@ -126,16 +138,17 @@ public abstract class DragReorderList extends OptionList {
                 Class<? extends Entry> trailerCls = children().get(index + 1).getClass();
                 if (!trailerCls.equals(Entry.Space.class) && !trailerCls.equals(trailerClass)) {
                     CommandKeys.LOG.error(
-                            "Cannot drag entry of type '{}' at index {}. " +
-                                    "hasTrailer is true but trailer is class '{}'. " +
-                                    "Allowed trailer types: '{}', '{}'.",
-                            Entry.Space.class, trailerClass
+                            "Cannot drag entry of type '{}' at index {}. "
+                                    + "hasTrailer is true but trailer is class '{}'. "
+                                    + "Allowed trailer types: '{}', '{}'.",
+                            Entry.Space.class,
+                            trailerClass
                     );
                     return false;
                 }
             } else {
-                CommandKeys.LOG.error("Cannot drag entry of type '{}' at index {}. " +
-                        "hasTrailer is true but entry is the last list element.");
+                CommandKeys.LOG.error("Cannot drag entry of type '{}' at index {}. "
+                        + "hasTrailer is true but entry is the last list element.");
                 return false;
             }
         }
@@ -151,12 +164,18 @@ public abstract class DragReorderList extends OptionList {
                 }
             } else {
                 CommandKeys.LOG.error(
-                        "Cannot drag entry of type '{}' at index {}. " +
-                                "Encountered unexpected type '{}' at index {} breaking " +
-                                "contiguous sub-list from {} to {}. Allowed trailer types: " +
-                                "'{}', '{}'.",
-                        cls, children().indexOf(entry), children().get(i).getClass(), i,
-                        start, end, Entry.Space.class, trailerClass
+                        "Cannot drag entry of type '{}' at index {}. "
+                                + "Encountered unexpected type '{}' at index {} breaking "
+                                + "contiguous sub-list from {} to {}. Allowed trailer types: "
+                                + "'{}', '{}'.",
+                        cls,
+                        children().indexOf(entry),
+                        children().get(i).getClass(),
+                        i,
+                        start,
+                        end,
+                        Entry.Space.class,
+                        trailerClass
                 );
                 return false;
             }
@@ -174,13 +193,27 @@ public abstract class DragReorderList extends OptionList {
         super.renderWidget(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
             super.renderItem(
-                    graphics, mouseX, mouseY, delta, dragSourceSlot,
-                    mouseX, mouseY, entryWidth, entryHeight
+                    graphics,
+                    mouseX,
+                    mouseY,
+                    delta,
+                    dragSourceSlot,
+                    mouseX,
+                    mouseY,
+                    entryWidth,
+                    entryHeight
             );
             if (hasTrailer) {
                 super.renderItem(
-                        graphics, mouseX, mouseY, delta, dragSourceSlot + 1,
-                        mouseX, mouseY + itemHeight, entryWidth, entryHeight
+                        graphics,
+                        mouseX,
+                        mouseY,
+                        delta,
+                        dragSourceSlot + 1,
+                        mouseX,
+                        mouseY + itemHeight,
+                        entryWidth,
+                        entryHeight
                 );
             }
         }
@@ -203,8 +236,8 @@ public abstract class DragReorderList extends OptionList {
             if (children().get(i).getClass().equals(cls))
                 return i;
         }
-        throw new IllegalArgumentException("getListStart could not find any element of type "
-                + cls.getName());
+        throw new IllegalArgumentException(
+                "getListStart could not find any element of type " + cls.getName());
     }
 
     /**
@@ -215,8 +248,8 @@ public abstract class DragReorderList extends OptionList {
             if (children().get(i).getClass().equals(cls))
                 return i;
         }
-        throw new IllegalArgumentException("getListEnd could not find any element of type "
-                + cls.getName());
+        throw new IllegalArgumentException(
+                "getListEnd could not find any element of type " + cls.getName());
     }
 
     /**
@@ -235,7 +268,10 @@ public abstract class DragReorderList extends OptionList {
                 return offset;
         }
         throw new IllegalArgumentException(String.format(
-                "Index out of range for class '%s' and index %s", dragClass, index));
+                "Index out of range for class '%s' and index %s",
+                dragClass,
+                index
+        ));
     }
 
     /**
@@ -278,20 +314,23 @@ public abstract class DragReorderList extends OptionList {
             } else {
                 // Within the sub-list, but it's still possible that there are
                 // invalid elements here so we need to check
-                if (hoveredEntry.getClass().equals(Entry.Space.class)
-                        || hoveredEntry.getClass().equals(trailerClass)) {
+                if (hoveredEntry.getClass().equals(Entry.Space.class) || hoveredEntry.getClass()
+                        .equals(trailerClass)) {
                     // Targeting a trailer, check that the main entry is valid
                     // and switch to it
                     if (!children().get(--hoveredSlot).getClass().equals(dragClass)) {
                         throw new IllegalStateException(String.format(
                                 "Invalid list structure: trailer parent class '%s', expected '%s'",
-                                children().get(hoveredSlot).getClass(), dragClass
+                                children().get(hoveredSlot).getClass(),
+                                dragClass
                         ));
                     }
                 } else if (!hoveredEntry.getClass().equals(dragClass)) {
                     throw new IllegalStateException(String.format(
                             "Invalid list structure: found class %s, expected %s or %s",
-                            hoveredEntry.getClass(), dragClass, trailerClass
+                            hoveredEntry.getClass(),
+                            dragClass,
+                            trailerClass
                     ));
                 }
             }

@@ -41,16 +41,25 @@ public class MainOptionScreen extends OptionScreen {
                 inGame
                         ? localized("option", "profile", CommandKeys.profile().getDisplayName())
                         : localized("option", "main"),
-                inGame
-                        ? new ProfileOptionList(
-                        Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                        BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING,
+                inGame ? new ProfileOptionList(
+                        Minecraft.getInstance(),
+                        0,
+                        0,
+                        HEADER_MARGIN,
+                        BASE_LIST_ENTRY_WIDTH,
+                        LIST_ENTRY_HEIGHT,
+                        LIST_ENTRY_SPACING,
                         CommandKeys.profile()
+                ) : new MainOptionList(
+                        Minecraft.getInstance(),
+                        0,
+                        0,
+                        HEADER_MARGIN,
+                        BASE_LIST_ENTRY_WIDTH,
+                        LIST_ENTRY_HEIGHT,
+                        LIST_ENTRY_SPACING,
+                        null
                 )
-                        : new MainOptionList(
-                                Minecraft.getInstance(), 0, 0, HEADER_MARGIN,
-                                BASE_LIST_ENTRY_WIDTH, LIST_ENTRY_HEIGHT, LIST_ENTRY_SPACING, null
-                        )
         );
     }
 
@@ -67,29 +76,23 @@ public class MainOptionScreen extends OptionScreen {
         );
 
         addRenderableWidget(Button.builder(
-                        CommonComponents.GUI_CANCEL,
-                        (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
-                                (confirm) -> {
-                                    if (confirm) {
-                                        Config.reload();
-                                        Minecraft.getInstance().setScreen(this);
-                                        onClose();
-                                    } else {
-                                        Minecraft.getInstance().setScreen(this);
-                                    }
-                                },
-                                localized("option", "main.exitWithoutSaving"),
-                                localized("option", "main.exitWithoutSaving.confirm")
-                        ))
-                )
-                .pos(x1, y)
-                .size(w, h)
-                .build());
+                CommonComponents.GUI_CANCEL,
+                (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
+                        (confirm) -> {
+                            if (confirm) {
+                                Config.reload();
+                                Minecraft.getInstance().setScreen(this);
+                                onClose();
+                            } else {
+                                Minecraft.getInstance().setScreen(this);
+                            }
+                        },
+                        localized("option", "main.exitWithoutSaving"),
+                        localized("option", "main.exitWithoutSaving.confirm")
+                ))
+        ).pos(x1, y).size(w, h).build());
 
-        addRenderableWidget(Button.builder(
-                        CommonComponents.GUI_DONE,
-                        (button) -> onClose()
-                )
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> onClose())
                 .pos(x2, y)
                 .size(w, h)
                 .build());

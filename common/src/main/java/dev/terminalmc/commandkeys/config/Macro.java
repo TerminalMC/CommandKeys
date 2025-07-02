@@ -238,7 +238,8 @@ public class Macro {
         this.cycleIndex = macro.cycleIndex;
         this.keybind = new Keybind(macro.keybind);
         this.altKeybind = new Keybind(macro.altKeybind);
-        this.messages = macro.messages.stream().map(Message::new)
+        this.messages = macro.messages.stream()
+                .map(Message::new)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -457,8 +458,10 @@ public class Macro {
                     // Blank messages are treated as spacers
                     if (!str.isBlank()) {
                         schedule(
-                                messages.get(cycleIndex).delayTicks, str,
-                                addToHistoryStatus, showHudMessageStatus
+                                messages.get(cycleIndex).delayTicks,
+                                str,
+                                addToHistoryStatus,
+                                showHudMessageStatus
                         );
                     }
                 }
@@ -470,8 +473,10 @@ public class Macro {
                     Message msg = messages.get(RANDOM.nextInt(messages.size()));
                     if (!msg.string.isBlank()) {
                         schedule(
-                                msg.delayTicks, msg.string,
-                                addToHistoryStatus, showHudMessageStatus
+                                msg.delayTicks,
+                                msg.string,
+                                addToHistoryStatus,
+                                showHudMessageStatus
                         );
                     }
                 }
@@ -525,8 +530,10 @@ public class Macro {
         final boolean addToHistory;
 
         public ScheduledMessage(
-                int delay, String message,
-                boolean showHudMessage, boolean addToHistory
+                int delay,
+                String message,
+                boolean showHudMessage,
+                boolean addToHistory
         ) {
             this.delay = delay;
             this.message = message;
@@ -572,9 +579,8 @@ public class Macro {
             }
             // Only allow blank messages for CYCLE mode (as spacers) and TYPE
             // mode (to open chat)
-            return (msg.string.isBlank()
-                    && !sendMode.equals(SendMode.CYCLE)
-                    && !sendMode.equals(SendMode.TYPE));
+            return (msg.string.isBlank() && !sendMode.equals(SendMode.CYCLE) && !sendMode.equals(
+                    SendMode.TYPE));
         });
     }
 
@@ -589,80 +595,77 @@ public class Macro {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
             boolean silent = version != VERSION;
 
-            boolean addToHistory = JsonUtil.getOrDefault(
-                    obj, "addToHistory",
-                    addToHistoryDefault, silent
-            );
+            boolean addToHistory =
+                    JsonUtil.getOrDefault(obj, "addToHistory", addToHistoryDefault, silent);
 
-            boolean showHudMessage = JsonUtil.getOrDefault(
-                    obj, "showHudMessage",
-                    showHudMessageDefault, silent
-            );
+            boolean showHudMessage =
+                    JsonUtil.getOrDefault(obj, "showHudMessage", showHudMessageDefault, silent);
 
-            boolean resumeRepeating = JsonUtil.getOrDefault(
-                    obj, "resumeRepeating",
-                    resumeRepeatingDefault, silent
-            );
+            boolean resumeRepeating =
+                    JsonUtil.getOrDefault(obj, "resumeRepeating", resumeRepeatingDefault, silent);
 
-            boolean useRatelimit = JsonUtil.getOrDefault(
-                    obj, "useRatelimit",
-                    useRatelimitDefault, silent
-            );
+            boolean useRatelimit =
+                    JsonUtil.getOrDefault(obj, "useRatelimit", useRatelimitDefault, silent);
 
             ConflictStrategy conflictStrategy = version >= 3 // Since 2.1.0-beta.2
                     ? JsonUtil.getOrDefault(
-                    obj, "conflictStrategy",
-                    ConflictStrategy.class, conflictStrategyDefault, silent
-            )
-                    : getConflictStrategy(JsonUtil.getOrDefault(
-                            obj, "conflictStrategy",
-                            "", true
-                    ));
+                    obj,
+                    "conflictStrategy",
+                    ConflictStrategy.class,
+                    conflictStrategyDefault,
+                    silent
+            ) : getConflictStrategy(JsonUtil.getOrDefault(obj, "conflictStrategy", "", true));
 
-            SendMode sendMode = version >= 3 // Since 2.1.0-beta.2
+            SendMode sendMode = version >= 3
+                    // Since 2.1.0-beta.2
                     ? JsonUtil.getOrDefault(
-                    obj, "sendMode",
-                    SendMode.class, sendModeDefault, silent
+                    obj,
+                    "sendMode",
+                    SendMode.class,
+                    sendModeDefault,
+                    silent
             )
-                    : getSendMode(JsonUtil.getOrDefault(
-                            obj, "sendMode",
-                            "", true
-                    ));
+                    : getSendMode(JsonUtil.getOrDefault(obj, "sendMode", "", true));
 
             ActivationType activationType = JsonUtil.getOrDefault(
-                    obj, "activationType",
-                    ActivationType.class, activationTypeDefault, silent
+                    obj,
+                    "activationType",
+                    ActivationType.class,
+                    activationTypeDefault,
+                    silent
             );
 
-            int spaceTicks = JsonUtil.getOrDefault(
-                    obj, "spaceTicks",
-                    spaceTicksDefault, silent
-            );
+            int spaceTicks = JsonUtil.getOrDefault(obj, "spaceTicks", spaceTicksDefault, silent);
 
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(
-                    ctx, obj, "keybind",
-                    Keybind.class, new Keybind(), silent
-            )
-                    : new Keybind(
-                            JsonUtil.getOrDefault(
-                                    obj, "keyName",
-                                    InputConstants.UNKNOWN, true
-                            ),
-                            JsonUtil.getOrDefault(
-                                    obj, "limitKeyName",
-                                    InputConstants.UNKNOWN, true
-                            )
-                    ).validate();
+                    ctx,
+                    obj,
+                    "keybind",
+                    Keybind.class,
+                    new Keybind(),
+                    silent
+            ) : new Keybind(
+                    JsonUtil.getOrDefault(obj, "keyName", InputConstants.UNKNOWN, true),
+                    JsonUtil.getOrDefault(obj, "limitKeyName", InputConstants.UNKNOWN, true)
+            ).validate();
 
             Keybind altKeybind = JsonUtil.getOrDefault(
-                    ctx, obj, "altKeybind",
-                    Keybind.class, new Keybind(), silent
+                    ctx,
+                    obj,
+                    "altKeybind",
+                    Keybind.class,
+                    new Keybind(),
+                    silent
             );
 
             List<Message> messages = JsonUtil.getOrDefault(
-                    ctx, obj, "messages",
-                    Message.class, messagesDefault.get(), silent
+                    ctx,
+                    obj,
+                    "messages",
+                    Message.class,
+                    messagesDefault.get(),
+                    silent
             );
 
             return new Macro(

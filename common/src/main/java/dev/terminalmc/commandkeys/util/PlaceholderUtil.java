@@ -145,8 +145,7 @@ public class PlaceholderUtil {
             Pattern regex = Pattern.compile(pattern[0]);
 
             int i = 0;
-            for (GuiMessage guiMsg : ((ChatComponentAccessor)
-                    Minecraft.getInstance().gui.getChat()).getAllMessages()) {
+            for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).getAllMessages()) {
                 if (++i > 50)
                     break;
 
@@ -226,13 +225,12 @@ public class PlaceholderUtil {
         if (pmSenderName != null)
             return pmSenderName;
         int i = 0;
-        for (GuiMessage guiMsg : ((ChatComponentAccessor)
-                Minecraft.getInstance().gui.getChat()).getAllMessages()) {
+        for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).getAllMessages()) {
             if (++i > 50)
                 break;
             Component msg = guiMsg.content();
-            if (msg.getContents() instanceof TranslatableContents tc
-                    && tc.getKey().contains("commands.message.display.incoming")) {
+            if (msg.getContents() instanceof TranslatableContents tc && tc.getKey()
+                    .contains("commands.message.display.incoming")) {
                 pmSenderName = ((MutableComponent) tc.getArgs()[0]).getString();
                 break;
             }
@@ -282,11 +280,12 @@ public class PlaceholderUtil {
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = playerBlockPos.getBottomCenter();
         if (offset != 0)
-            playerPos = offsetCardinalDirection(
-                    playerPos, lookAngle, args[0], offset);
+            playerPos = offsetCardinalDirection(playerPos, lookAngle, args[0], offset);
         return String.format(
-                "%d %d %d", Mth.floor(playerPos.x),
-                Mth.floor(playerPos.y), Mth.floor(playerPos.z)
+                "%d %d %d",
+                Mth.floor(playerPos.x),
+                Mth.floor(playerPos.y),
+                Mth.floor(playerPos.z)
         );
     }
 
@@ -314,11 +313,12 @@ public class PlaceholderUtil {
         int offset = Integer.parseInt(args[1]);
         Vec3 playerPos = lookBlockPos.getBottomCenter();
         if (offset != 0)
-            playerPos = offsetCardinalDirection(
-                    playerPos, lookAngle, args[0], offset);
+            playerPos = offsetCardinalDirection(playerPos, lookAngle, args[0], offset);
         return String.format(
-                "%d %d %d", Mth.floor(playerPos.x),
-                Mth.floor(playerPos.y), Mth.floor(playerPos.z)
+                "%d %d %d",
+                Mth.floor(playerPos.x),
+                Mth.floor(playerPos.y),
+                Mth.floor(playerPos.z)
         );
     }
 
@@ -343,7 +343,11 @@ public class PlaceholderUtil {
     // Util
 
     private static Vec3 offsetCardinalDirection(
-            Vec3 pos, Vec3 facingAngle, String offsetDir, int offset) {
+            Vec3 pos,
+            Vec3 facingAngle,
+            String offsetDir,
+            int offset
+    ) {
         if (Math.abs(facingAngle.x) >= Math.abs(facingAngle.z)) {
             if (facingAngle.x >= 0) { // East
                 return switch (offsetDir) {

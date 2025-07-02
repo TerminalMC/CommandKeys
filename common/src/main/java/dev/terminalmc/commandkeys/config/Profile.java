@@ -46,10 +46,9 @@ public class Profile {
 
     public static final Map<String, Profile> LINK_PROFILE_MAP = new HashMap<>();
 
-    public transient final Multimap<InputConstants.Key, Keybind> keybindMap
-            = LinkedHashMultimap.create();
-    public transient final Multimap<Keybind, Macro> macroMap
-            = LinkedHashMultimap.create();
+    public transient final Multimap<InputConstants.Key, Keybind> keybindMap =
+            LinkedHashMultimap.create();
+    public transient final Multimap<Keybind, Macro> macroMap = LinkedHashMultimap.create();
 
     // Profile details
     public String name;
@@ -134,7 +133,8 @@ public class Profile {
         this.showHudMessage = profile.showHudMessage;
         this.resumeRepeating = profile.resumeRepeating;
         this.useRatelimit = profile.useRatelimit;
-        this.macros = profile.macros.stream().map(Macro::new)
+        this.macros = profile.macros.stream()
+                .map(Macro::new)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -405,49 +405,62 @@ public class Profile {
             int version = obj.has("version") ? obj.get("version").getAsInt() : 0;
             boolean silent = version != VERSION;
 
-            String name = JsonUtil.getOrDefault(
-                    obj, "name",
-                    nameDefault, silent
-            );
+            String name = JsonUtil.getOrDefault(obj, "name", nameDefault, silent);
 
-            List<String> links = version >= 3 // Since 2.3.0-beta.2
-                    ? JsonUtil.getOrDefault(
-                    obj, "links",
-                    linksDefault.get(), silent
-            )
-                    : JsonUtil.getOrDefault(
-                            obj, "addresses",
-                            linksDefault.get(), true
-                    );
+            List<String> links = version >= 3
+                    // Since 2.3.0-beta.2
+                    ? JsonUtil.getOrDefault(obj, "links", linksDefault.get(), silent)
+                    : JsonUtil.getOrDefault(obj, "addresses", linksDefault.get(), true);
 
             Control addToHistory = JsonUtil.getOrDefault(
-                    obj, "addToHistory",
-                    Control.class, addToHistoryDefault, silent
+                    obj,
+                    "addToHistory",
+                    Control.class,
+                    addToHistoryDefault,
+                    silent
             );
 
             Control showHudMessage = JsonUtil.getOrDefault(
-                    obj, "showHudMessage",
-                    Control.class, showHudMessageDefault, silent
+                    obj,
+                    "showHudMessage",
+                    Control.class,
+                    showHudMessageDefault,
+                    silent
             );
 
             Control resumeRepeating = JsonUtil.getOrDefault(
-                    obj, "resumeRepeating",
-                    Control.class, resumeRepeatingDefault, silent
+                    obj,
+                    "resumeRepeating",
+                    Control.class,
+                    resumeRepeatingDefault,
+                    silent
             );
 
             Control useRatelimit = JsonUtil.getOrDefault(
-                    obj, "useRatelimit",
-                    Control.class, useRatelimitDefault, silent
+                    obj,
+                    "useRatelimit",
+                    Control.class,
+                    useRatelimitDefault,
+                    silent
             );
 
-            List<Macro> macros = version >= 2 // Since 2.1.0-beta.2
+            List<Macro> macros = version >= 2
+                    // Since 2.1.0-beta.2
                     ? JsonUtil.getOrDefault(
-                    ctx, obj, "macros",
-                    Macro.class, macrosDefault.get(), silent
+                    ctx,
+                    obj,
+                    "macros",
+                    Macro.class,
+                    macrosDefault.get(),
+                    silent
             )
                     : JsonUtil.getOrDefault(
-                            ctx, obj, "commandKeys",
-                            Macro.class, macrosDefault.get(), true
+                            ctx,
+                            obj,
+                            "commandKeys",
+                            Macro.class,
+                            macrosDefault.get(),
+                            true
                     );
 
             return new Profile(

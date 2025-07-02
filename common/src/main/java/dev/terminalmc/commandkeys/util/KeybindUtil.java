@@ -88,7 +88,8 @@ public class KeybindUtil {
                     // Found a limited keybind with its limit key down, get all
                     // macros that use this keybind and break if there are any
                     triggerKb = kb;
-                    macros = profile().macroMap.get(triggerKb).stream()
+                    macros = profile().macroMap.get(triggerKb)
+                            .stream()
                             .filter((macro) -> !macro.getStrategy().equals(AVOID))
                             .toList();
                     if (!macros.isEmpty())
@@ -105,7 +106,8 @@ public class KeybindUtil {
                 if (triggerKb == null)
                     return cancel;
                 // Otherwise we get all macros matching the backup
-                macros = profile().macroMap.get(triggerKb).stream()
+                macros = profile().macroMap.get(triggerKb)
+                        .stream()
                         .filter((macro) -> !macro.getStrategy().equals(AVOID))
                         .toList();
                 // If we don't have any matching macros, we exit
@@ -161,8 +163,13 @@ public class KeybindUtil {
             this.profile = profile;
             this.macro = macro;
             this.label = keybind.getLimitKey().equals(InputConstants.UNKNOWN)
-                    ? keybind.getKey().getDisplayName().copy()
-                    : keybind.getLimitKey().getDisplayName().copy().append(" + ")
+                    ? keybind.getKey()
+                    .getDisplayName()
+                    .copy()
+                    : keybind.getLimitKey()
+                            .getDisplayName()
+                            .copy()
+                            .append(" + ")
                             .append(keybind.getKey().getDisplayName());
             checkConflict(keybind.getLimitKey(), null);
             checkConflict(keybind.getKey(), keybind);
@@ -182,19 +189,19 @@ public class KeybindUtil {
                 if (internalConflict || mcConflict)
                     tooltip.append("\n");
                 tooltip.append(localized(
-                                "option", "macro.bind.tooltip.conflict.internal",
-                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
-                        ))
-                        .withStyle(ChatFormatting.WHITE);
+                        "option",
+                        "macro.bind.tooltip.conflict.internal",
+                        key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
+                )).withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
             } else if (keybind != null && profile.macroMap.get(keybind).size() > 1) {
                 if (internalConflict || mcConflict)
                     tooltip.append("\n");
                 tooltip.append(localized(
-                                "option", "macro.bind.tooltip.conflict.internal",
-                                key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
-                        ))
-                        .withStyle(ChatFormatting.WHITE);
+                        "option",
+                        "macro.bind.tooltip.conflict.internal",
+                        key.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
+                )).withStyle(ChatFormatting.WHITE);
                 internalConflict = true;
             }
             if (!macro.getStrategy().equals(AVOID)) {
@@ -204,12 +211,12 @@ public class KeybindUtil {
                     if (internalConflict || mcConflict)
                         tooltip.append("\n");
                     tooltip.append(localized(
-                                    "option", "macro.bind.tooltip.conflict.external",
-                                    key.getDisplayName().copy().withStyle(ChatFormatting.RED),
-                                    Component.translatable(keyMapping.getName())
-                                            .withStyle(ChatFormatting.GRAY)
-                            ))
-                            .withStyle(ChatFormatting.WHITE);
+                            "option",
+                            "macro.bind.tooltip.conflict.external",
+                            key.getDisplayName().copy().withStyle(ChatFormatting.RED),
+                            Component.translatable(keyMapping.getName())
+                                    .withStyle(ChatFormatting.GRAY)
+                    )).withStyle(ChatFormatting.WHITE);
                     mcConflict = true;
                 }
             }
@@ -220,17 +227,20 @@ public class KeybindUtil {
                 // Apply red brackets and add conflict strategy to the tooltip
                 conflictLabel = Component.literal("[ ")
                         .append(label.withStyle(ChatFormatting.WHITE))
-                        .append(" ]").withStyle(ChatFormatting.RED);
+                        .append(" ]")
+                        .withStyle(ChatFormatting.RED);
                 tooltip.append("\n");
                 tooltip.append(localized(
-                        "option", "macro.bind.tooltip.conflictStrategy",
+                        "option",
+                        "macro.bind.tooltip.conflictStrategy",
                         macro.getStrategy().tooltip()
                 ));
             } else if (internalConflict) {
                 // Apply orange brackets
                 conflictLabel = Component.literal("[ ")
                         .append(label.withStyle(ChatFormatting.WHITE))
-                        .append(" ]").withStyle(ChatFormatting.GOLD);
+                        .append(" ]")
+                        .withStyle(ChatFormatting.GOLD);
             } else {
                 // No conflict, so we use the plain label
                 conflictLabel = label;

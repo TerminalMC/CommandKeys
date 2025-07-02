@@ -40,7 +40,8 @@ public class FakeTextField extends TextField {
                 && mouseX >= (double) getX()
                 && mouseY >= (double) getY()
                 && mouseX < (double) (getX() + getWidth())
-                && mouseY < (double) (getY() + getHeight()));
+                && mouseY < (double) (getY()
+                + getHeight()));
     }
 
     @Override

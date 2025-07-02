@@ -71,8 +71,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     protected int tinyWidgetWidth;
 
     public OptionList(
-            Minecraft mc, int width, int height, int y, int entryWidth,
-            int entryHeight, int entrySpacing
+            Minecraft mc,
+            int width,
+            int height,
+            int y,
+            int entryWidth,
+            int entryHeight,
+            int entrySpacing
     ) {
         super(mc, width, height, y, entryHeight + entrySpacing);
         this.mc = mc;
@@ -95,9 +100,9 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         this.entryX = width / 2 - (entryWidth / 2);
         this.dynWideEntryX = width / 2 - (dynWideEntryWidth / 2);
         this.dynEntryX = width / 2 - (dynEntryWidth / 2);
-        this.rowWidth = Math.max(entryWidth, dynWideEntryWidth)
-                + (OptionScreen.SCROLL_BAR_MARGIN * 2)
-                + (OptionScreen.HANGING_WIDGET_MARGIN * 2);
+        this.rowWidth =
+                Math.max(entryWidth, dynWideEntryWidth) + (OptionScreen.SCROLL_BAR_MARGIN * 2) + (
+                        OptionScreen.HANGING_WIDGET_MARGIN * 2);
         this.smallWidgetWidth = Math.max(16, entryHeight);
         this.tinyWidgetWidth = 16;
     }
@@ -246,9 +251,16 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
         @Override
         public void render(
-                @NotNull GuiGraphics graphics, int index, int y, int x,
-                int entryWidth, int entryHeight, int mouseX, int mouseY,
-                boolean hovered, float tickDelta
+                @NotNull GuiGraphics graphics,
+                int index,
+                int y,
+                int x,
+                int entryWidth,
+                int entryHeight,
+                int mouseX,
+                int mouseY,
+                boolean hovered,
+                float tickDelta
         ) {
             elements.forEach((button) -> {
                 button.setY(y);
@@ -261,8 +273,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         public static class Text extends Entry {
 
             public Text(
-                    int x, int width, int height, Component message,
-                    @Nullable Tooltip tooltip, int tooltipDelay
+                    int x,
+                    int width,
+                    int height,
+                    Component message,
+                    @Nullable Tooltip tooltip,
+                    int tooltipDelay
             ) {
                 super();
 
@@ -277,8 +293,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                             Minecraft.getInstance().font
                     );
                 } else {
-                    widget = new MultiLineTextWidget(x, 0, message, Minecraft.getInstance().font)
-                            .setMaxWidth(width)
+                    widget = new MultiLineTextWidget(
+                            x,
+                            0,
+                            message,
+                            Minecraft.getInstance().font
+                    ).setMaxWidth(width)
                             .setCentered(true);
                 }
                 if (tooltip != null)
@@ -295,16 +315,17 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             private final Button button;
 
             public ActionButton(
-                    int x, int width, int height, Component message,
-                    @Nullable Tooltip tooltip, int tooltipDelay,
+                    int x,
+                    int width,
+                    int height,
+                    Component message,
+                    @Nullable Tooltip tooltip,
+                    int tooltipDelay,
                     Button.OnPress onPress
             ) {
                 super();
 
-                button = Button.builder(message, onPress)
-                        .pos(x, 0)
-                        .size(width, height)
-                        .build();
+                button = Button.builder(message, onPress).pos(x, 0).size(width, height).build();
                 if (tooltip != null)
                     button.setTooltip(tooltip);
                 if (tooltipDelay >= 0)
@@ -351,8 +372,11 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
 
             @Override
             public boolean mouseDragged(
-                    double mouseX, double mouseY, int button,
-                    double deltaX, double deltaY
+                    double mouseX,
+                    double mouseY,
+                    int button,
+                    double deltaX,
+                    double deltaY
             ) {
                 return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
             }
@@ -369,8 +393,9 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 if (entry.children().isEmpty()) {
                     return null;
                 } else {
-                    ComponentPath $$2 = entry.children().get(
-                            Math.min(i, entry.children().size() - 1)).nextFocusPath(event);
+                    ComponentPath $$2 = entry.children()
+                            .get(Math.min(i, entry.children().size() - 1))
+                            .nextFocusPath(event);
                     return ComponentPath.path(entry, $$2);
                 }
             }

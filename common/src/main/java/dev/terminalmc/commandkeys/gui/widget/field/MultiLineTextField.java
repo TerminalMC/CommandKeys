@@ -66,21 +66,38 @@ public class MultiLineTextField extends MultiLineEditBox {
 
     public MultiLineTextField(int x, int y, int width, int height) {
         this(
-                Minecraft.getInstance().font, x, y, width, height, Component.empty(),
-                Component.empty(), null
+                Minecraft.getInstance().font,
+                x,
+                y,
+                width,
+                height,
+                Component.empty(),
+                Component.empty(),
+                null
         );
     }
 
     public MultiLineTextField(int x, int y, int width, int height, Component placeholder) {
         this(
-                Minecraft.getInstance().font, x, y, width, height, placeholder,
-                Component.empty(), null
+                Minecraft.getInstance().font,
+                x,
+                y,
+                width,
+                height,
+                placeholder,
+                Component.empty(),
+                null
         );
     }
 
     public MultiLineTextField(
-            Font font, int x, int y, int width, int height,
-            Component placeholder, Component message,
+            Font font,
+            int x,
+            int y,
+            int width,
+            int height,
+            Component placeholder,
+            Component message,
             @Nullable TextField.Validator validator
     ) {
         super(font, x, y, width, height, placeholder, message);
@@ -144,8 +161,8 @@ public class MultiLineTextField extends MultiLineEditBox {
     @Override
     public void setWidth(int width) {
         super.setWidth(width);
-        ((MultilineTextFieldAccessor) ((MultiLineEditBoxAccessor) this)
-                .getTextField()).setWidth(width);
+        ((MultilineTextFieldAccessor) ((MultiLineEditBoxAccessor) this).getTextField()).setWidth(
+                width);
     }
 
     // Chained clicks

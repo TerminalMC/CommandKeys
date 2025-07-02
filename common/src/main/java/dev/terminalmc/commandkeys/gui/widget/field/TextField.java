@@ -80,7 +80,12 @@ public class TextField extends EditBox {
     }
 
     public TextField(
-            Font font, int x, int y, int width, int height, Component msg,
+            Font font,
+            int x,
+            int y,
+            int width,
+            int height,
+            Component msg,
             @Nullable Validator validator
     ) {
         super(font, x, y, width, height, msg);
@@ -174,9 +179,8 @@ public class TextField extends EditBox {
                         // go backwards to the start of the word.
                         if (pos < 0) {
                             start = 0;
-                        } else if (pos >= getValue().length()
-                                || getValue().charAt(pos) == ' '
-                                || (pos > 0 && getValue().charAt(pos - 1) != ' ')) {
+                        } else if (pos >= getValue().length() || getValue().charAt(pos) == ' ' || (
+                                pos > 0 && getValue().charAt(pos - 1) != ' ')) {
                             start = getWordPosition(-1);
                         }
                         int end = getWordPosition(1);
@@ -223,17 +227,15 @@ public class TextField extends EditBox {
 
         if (mouseX < dragOriginX) { // Dragging left
             String subLeft = str.substring(0, dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(
-                    subLeft,
-                    Mth.floor(dragOriginX - mouseX), true
-            ).length();
+            int offsetChars =
+                    font.plainSubstrByWidth(subLeft, Mth.floor(dragOriginX - mouseX), true)
+                            .length();
             moveCursorTo(dragOriginPos - offsetChars, true);
         } else { // Dragging right
             String subRight = str.substring(dragOriginPos);
-            int offsetChars = font.plainSubstrByWidth(
-                    subRight,
-                    Mth.floor(mouseX - dragOriginX), false
-            ).length();
+            int offsetChars =
+                    font.plainSubstrByWidth(subRight, Mth.floor(mouseX - dragOriginX), false)
+                            .length();
             moveCursorTo(dragOriginPos + offsetChars, true);
         }
 
@@ -300,8 +302,8 @@ public class TextField extends EditBox {
                         throw new NumberFormatException();
                     return Optional.empty();
                 } catch (NumberFormatException ignored) {
-                    return Optional.of(localized("ui", "field.error.pos_int")
-                            .withStyle(ChatFormatting.RED));
+                    return Optional.of(localized("ui", "field.error.pos_int").withStyle(
+                            ChatFormatting.RED));
                 }
             }
         }
@@ -310,16 +312,12 @@ public class TextField extends EditBox {
     // Utility methods
 
     public static boolean isUndo(int keyCode) {
-        return keyCode == InputConstants.KEY_Z
-                && Screen.hasControlDown()
-                && !Screen.hasShiftDown()
+        return keyCode == InputConstants.KEY_Z && Screen.hasControlDown() && !Screen.hasShiftDown()
                 && !Screen.hasAltDown();
     }
 
     public static boolean isRedo(int keyCode) {
-        return keyCode == InputConstants.KEY_Y
-                && Screen.hasControlDown()
-                && !Screen.hasShiftDown()
+        return keyCode == InputConstants.KEY_Y && Screen.hasControlDown() && !Screen.hasShiftDown()
                 && !Screen.hasAltDown();
     }
 }

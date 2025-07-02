@@ -102,10 +102,12 @@ public class Keybind {
             return false;
         if (key.getType().equals(InputConstants.Type.MOUSE)) {
             return GLFW.glfwGetMouseButton(
-                    Minecraft.getInstance().getWindow().getWindow(), key.getValue()) == 1;
+                    Minecraft.getInstance().getWindow().getWindow(),
+                    key.getValue()
+            ) == 1;
         } else {
-            return GLFW.glfwGetKey(
-                    Minecraft.getInstance().getWindow().getWindow(), key.getValue()) == 1;
+            return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getValue())
+                    == 1;
         }
     }
 
@@ -149,20 +151,13 @@ public class Keybind {
             int version = obj.get("version").getAsInt();
             boolean silent = version != VERSION;
 
-            InputConstants.Key key = JsonUtil.getOrDefault(
-                    obj, "keyName",
-                    InputConstants.UNKNOWN, silent
-            );
+            InputConstants.Key key =
+                    JsonUtil.getOrDefault(obj, "keyName", InputConstants.UNKNOWN, silent);
 
-            InputConstants.Key limitKey = JsonUtil.getOrDefault(
-                    obj, "limitKeyName",
-                    InputConstants.UNKNOWN, silent
-            );
+            InputConstants.Key limitKey =
+                    JsonUtil.getOrDefault(obj, "limitKeyName", InputConstants.UNKNOWN, silent);
 
-            return new Keybind(
-                    key,
-                    limitKey
-            ).validate();
+            return new Keybind(key, limitKey).validate();
         }
     }
 }

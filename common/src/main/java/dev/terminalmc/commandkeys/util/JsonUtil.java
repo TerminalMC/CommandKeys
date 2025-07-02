@@ -38,7 +38,11 @@ public class JsonUtil {
     }
 
     public static @Nullable JsonPrimitive getAsJsonPrimitiveOrNull(
-            JsonObject obj, String key, Class<?> cls, boolean silent) {
+            JsonObject obj,
+            String key,
+            Class<?> cls,
+            boolean silent
+    ) {
         if (!obj.has(key)) {
             if (!silent)
                 CommandKeys.LOG.error(LOG_STR, key, cls.getName(), "Key not found");
@@ -50,7 +54,9 @@ public class JsonUtil {
         if (!element.isJsonPrimitive()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not JsonPrimitive"
                 );
             hasChanged = true;
@@ -61,7 +67,11 @@ public class JsonUtil {
     }
 
     public static @Nullable JsonObject getAsJsonObjectOrNull(
-            JsonObject obj, String key, Class<?> cls, boolean silent) {
+            JsonObject obj,
+            String key,
+            Class<?> cls,
+            boolean silent
+    ) {
         if (!obj.has(key)) {
             if (!silent)
                 CommandKeys.LOG.error(LOG_STR, key, cls.getName(), "Key not found");
@@ -73,7 +83,9 @@ public class JsonUtil {
         if (!element.isJsonObject()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not JsonObject"
                 );
             hasChanged = true;
@@ -84,7 +96,11 @@ public class JsonUtil {
     }
 
     public static @Nullable JsonArray getAsJsonArrayOrNull(
-            JsonObject obj, String key, Class<?> cls, boolean silent) {
+            JsonObject obj,
+            String key,
+            Class<?> cls,
+            boolean silent
+    ) {
         if (!obj.has(key)) {
             if (!silent)
                 CommandKeys.LOG.error(LOG_STR, key, cls.getName(), "Key not found");
@@ -96,7 +112,9 @@ public class JsonUtil {
         if (!element.isJsonArray()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not JsonArray"
                 );
             hasChanged = true;
@@ -118,7 +136,9 @@ public class JsonUtil {
         if (!element.getAsJsonPrimitive().isString()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not String"
                 );
             hasChanged = true;
@@ -140,7 +160,9 @@ public class JsonUtil {
         if (!element.getAsJsonPrimitive().isNumber()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not Number"
                 );
             hasChanged = true;
@@ -162,7 +184,9 @@ public class JsonUtil {
         if (!element.getAsJsonPrimitive().isNumber()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not Number"
                 );
             hasChanged = true;
@@ -184,7 +208,9 @@ public class JsonUtil {
         if (!element.getAsJsonPrimitive().isBoolean()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not Boolean"
                 );
             hasChanged = true;
@@ -198,7 +224,12 @@ public class JsonUtil {
      * Enum deserialization helper.
      */
     public static <T extends Enum<T>> T getOrDefault(
-            JsonObject obj, String key, Class<T> cls, T def, boolean silent) {
+            JsonObject obj,
+            String key,
+            Class<T> cls,
+            T def,
+            boolean silent
+    ) {
         JsonElement element = getAsJsonPrimitiveOrNull(obj, key, cls, silent);
         if (element == null)
             return def;
@@ -206,7 +237,9 @@ public class JsonUtil {
         if (!element.getAsJsonPrimitive().isString()) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, cls.getName(),
+                        LOG_STR,
+                        key,
+                        cls.getName(),
                         "Value '" + element + "' is not String"
                 );
             hasChanged = true;
@@ -222,7 +255,9 @@ public class JsonUtil {
 
         if (!silent)
             CommandKeys.LOG.error(
-                    LOG_STR, key, cls.getName(),
+                    LOG_STR,
+                    key,
+                    cls.getName(),
                     "Value '" + value + "' is not in Enum Constants"
             );
         hasChanged = true;
@@ -233,7 +268,11 @@ public class JsonUtil {
      * {@link InputConstants.Key} deserialization helper.
      */
     public static InputConstants.Key getOrDefault(
-            JsonObject obj, String key, InputConstants.Key def, boolean silent) {
+            JsonObject obj,
+            String key,
+            InputConstants.Key def,
+            boolean silent
+    ) {
         String keyName = getOrDefault(obj, key, (String) null, silent);
         if (keyName == null)
             return def;
@@ -243,7 +282,9 @@ public class JsonUtil {
         } catch (IllegalArgumentException e) {
             if (!silent)
                 CommandKeys.LOG.error(
-                        LOG_STR, key, String.class.getName(),
+                        LOG_STR,
+                        key,
+                        String.class.getName(),
                         "Value '" + keyName + "' is not the name of an InputConstants.Key"
                 );
             hasChanged = true;
@@ -258,8 +299,12 @@ public class JsonUtil {
      * registered to the deserializing {@link Gson}.</p>
      */
     public static <T> T getOrDefault(
-            JsonDeserializationContext ctx, JsonObject obj,
-            String key, Class<T> cls, T def, boolean silent
+            JsonDeserializationContext ctx,
+            JsonObject obj,
+            String key,
+            Class<T> cls,
+            T def,
+            boolean silent
     ) {
         JsonElement element = getAsJsonObjectOrNull(obj, key, cls, silent);
         if (element == null)
@@ -272,13 +317,16 @@ public class JsonUtil {
      * String list deserialization helper.
      */
     public static List<String> getOrDefault(
-            JsonObject obj, String key, List<String> def, boolean silent) {
+            JsonObject obj,
+            String key,
+            List<String> def,
+            boolean silent
+    ) {
         JsonArray array = getAsJsonArrayOrNull(obj, key, String.class, silent);
         if (array == null)
             return def;
 
-        return array
-                .asList()
+        return array.asList()
                 .stream()
                 .filter((je) -> (je.isJsonPrimitive() && je.getAsJsonPrimitive().isString()))
                 .map(JsonElement::getAsString)
@@ -293,15 +341,18 @@ public class JsonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> getOrDefault(
-            JsonDeserializationContext ctx, JsonObject obj,
-            String key, Class<T> cls, List<T> def, boolean silent
+            JsonDeserializationContext ctx,
+            JsonObject obj,
+            String key,
+            Class<T> cls,
+            List<T> def,
+            boolean silent
     ) {
         JsonArray array = getAsJsonArrayOrNull(obj, key, cls, silent);
         if (array == null)
             return def;
 
-        return array
-                .asList()
+        return array.asList()
                 .stream()
                 .filter(JsonElement::isJsonObject)
                 .map((je) -> (T) ctx.deserialize(je, cls))

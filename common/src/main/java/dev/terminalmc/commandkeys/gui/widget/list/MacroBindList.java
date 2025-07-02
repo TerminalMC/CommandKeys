@@ -44,8 +44,14 @@ public abstract class MacroBindList extends DragReorderList {
     private @Nullable Keybind sendKeybind;
 
     public MacroBindList(
-            Minecraft mc, int width, int height, int y, int entryWidth,
-            int entryHeight, int entrySpace, @NotNull Profile profile,
+            Minecraft mc,
+            int width,
+            int height,
+            int y,
+            int entryWidth,
+            int entryHeight,
+            int entrySpace,
+            @NotNull Profile profile,
             Map<Class<? extends Entry>, BiFunction<Integer, Integer, Boolean>> clsFunMap
     ) {
         super(mc, width, height, y, entryWidth, entryHeight, entrySpace, clsFunMap);
@@ -63,11 +69,9 @@ public abstract class MacroBindList extends DragReorderList {
 
     protected void setSelected(@NotNull Macro macro, @NotNull Keybind keybind) {
         if (!profile.getMacros().contains(macro))
-            throw new IllegalArgumentException(
-                    "Specified macro does not exist in profile.");
+            throw new IllegalArgumentException("Specified macro does not exist in profile.");
         if (!macro.ownsKeybind(keybind))
-            throw new IllegalArgumentException(
-                    "Specified keybind not used by specified macro.");
+            throw new IllegalArgumentException("Specified keybind not used by specified macro.");
         this.macro = macro;
         this.keybind = keybind;
     }
@@ -97,8 +101,8 @@ public abstract class MacroBindList extends DragReorderList {
             return true;
         }
         // Else if we have no other widget selected
-        else if (getSelected() == null && CommandKeys.inGame() &&
-                !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey())) {
+        else if (getSelected() == null && CommandKeys.inGame()
+                && !key.equals(((KeyMappingAccessor) CommandKeys.CONFIG_KEY).getKey())) {
             // Prepare to use the key to trigger macros on release
             Collection<Keybind> keybinds = profile.keybindMap.get(key);
             Keybind limitedKb = null;

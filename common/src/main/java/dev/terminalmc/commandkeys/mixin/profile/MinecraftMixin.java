@@ -39,8 +39,10 @@ public class MinecraftMixin {
     )
     private void startIntegratedServer(
             LevelStorageSource.LevelStorageAccess levelStorage,
-            PackRepository packRepo, WorldStem worldStem,
-            boolean newWorld, CallbackInfo ci
+            PackRepository packRepo,
+            WorldStem worldStem,
+            boolean newWorld,
+            CallbackInfo ci
     ) {
         String world = worldStem.worldData().getLevelName();
         Config.get().activateSpProfile(world);

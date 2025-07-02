@@ -37,8 +37,10 @@ public class ModLogger {
     private String edit(Level level, String message) {
         if (level == Level.DEBUG)
             return String.format(
-                    "[%s/%s]: %s", logger.getName(),
-                    StackLocatorUtil.getCallerClass(4).getSimpleName(), message
+                    "[%s/%s]: %s",
+                    logger.getName(),
+                    StackLocatorUtil.getCallerClass(4).getSimpleName(),
+                    message
             );
         return String.format("[%s]: %s", logger.getName(), message);
     }

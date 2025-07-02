@@ -64,7 +64,9 @@ public class KeyboardHandlerMixin {
     @WrapMethod(method = "charTyped")
     @SuppressWarnings("JavadocReference")
     private void wrapCharTyped(
-            long windowPointer, int codePoint, int modifiers,
+            long windowPointer,
+            int codePoint,
+            int modifiers,
             Operation<Void> original
     ) {
         if (commandKeys$cancelCharTyped) {

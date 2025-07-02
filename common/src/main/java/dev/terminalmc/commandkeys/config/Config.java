@@ -509,8 +509,12 @@ public class Config {
             boolean ratelimitSp =
                     JsonUtil.getOrDefault(obj, "ratelimitSp", ratelimitSpDefault, silent);
 
-            int lengthLimitLength =
-                    JsonUtil.getOrDefault(obj, "lengthLimitLength", lengthLimitLengthDefault, silent);
+            int lengthLimitLength = JsonUtil.getOrDefault(
+                    obj,
+                    "lengthLimitLength",
+                    lengthLimitLengthDefault,
+                    silent
+            );
 
             return new Config(
                     profiles,

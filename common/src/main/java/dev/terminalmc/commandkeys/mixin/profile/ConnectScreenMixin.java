@@ -39,8 +39,11 @@ public class ConnectScreenMixin {
             at = @At("HEAD")
     )
     private void selectMultiplayerProfile(
-            Minecraft mc, ServerAddress address, ServerData data,
-            TransferState state, CallbackInfo ci
+            Minecraft mc,
+            ServerAddress address,
+            ServerData data,
+            TransferState state,
+            CallbackInfo ci
     ) {
         String server = address.getHost();
         Config.get().activateMpProfile(server);

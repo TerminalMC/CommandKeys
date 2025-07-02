@@ -69,9 +69,8 @@ public class OptionScreen extends OptionsSubScreen {
     /**
      * The maximum safe cumulative width for hardcoding list entry element widths and SPACE.
      */
-    public static final int BASE_LIST_ENTRY_WIDTH = BASE_ROW_WIDTH
-            - (SCROLL_BAR_MARGIN * 2)
-            - (HANGING_WIDGET_MARGIN * 2);
+    public static final int BASE_LIST_ENTRY_WIDTH =
+            BASE_ROW_WIDTH - (SCROLL_BAR_MARGIN * 2) - (HANGING_WIDGET_MARGIN * 2);
 
     protected OptionList list;
 
