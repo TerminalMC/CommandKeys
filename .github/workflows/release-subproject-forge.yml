@@ -1,5 +1,5 @@
-# A CurseForge-only version of the normal release workflow.
-name: Release-Platform-CurseForge
+# A Forge-only version of the normal release workflow.
+name: Release-Subproject-Forge
 
 on:
   workflow_dispatch:
@@ -34,8 +34,10 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
       - name: Build
-        run: ./gradlew build publishCurseforge --stacktrace
+        run: ./gradlew build forge:publishModrinth forge:publishCurseforge forge:publishGithub --stacktrace
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
       - name: Capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
