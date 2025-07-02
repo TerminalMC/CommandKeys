@@ -578,9 +578,9 @@ public class MainOptionList extends OptionList {
                         if (space < 1)
                             throw new NumberFormatException();
                         Config.get().setRatelimitTicks(space);
-                        ticksField.setTextColor(16777215);
+                        ticksField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
                     } catch (NumberFormatException ignored) {
-                        ticksField.setTextColor(16711680);
+                        ticksField.setTextColor(TextField.TEXT_COLOR_ERROR);
                     }
                 });
                 ticksField.setValue(String.valueOf(Config.get().getRatelimitTicks()));
