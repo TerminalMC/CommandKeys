@@ -439,7 +439,7 @@ public class Macro {
             case TYPE -> {
                 // Type the first message
                 if (!messages.isEmpty()) {
-                    CommandKeys.type(messages.getFirst().string);
+                    CommandKeys.type(messages.get(0).string);
                 }
                 singleActionComplete();
             }

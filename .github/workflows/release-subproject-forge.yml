@@ -1,5 +1,5 @@
-# A Fabric-only version of the normal release workflow.
-name: Release-Subproject-Fabric
+# A Forge-only version of the normal release workflow.
+name: Release-Subproject-Forge
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
       - name: Build
-        run: ./gradlew build fabric:publishModrinth fabric:publishCurseforge fabric:publishGithub --stacktrace
+        run: ./gradlew build forge:publishModrinth forge:publishCurseforge forge:publishGithub --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}

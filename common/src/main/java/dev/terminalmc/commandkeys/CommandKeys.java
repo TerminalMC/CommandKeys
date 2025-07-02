@@ -100,7 +100,7 @@ public class CommandKeys {
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
             mc.getToasts().addToast(new SystemToast(
-                    new SystemToast.SystemToastId(15000L),
+                    SystemToast.SystemToastIds.UNSECURE_SERVER_WARNING,
                     localized("toast", "reset.title"),
                     localized(
                             "toast",
