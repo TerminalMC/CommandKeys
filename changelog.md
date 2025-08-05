@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.12
+
+- Fixed invisible text in message length limit field on 1.21.6+
+
 ## 2.3.11
 
 - Added a configurable message length limit to mitigate being kicked when sending overlength messages
