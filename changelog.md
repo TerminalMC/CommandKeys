@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.13
+
+- Added an option to cap the number of repetitions when using repeat mode
+
 ## 2.3.12
 
 - Fixed invisible text in message length limit field on 1.21.6+

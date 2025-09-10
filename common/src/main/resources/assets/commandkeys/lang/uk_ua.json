@@ -36,6 +36,7 @@
   "option.commandkeys.macro.delay.individual.tooltip.subsequent": "Час у тіках для очікування після попереднього повідомлення, перед надсиланням.",
   "option.commandkeys.macro.delay.tooltip": "Затримка в тіках перед кожним повідомленням після першого.\nВстановіть 0 для використання індивідуальних затримок.",
   "option.commandkeys.macro.delay.tooltip.repeat": "Затримка в тіках між повторами.\nЯкщо встановити 40, кожне повідомлення надсилатиметься кожні 40 тіків, зміщених один від одного згідно з індивідуальними затримками.",
+  "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "Команди/Повідомлення",
   "option.commandkeys.macro.mode": "Режим надсилання",
   "option.commandkeys.macro.profile": "Назад до профілю",

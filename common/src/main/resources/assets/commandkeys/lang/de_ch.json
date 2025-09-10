@@ -37,6 +37,7 @@
   "option.commandkeys.macro.delay.individual.tooltip.subsequent": "Zeit in Ticks, die nach der letzten Nachricht gewartet wird, bevor sie gesendet wird.",
   "option.commandkeys.macro.delay.tooltip": "Verzögerung in Ticks vor jeder Nachricht nach der ersten.\nSetze den Wert auf 0, um eine Verzögerungen pro Nachricht zu verwenden zu können.",
   "option.commandkeys.macro.delay.tooltip.repeat": "Verzögerung in Ticks zwischen den Wiederholungen.\nWenn dieser Wert auf 40 ist, wird jede Nachricht alle 40 Ticks gesendet, versetzt zueinander, wie durch individuelle Verzögerungen festgelegt.",
+  "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "Befehle/Nachrichten",
   "option.commandkeys.macro.mode": "Sende Modus",
   "option.commandkeys.macro.profile": "Zurück zum Profil",

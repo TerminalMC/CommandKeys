@@ -36,6 +36,7 @@
   "option.commandkeys.macro.delay.individual.tooltip.subsequent": "Time in ticks to wait after the previous message, before sending.",
   "option.commandkeys.macro.delay.tooltip": "第一条消息之后在每条消息之前的延迟（以刻为单位）。\n设为0以使用每条消息的延迟。",
   "option.commandkeys.macro.delay.tooltip.repeat": "重复之间的延迟（以刻为单位）。\n若将其设置为40，则每条消息将每40刻发送一次，彼此之间的偏移量由各个延迟指定。",
+  "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "命令与消息",
   "option.commandkeys.macro.mode": "发送模式",
   "option.commandkeys.macro.profile": "返回配置文件",

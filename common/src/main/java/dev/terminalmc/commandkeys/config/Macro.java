@@ -144,6 +144,12 @@ public class Macro {
     public static final int spaceTicksDefault = 0;
 
     /**
+     * Maximum number of repetitions when repeating.
+     */
+    public int maxRepeats;
+    public static final int maxRepeatsDefault = 0;
+
+    /**
      * Index of next message forwards when cycling.
      */
     public transient int cycleIndex;
@@ -181,6 +187,7 @@ public class Macro {
                 Config.get().defaultSendMode,
                 Config.get().defaultActivationType,
                 spaceTicksDefault,
+                maxRepeatsDefault,
                 cycleIndexDefault,
                 keybindDefault.get(),
                 altKeybindDefault.get(),
@@ -200,6 +207,7 @@ public class Macro {
             SendMode sendMode,
             ActivationType activationType,
             int spaceTicks,
+            int maxRepeats,
             int cycleIndex,
             Keybind keybind,
             Keybind altKeybind,
@@ -213,6 +221,7 @@ public class Macro {
         this.sendMode = sendMode;
         this.activationType = activationType;
         this.spaceTicks = spaceTicks;
+        this.maxRepeats = maxRepeats;
         this.cycleIndex = cycleIndex;
         this.keybind = keybind;
         this.altKeybind = altKeybind;
@@ -235,6 +244,7 @@ public class Macro {
         this.sendMode = macro.sendMode;
         this.activationType = macro.activationType;
         this.spaceTicks = macro.spaceTicks;
+        this.maxRepeats = macro.maxRepeats;
         this.cycleIndex = macro.cycleIndex;
         this.keybind = new Keybind(macro.keybind);
         this.altKeybind = new Keybind(macro.altKeybind);
@@ -369,6 +379,7 @@ public class Macro {
      */
     private transient boolean active = false;
     private transient int activeTicks = 0;
+    private transient int repetitions = 0;
 
     public void tick() {
         // Tick scheduled messages, removing those that have finished
@@ -385,7 +396,9 @@ public class Macro {
                 switch (sendMode) {
                     case REPEAT -> {
                         if (spaceTicks == 0 || activeTicks > 0 && activeTicks % spaceTicks == 0) {
-                            scheduleAll(false);
+                            if (maxRepeats == 0 || ++repetitions <= maxRepeats) {
+                                scheduleAll(false);
+                            }
                         }
                     }
                 }
@@ -430,6 +443,7 @@ public class Macro {
     private void activate(@Nullable Keybind keybind) {
         active = true;
         activeTicks = -1; // trigger is processed prior to tick
+        repetitions = 1;
         switch (sendMode) {
             case SEND -> {
                 scheduleAll(spaceTicks != 0);
@@ -559,6 +573,8 @@ public class Macro {
     Macro validate() {
         if (spaceTicks < 0)
             spaceTicks = 0;
+        if (maxRepeats < 0)
+            maxRepeats = 0;
 
         keybind.validate();
         altKeybind.validate();
@@ -637,6 +653,8 @@ public class Macro {
 
             int spaceTicks = JsonUtil.getOrDefault(obj, "spaceTicks", spaceTicksDefault, silent);
 
+            int maxRepeats = JsonUtil.getOrDefault(obj, "maxRepeats", maxRepeatsDefault, silent);
+
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(
                     ctx,
@@ -677,6 +695,7 @@ public class Macro {
                     sendMode,
                     activationType,
                     spaceTicks,
+                    maxRepeats,
                     0,
                     keybind,
                     altKeybind,

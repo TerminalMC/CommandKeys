@@ -461,6 +461,24 @@ public class MacroOptionList extends MacroBindList {
                                 localized("option", "macro.activation"),
                                 (button, status) -> profile.setActivationType(macro, status)
                         ));
+
+                if (macro.getMode().equals(REPEAT)) {
+                    TextField delayField = new TextField(
+                            x + width - buttonWidth,
+                            0,
+                            buttonWidth,
+                            height
+                    ).posIntValidator().strict();
+                    delayField.setMaxLength(8);
+                    delayField.setResponder((val) ->
+                            macro.maxRepeats = Integer.parseInt(val.strip()));
+                    delayField.setValue(String.valueOf(macro.maxRepeats));
+                    delayField.setTooltip(Tooltip.create(localized(
+                            "option",
+                            "macro.maxRepeats.tooltip"
+                    )));
+                    elements.add(delayField);
+                }
             }
         }
 
