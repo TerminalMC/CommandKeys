@@ -45,8 +45,8 @@ import java.util.function.Consumer;
 public class MultiLineTextField extends MultiLineEditBox {
 
     public static final long CLICK_CHAIN_TIME = 250L;
-    public static final int TEXT_COLOR_DEFAULT = 0xE0E0E0;
-    public static final int TEXT_COLOR_ERROR = 0xFF5555;
+    public static final int TEXT_COLOR_DEFAULT = 0xFFE0E0E0;
+    public static final int TEXT_COLOR_ERROR = 0xFFFF5555;
 
     // Validation
     public final List<TextField.@NotNull Validator> validators = new ArrayList<>();
@@ -100,7 +100,20 @@ public class MultiLineTextField extends MultiLineEditBox {
             Component message,
             @Nullable TextField.Validator validator
     ) {
-        super(font, x, y, width, height, placeholder, message);
+        super(
+                font,
+                x,
+                y,
+                width,
+                height,
+                placeholder,
+                message,
+                TEXT_COLOR_DEFAULT,
+                true,
+                0xFFD0D0D0,
+                true,
+                true
+        );
         if (validator != null) {
             this.validators.add(validator);
         }
