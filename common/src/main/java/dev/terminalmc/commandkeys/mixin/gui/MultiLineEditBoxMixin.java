@@ -32,8 +32,8 @@ public class MultiLineEditBoxMixin {
     @ModifyExpressionValue(
             method = "renderContents",
             at = @At(
-                    value = "CONSTANT",
-                    args = "intValue=-2039584"
+                    value = "FIELD",
+                    target = "Lnet/minecraft/client/gui/components/MultiLineEditBox;textColor:I"
             )
     )
     private int modifyColor(int original) {
