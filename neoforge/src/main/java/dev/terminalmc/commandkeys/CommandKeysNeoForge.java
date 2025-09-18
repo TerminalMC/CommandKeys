@@ -35,7 +35,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 )
 @EventBusSubscriber(
         modid = CommandKeys.MOD_ID,
-        bus = EventBusSubscriber.Bus.MOD,
         value = Dist.CLIENT
 )
 public class CommandKeysNeoForge {
