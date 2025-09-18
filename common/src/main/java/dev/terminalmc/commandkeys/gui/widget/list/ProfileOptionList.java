@@ -139,7 +139,7 @@ public class ProfileOptionList extends MacroBindList {
                     )
             );
         }
-        clampScrollAmount();
+        refreshScrollAmount();
     }
 
     // Sub-screen opening
