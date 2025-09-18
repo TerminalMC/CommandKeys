@@ -23,11 +23,13 @@ import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.EditScreen;
 import dev.terminalmc.commandkeys.gui.screen.MainOptionScreen;
+import dev.terminalmc.commandkeys.mixin.accessor.ChatScreenAccessor;
 import dev.terminalmc.commandkeys.util.ModLogger;
 import dev.terminalmc.commandkeys.util.PlaceholderUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -217,7 +219,16 @@ public class CommandKeys {
     ) {
         Minecraft mc = Minecraft.getInstance();
         if (type) {
-            mc.setScreen(new ChatScreen(message));
+            ChatScreen screen = new ChatScreen(message);
+            mc.setScreen(screen);
+            int index = message.indexOf("%edit%");
+            if (index != -1) {
+                EditBox input = ((ChatScreenAccessor) screen).commandkeys$getInput();
+                if (input != null) {
+                    input.moveCursorTo(index + "%edit%".length(), false);
+                    input.moveCursorTo(index, true);
+                }
+            }
         } else if (message.length() > Config.get().getLengthLimitLength()) {
             MutableComponent msg = PREFIX.copy();
             msg.append(localized(

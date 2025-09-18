@@ -8,6 +8,7 @@
   ],
   "client": [
     "accessor.ChatComponentAccessor",
+    "accessor.ChatScreenAccessor",
     "accessor.KeyMappingAccessor",
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",
