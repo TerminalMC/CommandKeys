@@ -41,9 +41,9 @@ public class EditScreen extends Screen {
                 Component.empty()
         );
         field.setValueListener((str) -> {
-            if (str.endsWith("\n")) {
+            if (str.contains("\n")) {
                 onClose();
-                callback.accept(str.substring(0, str.length() - 1));
+                callback.accept(str.replaceAll("\\n", ""));
             }
         });
         addRenderableWidget(field);
