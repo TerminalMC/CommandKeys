@@ -42,6 +42,8 @@
   "option.commandkeys.macro.profile": "Back to Profile",
   "option.commandkeys.macro.send.CYCLE": "Cycle",
   "option.commandkeys.macro.send.CYCLE.tooltip": "Messages will be cycled through, one per key-press.\nIn this mode, you can send multiple messages in a single key-press by separating them with two commas e.g. /lobby,,/nick",
+  "option.commandkeys.macro.send.EDIT": "Edit",
+  "option.commandkeys.macro.send.EDIT.tooltip": "A GUI will be shown to replace the %edit% placeholder in the first message.",
   "option.commandkeys.macro.send.RANDOM": "Random",
   "option.commandkeys.macro.send.RANDOM.tooltip": "When the key is pressed, one of the messages will be randomly chosen and sent.",
   "option.commandkeys.macro.send.REPEAT": "Repeat",

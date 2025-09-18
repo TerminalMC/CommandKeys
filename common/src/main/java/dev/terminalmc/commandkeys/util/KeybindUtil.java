@@ -32,6 +32,7 @@ import java.util.Collection;
 
 import static dev.terminalmc.commandkeys.CommandKeys.profile;
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.AVOID;
+import static dev.terminalmc.commandkeys.config.Macro.SendMode.EDIT;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.TYPE;
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
@@ -130,8 +131,9 @@ public class KeybindUtil {
 
                 if (send) {
                     boolean rl = macro.trigger(triggerKb, ratelimited);
-                    // TYPE mode requires cancelling char
-                    if (!rl && cancel == 0 && macro.getMode().equals(TYPE))
+                    // TYPE, EDIT modes require cancelling char
+                    if (!rl && cancel == 0 &&
+                            (macro.getMode().equals(TYPE) || macro.getMode().equals(EDIT)))
                         cancel = 1;
                     ratelimited |= rl;
                 }

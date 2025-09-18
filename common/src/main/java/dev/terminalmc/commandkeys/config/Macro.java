@@ -96,6 +96,7 @@ public class Macro {
     public enum SendMode {
         SEND(ChatFormatting.GREEN),
         TYPE(ChatFormatting.GOLD),
+        EDIT(ChatFormatting.BLUE),
         CYCLE(ChatFormatting.AQUA),
         RANDOM(ChatFormatting.LIGHT_PURPLE),
         REPEAT(ChatFormatting.RED);
@@ -450,6 +451,13 @@ public class Macro {
                 singleActionComplete();
             }
             case REPEAT -> scheduleAll(false);
+            case EDIT -> {
+                // Edit the first message
+                if (!messages.isEmpty()) {
+                    CommandKeys.edit(messages.getFirst().string);
+                }
+                singleActionComplete();
+            }
             case TYPE -> {
                 // Type the first message
                 if (!messages.isEmpty()) {
@@ -590,7 +598,7 @@ public class Macro {
             // Never allow leading whitespace
             msg.string = msg.string.stripLeading();
             // Only allow trailing whitespace for TYPE mode
-            if (!sendMode.equals(SendMode.TYPE)) {
+            if (!sendMode.equals(SendMode.TYPE) && !sendMode.equals(SendMode.EDIT)) {
                 msg.string = msg.string.stripTrailing();
             }
             // Only allow blank messages for CYCLE mode (as spacers) and TYPE

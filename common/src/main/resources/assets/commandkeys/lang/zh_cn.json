@@ -42,6 +42,8 @@
   "option.commandkeys.macro.profile": "返回配置文件",
   "option.commandkeys.macro.send.CYCLE": "循环",
   "option.commandkeys.macro.send.CYCLE.tooltip": "消息将循环显示，每按一次按键显示一条消息。\n在此模式下，你可以通过在每条消息之间用两个逗号分隔即可按一次按键发送多条消息，例如/lobby,,/nick",
+  "option.commandkeys.macro.send.EDIT": "Edit",
+  "option.commandkeys.macro.send.EDIT.tooltip": "A GUI will be shown to replace the %edit% placeholder in the first message.",
   "option.commandkeys.macro.send.RANDOM": "Random",
   "option.commandkeys.macro.send.RANDOM.tooltip": "When the key is pressed, one of the messages will be randomly chosen and sent.",
   "option.commandkeys.macro.send.REPEAT": "重复",

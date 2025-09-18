@@ -21,6 +21,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
+import dev.terminalmc.commandkeys.gui.screen.EditScreen;
 import dev.terminalmc.commandkeys.gui.screen.MainOptionScreen;
 import dev.terminalmc.commandkeys.util.ModLogger;
 import dev.terminalmc.commandkeys.util.PlaceholderUtil;
@@ -158,16 +159,21 @@ public class CommandKeys {
     }
 
     public static void send(String message, boolean addToHistory, boolean showHudMsg) {
-        send(false, message, addToHistory, showHudMsg);
+        send(message, false, false, addToHistory, showHudMsg);
     }
 
     public static void type(String message) {
-        send(true, message, false, false);
+        send(message, true, false, false, false);
+    }
+
+    public static void edit(String message) {
+        send(message, false, true, false, false);
     }
 
     public static void send(
-            boolean type,
             String message,
+            boolean type,
+            boolean edit,
             boolean addToHistory,
             boolean showHudMsg
     ) {
@@ -181,34 +187,16 @@ public class CommandKeys {
         message = result.getFirst();
         int faults = result.getSecond();
         if (faults == 0) {
-            if (type) {
-                mc.setScreen(new ChatScreen(message));
-            } else if (message.length() > Config.get().getLengthLimitLength()) {
-                MutableComponent msg = PREFIX.copy();
-                msg.append(localized(
-                        "message",
-                        "blocked.lengthlimit",
-                        Component.literal(String.valueOf(message.length()))
-                                .withStyle(ChatFormatting.GRAY),
-                        Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
-                                .withStyle(ChatFormatting.GRAY)
-                ).withStyle(ChatFormatting.RED));
-                mc.gui.getChat().addMessage(msg);
+            if (edit) {
+                String finalMessage = message;
+                mc.setScreen(new EditScreen((str) -> send(
+                        type,
+                        finalMessage.replaceAll("%edit%", str),
+                        addToHistory,
+                        showHudMsg
+                )));
             } else {
-                // new ChatScreen("").handleChatInput(message, addToHistory)
-                // could be slightly better for compat but costs performance.
-                if (message.startsWith("/")) {
-                    mc.player.connection.sendCommand(message.substring(1));
-                } else {
-                    mc.player.connection.sendChat(message);
-                }
-                if (addToHistory)
-                    mc.gui.getChat().addRecentChat(message);
-                if (showHudMsg)
-                    mc.gui.setOverlayMessage(
-                            Component.literal(message)
-                                    .withStyle(ChatFormatting.GRAY), false
-                    );
+                send(type, message, addToHistory, showHudMsg);
             }
         } else {
             MutableComponent msg = PREFIX.copy();
@@ -218,6 +206,44 @@ public class CommandKeys {
                     Component.literal(message).withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
             mc.gui.getChat().addMessage(msg);
+        }
+    }
+
+    private static void send(
+            boolean type,
+            String message,
+            boolean addToHistory,
+            boolean showHudMsg
+    ) {
+        Minecraft mc = Minecraft.getInstance();
+        if (type) {
+            mc.setScreen(new ChatScreen(message));
+        } else if (message.length() > Config.get().getLengthLimitLength()) {
+            MutableComponent msg = PREFIX.copy();
+            msg.append(localized(
+                    "message",
+                    "blocked.lengthlimit",
+                    Component.literal(String.valueOf(message.length()))
+                            .withStyle(ChatFormatting.GRAY),
+                    Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
+                            .withStyle(ChatFormatting.GRAY)
+            ).withStyle(ChatFormatting.RED));
+            mc.gui.getChat().addMessage(msg);
+        } else {
+            // new ChatScreen("").handleChatInput(message, addToHistory)
+            // could be slightly better for compat but costs performance.
+            if (message.startsWith("/")) {
+                mc.player.connection.sendCommand(message.substring(1));
+            } else {
+                mc.player.connection.sendChat(message);
+            }
+            if (addToHistory)
+                mc.gui.getChat().addRecentChat(message);
+            if (showHudMsg)
+                mc.gui.setOverlayMessage(
+                        Component.literal(message)
+                                .withStyle(ChatFormatting.GRAY), false
+                );
         }
     }
 }

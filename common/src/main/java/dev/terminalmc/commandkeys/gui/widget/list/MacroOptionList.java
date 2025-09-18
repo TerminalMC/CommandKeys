@@ -335,7 +335,7 @@ public class MacroOptionList extends MacroBindList {
                 int minDelayFieldWidth = font.width("0_") + 8;
                 int modeButtonWidth = switch (macro.getMode()) {
                     case SEND, REPEAT -> buttonWidth - minDelayFieldWidth;
-                    case TYPE, RANDOM -> buttonWidth;
+                    case TYPE, RANDOM, EDIT -> buttonWidth;
                     case CYCLE -> buttonWidth - list.smallWidgetWidth;
                 };
 

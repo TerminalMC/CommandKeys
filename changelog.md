@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.14
+
+- Added `EDIT` mode, which allows you to manually enter replacements for a new `%edit%` placeholder
+  when sending
+
 ## 2.3.13
 
 - Added an option to cap the number of repetitions when using repeat mode
@@ -10,7 +15,8 @@
 
 ## 2.3.11
 
-- Added a configurable message length limit to mitigate being kicked when sending overlength messages
+- Added a configurable message length limit to mitigate being kicked when sending overlength
+  messages
 
 ## 2.3.10
 
@@ -33,10 +39,10 @@
 
 ## 2.3.7
 
-- Fixed a deserialization bug. If your macros were reset when upgrading to v2.3.6,
-install v2.3.7 and check the `config` folder of your Minecraft instance for a 
-`commandkeys.unreadable.json` file. If it exists, delete your `commandkeys.json` 
-file, rename the `unreadable` file to `commandkeys.json`, and start the game again.
+- Fixed a deserialization bug. If your macros were reset when upgrading to v2.3.6, install v2.3.7
+  and check the `config` folder of your Minecraft instance for a
+  `commandkeys.unreadable.json` file. If it exists, delete your `commandkeys.json`
+  file, rename the `unreadable` file to `commandkeys.json`, and start the game again.
 - Updated German translation (Lucanoria)
 - Updated Russian translation (rfin0)
 
@@ -67,7 +73,7 @@ file, rename the `unreadable` file to `commandkeys.json`, and start the game aga
 
 ## 2.3.0
 
-- Added activation ratelimiter to prevent spam on servers 
-- Added alternate keybind to allow reversal of cycling macros 
-- Added placeholders for the block that the player is looking at 
+- Added activation ratelimiter to prevent spam on servers
+- Added alternate keybind to allow reversal of cycling macros
+- Added placeholders for the block that the player is looking at
 - Fixed messages sending with incomplete placeholder replacement

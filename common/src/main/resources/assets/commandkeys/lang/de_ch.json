@@ -43,6 +43,8 @@
   "option.commandkeys.macro.profile": "Zurück zum Profil",
   "option.commandkeys.macro.send.CYCLE": "Durchlauf",
   "option.commandkeys.macro.send.CYCLE.tooltip": "In diesem Modus können mehrere Nachrichten mit einem einzigen Tastaturbefehl gesendet werden, indem sie durch zwei Kommas getrennt werden, z. B. /lobby,,/nick",
+  "option.commandkeys.macro.send.EDIT": "Edit",
+  "option.commandkeys.macro.send.EDIT.tooltip": "A GUI will be shown to replace the %edit% placeholder in the first message.",
   "option.commandkeys.macro.send.RANDOM": "Zufällig",
   "option.commandkeys.macro.send.RANDOM.tooltip": "Wenn die Taste gedrückt wird, wird eine der Nachrichten zufällig ausgewählt und gesendet.",
   "option.commandkeys.macro.send.REPEAT": "Wiederholung",

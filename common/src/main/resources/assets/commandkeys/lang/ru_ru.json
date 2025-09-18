@@ -42,6 +42,8 @@
   "option.commandkeys.macro.profile": "Вернуться к профилю",
   "option.commandkeys.macro.send.CYCLE": "Цикл",
   "option.commandkeys.macro.send.CYCLE.tooltip": "Сообщения будут циклически повторяться, по одному за нажатие клавиши.\nВ этом режиме можно отправлять несколько сообщений за одно нажатие клавиши, разделяя их двумя запятыми, например, /lobby,,/nick",
+  "option.commandkeys.macro.send.EDIT": "Edit",
+  "option.commandkeys.macro.send.EDIT.tooltip": "A GUI will be shown to replace the %edit% placeholder in the first message.",
   "option.commandkeys.macro.send.RANDOM": "Случайный",
   "option.commandkeys.macro.send.RANDOM.tooltip": "При нажатии клавиши одно из сообщений будет случайным образом выбрано и отправлено.",
   "option.commandkeys.macro.send.REPEAT": "Повторить",
