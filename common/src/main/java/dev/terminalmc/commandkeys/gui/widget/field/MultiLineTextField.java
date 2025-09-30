@@ -27,6 +27,8 @@ import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.Whence;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -181,8 +183,8 @@ public class MultiLineTextField extends MultiLineEditBox {
     // Chained clicks
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) {
             // Double-click to select all
             long time = Util.getMillis();
             if (lastClickTime + CLICK_CHAIN_TIME > time) {
@@ -241,12 +243,12 @@ public class MultiLineTextField extends MultiLineEditBox {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!super.keyPressed(keyCode, scanCode, modifiers)) {
-            if (TextField.isUndo(keyCode)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (!super.keyPressed(event)) {
+            if (TextField.isUndo(event)) {
                 undo();
                 return true;
-            } else if (TextField.isRedo(keyCode)) {
+            } else if (TextField.isRedo(event)) {
                 redo();
                 return true;
             }

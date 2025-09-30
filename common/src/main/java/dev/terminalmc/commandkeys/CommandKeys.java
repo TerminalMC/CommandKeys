@@ -37,6 +37,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class CommandKeys {
             translationKey("key", "main.edit"),
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_K,
-            translationKey("key", "main")
+            KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "main"))
     );
     public static final List<KeyMapping> KEYBINDS = List.of(CONFIG_KEY);
 
@@ -219,7 +220,7 @@ public class CommandKeys {
     ) {
         Minecraft mc = Minecraft.getInstance();
         if (type) {
-            ChatScreen screen = new ChatScreen(message);
+            ChatScreen screen = new ChatScreen(message, false);
             mc.setScreen(screen);
             int index = message.indexOf("%edit%");
             if (index != -1) {

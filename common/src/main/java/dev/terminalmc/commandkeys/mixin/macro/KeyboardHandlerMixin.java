@@ -23,6 +23,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.util.KeybindUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
+import net.minecraft.client.input.CharacterEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,16 +64,11 @@ public class KeyboardHandlerMixin {
      */
     @WrapMethod(method = "charTyped")
     @SuppressWarnings("JavadocReference")
-    private void wrapCharTyped(
-            long windowPointer,
-            int codePoint,
-            int modifiers,
-            Operation<Void> original
-    ) {
+    private void wrapCharTyped(long windowPointer, CharacterEvent event, Operation<Void> original) {
         if (commandKeys$cancelCharTyped) {
             commandKeys$cancelCharTyped = false;
         } else {
-            original.call(windowPointer, codePoint, modifiers);
+            original.call(windowPointer, event);
         }
     }
 }
