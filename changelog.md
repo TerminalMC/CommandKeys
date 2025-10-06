@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.15
+
+- Added South Korean translation (doyoung07)
+
 ## 2.3.14
 
 - Added `EDIT` mode, which allows you to manually enter replacements for a new `%edit%` placeholder
