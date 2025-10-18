@@ -111,6 +111,7 @@ public class MacroOptionList extends MacroBindList {
 
         addEntry(new Entry.MacroMode1(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
         addEntry(new Entry.MacroMode2(dynEntryX, dynEntryWidth, entryHeight, profile, macro));
+        addEntry(new Entry.MacroMode3(dynEntryX, dynEntryWidth, entryHeight, macro));
 
         addEntry(new OptionList.Entry.Text(
                 dynEntryX,
@@ -573,6 +574,27 @@ public class MacroOptionList extends MacroBindList {
                             list.init();
                         }
                 ).pos(x + width + SPACE, 0).size(list.smallWidgetWidth, height).build());
+            }
+        }
+
+        private static class MacroMode3 extends Entry {
+
+            MacroMode3(int x, int width, int height, Macro macro) {
+                int buttonWidth = (width - SPACE) / 2;
+
+                TextField delayField = new TextField(
+                        x,
+                        0,
+                        buttonWidth,
+                        height
+                ).posIntValidator().strict();
+                delayField.setMaxLength(8);
+                delayField.setResponder((val) ->
+                        macro.mcKeybind = Integer.parseInt(val.strip()));
+                delayField.setValue(String.valueOf(macro.mcKeybind));
+                delayField.setTooltip(Tooltip.create(Component.literal(
+                        "MC keybind number to trigger this macro when this profile is active.")));
+                elements.add(delayField);
             }
         }
     }

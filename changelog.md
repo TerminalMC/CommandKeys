@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.15-alpha.1
+
+- Added MC keybinds to trigger macros
+
 ## 2.3.15
 
 - Added South Korean translation (doyoung07)

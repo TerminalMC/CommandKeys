@@ -61,7 +61,19 @@ public class CommandKeys {
             InputConstants.KEY_K,
             translationKey("key", "main")
     );
-    public static final List<KeyMapping> KEYBINDS = List.of(CONFIG_KEY);
+    public static final List<KeyMapping> KEYBINDS = new ArrayList<>(List.of(CONFIG_KEY));
+
+    static {
+        Config.getAndSave();
+        for (int i = 0; i < Config.get().getMcKeybindCount(); i++) {
+            KEYBINDS.add(new KeyMapping(
+                    "Macro Trigger " + (i + 1),
+                    InputConstants.Type.KEYSYM,
+                    InputConstants.UNKNOWN.getValue(),
+                    translationKey("key", "main")
+            ));
+        }
+    }
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
@@ -79,7 +91,6 @@ public class CommandKeys {
     }
 
     public static void init() {
-        Config.getAndSave();
     }
 
     public static void afterClientTick(Minecraft mc) {
@@ -112,6 +123,16 @@ public class CommandKeys {
                                     .withStyle(ChatFormatting.GOLD)
                     )
             ));
+        }
+
+        for (int i = 1; i < KEYBINDS.size(); i++) {
+            while (KEYBINDS.get(i).consumeClick()) {
+                for (Macro m : profile().getMacros()) {
+                    if (m.mcKeybind == i) {
+                        m.trigger(m.getKeybind(), false);
+                    }
+                }
+            }
         }
     }
 

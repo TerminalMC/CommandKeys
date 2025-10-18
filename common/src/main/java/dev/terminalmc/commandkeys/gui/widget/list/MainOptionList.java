@@ -161,6 +161,7 @@ public class MainOptionList extends OptionList {
                 500
         ));
         addEntry(new Entry.LengthLimit(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.McKeybindCount(dynEntryX, dynEntryWidth, entryHeight));
     }
 
     // Sub-screen opening
@@ -672,6 +673,33 @@ public class MainOptionList extends OptionList {
                                 "main.lengthlimit.length.tooltip.warning"
                         ).withStyle(ChatFormatting.RED))));
                 elements.add(lengthField);
+            }
+        }
+
+        private static class McKeybindCount extends Entry {
+
+            McKeybindCount(int x, int width, int height) {
+                super();
+
+                TextField countField = new TextField(x, 0, width, height);
+                countField.posIntValidator().strict();
+                countField.setMaxLength(6);
+                countField.setResponder((val) -> {
+                    try {
+                        int space = Integer.parseInt(val.strip());
+                        if (space < 0)
+                            throw new NumberFormatException();
+                        Config.get().setMcKeybindCount(space);
+                        countField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
+                    } catch (NumberFormatException ignored) {
+                        countField.setTextColor(TextField.TEXT_COLOR_ERROR);
+                    }
+                });
+                countField.setValue(String.valueOf(Config.get().getMcKeybindCount()));
+                countField.setTooltip(Tooltip.create(Component.literal(
+                                "MC keybind count. You must restart the game to apply changes to this option.")
+                        .append("\n")));
+                elements.add(countField);
             }
         }
     }
