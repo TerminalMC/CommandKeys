@@ -156,6 +156,9 @@ public class Macro {
     public transient int cycleIndex;
     public static final int cycleIndexDefault = 0;
 
+    public int mcKeybind;
+    public static final int mcKeybindDefault = 0;
+
     // Keybinds
 
     /**
@@ -190,6 +193,7 @@ public class Macro {
                 spaceTicksDefault,
                 maxRepeatsDefault,
                 cycleIndexDefault,
+                mcKeybindDefault,
                 keybindDefault.get(),
                 altKeybindDefault.get(),
                 messagesDefault.get()
@@ -210,6 +214,7 @@ public class Macro {
             int spaceTicks,
             int maxRepeats,
             int cycleIndex,
+            int mcKeybind,
             Keybind keybind,
             Keybind altKeybind,
             List<Message> messages
@@ -224,6 +229,7 @@ public class Macro {
         this.spaceTicks = spaceTicks;
         this.maxRepeats = maxRepeats;
         this.cycleIndex = cycleIndex;
+        this.mcKeybind = mcKeybind;
         this.keybind = keybind;
         this.altKeybind = altKeybind;
         this.messages = messages;
@@ -247,6 +253,7 @@ public class Macro {
         this.spaceTicks = macro.spaceTicks;
         this.maxRepeats = macro.maxRepeats;
         this.cycleIndex = macro.cycleIndex;
+        this.mcKeybind = macro.mcKeybind;
         this.keybind = new Keybind(macro.keybind);
         this.altKeybind = new Keybind(macro.altKeybind);
         this.messages = macro.messages.stream()
@@ -663,6 +670,8 @@ public class Macro {
 
             int maxRepeats = JsonUtil.getOrDefault(obj, "maxRepeats", maxRepeatsDefault, silent);
 
+            int mcKeybind = JsonUtil.getOrDefault(obj, "mcKeybind", mcKeybindDefault, silent);
+
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(
                     ctx,
@@ -705,6 +714,7 @@ public class Macro {
                     spaceTicks,
                     maxRepeats,
                     0,
+                    mcKeybind,
                     keybind,
                     altKeybind,
                     messages

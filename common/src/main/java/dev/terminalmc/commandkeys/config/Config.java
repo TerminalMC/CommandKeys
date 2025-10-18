@@ -95,6 +95,10 @@ public class Config {
     private int lengthLimitLength;
     public static final int lengthLimitLengthDefault = SharedConstants.MAX_CHAT_LENGTH;
 
+    // MC keybind
+    private int mcKeybindCount;
+    public static final int mcKeybindCountDefault = 5;
+
     /**
      * Creates a profile list with a single profile, set as both singleplayer and multiplayer
      * default.
@@ -111,7 +115,8 @@ public class Config {
                 ratelimitTicksDefault,
                 ratelimitStrictDefault,
                 ratelimitSpDefault,
-                lengthLimitLengthDefault
+                lengthLimitLengthDefault,
+                mcKeybindCountDefault
         );
     }
 
@@ -129,7 +134,8 @@ public class Config {
             int ratelimitTicks,
             boolean ratelimitStrict,
             boolean ratelimitSp,
-            int lengthLimitLength
+            int lengthLimitLength,
+            int mcKeybindCount
     ) {
         this.profiles = profiles;
         this.spDefault = spDefault;
@@ -142,6 +148,7 @@ public class Config {
         this.ratelimitStrict = ratelimitStrict;
         this.ratelimitSp = ratelimitSp;
         this.lengthLimitLength = lengthLimitLength;
+        this.mcKeybindCount = mcKeybindCount;
     }
 
     // Default profile pointer management
@@ -198,6 +205,18 @@ public class Config {
         if (length < 1)
             throw new IllegalArgumentException();
         this.lengthLimitLength = length;
+    }
+
+    // MC keybind management
+
+    public int getMcKeybindCount() {
+        return mcKeybindCount;
+    }
+
+    public void setMcKeybindCount(int length) {
+        if (length < 0)
+            throw new IllegalArgumentException();
+        this.mcKeybindCount = length;
     }
 
     // Profile activation handling
@@ -516,6 +535,13 @@ public class Config {
                     silent
             );
 
+            int mcKeybindCount = JsonUtil.getOrDefault(
+                    obj,
+                    "mcKeybindCount",
+                    mcKeybindCountDefault,
+                    silent
+            );
+
             return new Config(
                     profiles,
                     spDefault,
@@ -527,7 +553,8 @@ public class Config {
                     ratelimitTicks,
                     ratelimitStrict,
                     ratelimitSp,
-                    lengthLimitLength
+                    lengthLimitLength,
+                    mcKeybindCount
             ).validate();
         }
     }

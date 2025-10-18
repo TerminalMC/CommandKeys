@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.15-alpha.1
+
+- Added MC keybinds to trigger macros
+
 ## 2.3.14
 
 - Added `EDIT` mode, which allows you to manually enter replacements for a new `%edit%` placeholder

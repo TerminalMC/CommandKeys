@@ -56,13 +56,27 @@ public class CommandKeys {
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    public static final KeyMapping.Category CATEGORY =
+            KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "main"));
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
             translationKey("key", "main.edit"),
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_K,
-            KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "main"))
+            CATEGORY
     );
-    public static final List<KeyMapping> KEYBINDS = List.of(CONFIG_KEY);
+    public static final List<KeyMapping> KEYBINDS = new ArrayList<>(List.of(CONFIG_KEY));
+
+    static {
+        Config.getAndSave();
+        for (int i = 0; i < Config.get().getMcKeybindCount(); i++) {
+            KEYBINDS.add(new KeyMapping(
+                    "Macro Trigger " + (i + 1),
+                    InputConstants.Type.KEYSYM,
+                    InputConstants.UNKNOWN.getValue(),
+                    CATEGORY
+            ));
+        }
+    }
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
@@ -80,7 +94,6 @@ public class CommandKeys {
     }
 
     public static void init() {
-        Config.getAndSave();
     }
 
     public static void afterClientTick(Minecraft mc) {
@@ -113,6 +126,16 @@ public class CommandKeys {
                                     .withStyle(ChatFormatting.GOLD)
                     )
             ));
+        }
+
+        for (int i = 1; i < KEYBINDS.size(); i++) {
+            while (KEYBINDS.get(i).consumeClick()) {
+                for (Macro m : profile().getMacros()) {
+                    if (m.mcKeybind == i) {
+                        m.trigger(m.getKeybind(), false);
+                    }
+                }
+            }
         }
     }
 
