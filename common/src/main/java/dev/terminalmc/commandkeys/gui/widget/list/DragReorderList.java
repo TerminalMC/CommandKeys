@@ -51,13 +51,14 @@ public abstract class DragReorderList extends OptionList {
             Minecraft mc,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpacing,
             Map<Class<? extends Entry>, BiFunction<Integer, Integer, Boolean>> clsFunMap
     ) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpacing);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpacing);
         this.clsFunMap = clsFunMap;
     }
 
@@ -189,8 +190,8 @@ public abstract class DragReorderList extends OptionList {
     }
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.render(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
             super.renderItem(
                     graphics,
@@ -288,9 +289,9 @@ public abstract class DragReorderList extends OptionList {
             return;
         }
 
-        @Nullable Entry hoveredEntry = getEntryAtPosition(getX() + (double) getWidth() / 2, mouseY);
+        @Nullable Entry hoveredEntry = getEntryAtPosition(x0 + (double) width / 2, mouseY);
         if (hoveredEntry == null) {
-            if (mouseY > getBottom() || mouseY > getY() + itemHeight * children().size()) {
+            if (mouseY > y1 || mouseY > y0 + itemHeight * children().size()) {
                 // If we're off the bottom, snap to list bottom. Now if
                 // hoveredEntry is still null we can assume we're off the top.
                 hoveredEntry = children().get(end);

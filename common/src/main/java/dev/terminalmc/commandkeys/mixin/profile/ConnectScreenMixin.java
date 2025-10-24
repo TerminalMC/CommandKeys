@@ -21,7 +21,6 @@ import dev.terminalmc.commandkeys.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.TransferState;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,7 +41,6 @@ public class ConnectScreenMixin {
             Minecraft mc,
             ServerAddress address,
             ServerData data,
-            TransferState state,
             CallbackInfo ci
     ) {
         String server = address.getHost();

@@ -17,14 +17,16 @@
 package dev.terminalmc.commandkeys.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import dev.terminalmc.commandkeys.gui.widget.list.OptionList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +44,7 @@ public class OptionScreen extends OptionsSubScreen {
      * Thus, if the option list width does not exceed this value, the widths of entry elements can
      * be safely hardcoded.
      */
-    public static final int BASE_ROW_WIDTH = Window.BASE_WIDTH;
+    public static final int BASE_ROW_WIDTH = 320;
     /**
      * Space on either side of list entries for the scrollbar.
      */
@@ -103,7 +105,7 @@ public class OptionScreen extends OptionsSubScreen {
         init();
     }
 
-    @Override
+
     protected void addTitle() {
         Font font = Minecraft.getInstance().font;
         int w = font.width(title);
@@ -116,14 +118,19 @@ public class OptionScreen extends OptionsSubScreen {
         addRenderableWidget(new StringWidget(x, y, w, h, title, font).alignLeft());
     }
 
-    @Override
+
     protected void addContents() {
         // Option list
-        list.updateSizeAndPosition(width, height - HEADER_MARGIN - FOOTER_MARGIN, HEADER_MARGIN);
+        list.updateSize(
+                width,
+                height - HEADER_MARGIN - FOOTER_MARGIN,
+                HEADER_MARGIN,
+                height - FOOTER_MARGIN
+        );
         addRenderableWidget(list);
     }
 
-    @Override
+
     protected void addFooter() {
         int w = BASE_LIST_ENTRY_WIDTH;
         int h = LIST_ENTRY_HEIGHT;
@@ -138,10 +145,21 @@ public class OptionScreen extends OptionsSubScreen {
                 .build());
     }
 
-    @Override
-    protected void addOptions() {
-        // Called only by OptionsSubScreen#addContents(), which we override so
-        // this method is not used.
+    protected void clearFocus() {
+        ComponentPath path = this.getCurrentFocusPath();
+        if (path != null) {
+            path.applyFocus(false);
+        }
+    }
+
+    protected void setInitialFocus() {
+        if (Minecraft.getInstance().getLastInputType().isKeyboard()) {
+            FocusNavigationEvent.TabNavigation nav = new FocusNavigationEvent.TabNavigation(true);
+            ComponentPath path = super.nextFocusPath(nav);
+            if (path != null) {
+                changeFocus(path);
+            }
+        }
     }
 
     @Override
@@ -150,6 +168,12 @@ public class OptionScreen extends OptionsSubScreen {
             screen.resize(Minecraft.getInstance(), width, height);
         }
         super.onClose();
+    }
+
+    @Override
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderDirtBackground(graphics);
+        super.render(graphics, mouseX, mouseY, delta);
     }
 
     public Screen getLastScreen() {

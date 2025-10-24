@@ -7,8 +7,10 @@
   "mixins": [
   ],
   "client": [
+    "accessor.AbstractWidgetAccessor",
     "accessor.ChatComponentAccessor",
     "accessor.ChatScreenAccessor",
+    "accessor.EditBoxAccessor",
     "accessor.KeyMappingAccessor",
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",

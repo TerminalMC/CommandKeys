@@ -33,9 +33,9 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +56,8 @@ public class ProfileOptionList extends MacroBindList {
             Minecraft mc,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpace,
@@ -66,7 +67,8 @@ public class ProfileOptionList extends MacroBindList {
                 mc,
                 width,
                 height,
-                y,
+                top,
+                bottom,
                 entryWidth,
                 entryHeight,
                 entrySpace,
@@ -139,7 +141,7 @@ public class ProfileOptionList extends MacroBindList {
                     )
             );
         }
-        clampScrollAmount();
+        setScrollAmount(getScrollAmount());
     }
 
     // Sub-screen opening
@@ -152,7 +154,8 @@ public class ProfileOptionList extends MacroBindList {
                         mc,
                         width,
                         height,
-                        getY(),
+                        y0,
+                        y1,
                         entryWidth,
                         entryHeight,
                         entrySpacing,
@@ -169,7 +172,8 @@ public class ProfileOptionList extends MacroBindList {
                         mc,
                         width,
                         height,
-                        getY(),
+                        y0,
+                        y1,
                         entryWidth,
                         entryHeight,
                         entrySpacing,
@@ -225,7 +229,7 @@ public class ProfileOptionList extends MacroBindList {
                                 localized("option", "macro.control.hud"),
                                 (button, status) -> list.profile.setShowHudMessage(status)
                         );
-                hudButton.setTooltipDelay(Duration.ofMillis(500));
+                hudButton.setTooltipDelay(500);
                 elements.add(hudButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
@@ -245,7 +249,7 @@ public class ProfileOptionList extends MacroBindList {
                                 localized("option", "macro.control.history"),
                                 (button, status) -> list.profile.setAddToHistory(status)
                         );
-                historyButton.setTooltipDelay(Duration.ofMillis(500));
+                historyButton.setTooltipDelay(500);
                 elements.add(historyButton);
                 movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
@@ -265,7 +269,7 @@ public class ProfileOptionList extends MacroBindList {
                                 localized("option", "macro.control.resume"),
                                 (button, status) -> list.profile.setResumeRepeating(status)
                         );
-                resumeButton.setTooltipDelay(Duration.ofMillis(500));
+                resumeButton.setTooltipDelay(500);
                 elements.add(resumeButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
@@ -285,7 +289,7 @@ public class ProfileOptionList extends MacroBindList {
                                 localized("option", "macro.control.ratelimit"),
                                 (button, status) -> list.profile.setUseRatelimit(status)
                         );
-                ratelimitButton.setTooltipDelay(Duration.ofMillis(500));
+                ratelimitButton.setTooltipDelay(500);
                 elements.add(ratelimitButton);
             }
 
@@ -316,12 +320,12 @@ public class ProfileOptionList extends MacroBindList {
                 List<Message> messages = macro.getMessages();
                 boolean editableField = messages.size() == 1;
 
-                int keyButtonWidth = Math.clamp(font.width("> Right Control + W <") + 4, 90, 130);
+                int keyButtonWidth = Mth.clamp(font.width("> Right Control + W <") + 4, 90, 130);
                 KeybindUtil.KeybindInfo keybindInfo =
                         new KeybindUtil.KeybindInfo(profile, macro, macro.getKeybind());
                 int nominalWidth = font.width("> " + keybindInfo.label.getString() + " <") + 4;
                 if (nominalWidth > keyButtonWidth)
-                    keyButtonWidth = Math.clamp(nominalWidth, 90, 130);
+                    keyButtonWidth = Mth.clamp(nominalWidth, 90, 130);
 
                 int messageFieldWidth =
                         width - keyButtonWidth - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
@@ -362,17 +366,19 @@ public class ProfileOptionList extends MacroBindList {
 
                 // Send button
                 Button sendButton = new ImageButton(
-                        movingX, 0, list.smallWidgetWidth, height, SEND_SPRITES, (button) -> {
-                    list.screen.onClose();
-                    Minecraft.getInstance().setScreen(null);
-                    macro.trigger(null, false);
-                }
+                        movingX, 0, list.smallWidgetWidth, height,
+                        0, 0, 20, SEND_ICON, 32, 64,
+                        (button) -> {
+                            list.screen.onClose();
+                            Minecraft.getInstance().setScreen(null);
+                            macro.trigger(null, false);
+                        }
                 );
                 sendButton.setTooltip(Tooltip.create(localized(
                         "option",
                         "profile.trigger.tooltip"
                 )));
-                sendButton.setTooltipDelay(Duration.ofMillis(500));
+                sendButton.setTooltipDelay(500);
                 sendButton.active = CommandKeys.inGame();
                 elements.add(sendButton);
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
@@ -391,20 +397,22 @@ public class ProfileOptionList extends MacroBindList {
                 if (editableField)
                     messageField.setResponder((val) -> macro.setMessage(0, val.stripLeading()));
                 messageField.setValue(editableField
-                        ? messages.getFirst().string
+                        ? messages.get(0).string
                         : getEditButtonLabel(macro, messageFieldWidth - 10));
                 elements.add(messageField);
                 movingX += messageFieldWidth + SPACE_SMALL;
 
                 // Edit button
                 ImageButton editButton = new ImageButton(
-                        movingX, 0, list.smallWidgetWidth, height, OPTION_SPRITES, (button) -> {
-                    list.openMacroOptions(macro);
-                    list.init();
-                }
+                        movingX, 0, list.smallWidgetWidth, height,
+                        0, 0, 20, OPTIONS_ICON, 32, 64,
+                        (button) -> {
+                            list.openMacroOptions(macro);
+                            list.init();
+                        }
                 );
                 editButton.setTooltip(Tooltip.create(localized("option", "profile.key.edit")));
-                editButton.setTooltipDelay(Duration.ofMillis(500));
+                editButton.setTooltipDelay(500);
                 elements.add(editButton);
                 movingX += list.smallWidgetWidth + SPACE_SMALL;
 
@@ -483,7 +491,7 @@ public class ProfileOptionList extends MacroBindList {
                 int excess = strings.size() - 1;
                 String tag = String.format(" [+%d]", excess);
                 String trimTag = String.format("... [+%d]", excess);
-                String first = strings.getFirst();
+                String first = strings.get(0);
 
                 if (first.isBlank()) {
                     return trimTag;
