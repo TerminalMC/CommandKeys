@@ -102,11 +102,11 @@ public class Keybind {
             return false;
         if (key.getType().equals(InputConstants.Type.MOUSE)) {
             return GLFW.glfwGetMouseButton(
-                    Minecraft.getInstance().getWindow().getWindow(),
+                    Minecraft.getInstance().getWindow().handle(),
                     key.getValue()
             ) == 1;
         } else {
-            return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getValue())
+            return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(), key.getValue())
                     == 1;
         }
     }

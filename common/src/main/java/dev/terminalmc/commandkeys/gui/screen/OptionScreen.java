@@ -25,6 +25,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsSubScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -113,7 +115,7 @@ public class OptionScreen extends OptionsSubScreen {
                 0, // Top of screen
                 (HEADER_MARGIN / 2) - (h / 2) // Center of margin
         );
-        addRenderableWidget(new StringWidget(x, y, w, h, title, font).alignLeft());
+        addRenderableWidget(new StringWidget(x, y, w, h, title, font));
     }
 
     @Override
@@ -159,30 +161,30 @@ public class OptionScreen extends OptionsSubScreen {
     // Input handling
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (list.keyPressed(InputConstants.getKey(keyCode, scanCode)))
+    public boolean keyPressed(KeyEvent event) {
+        if (list.keyPressed(InputConstants.getKey(event)))
             return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (list.keyReleased(InputConstants.getKey(keyCode, scanCode)))
+    public boolean keyReleased(KeyEvent event) {
+        if (list.keyReleased(InputConstants.getKey(event)))
             return true;
-        return super.keyReleased(keyCode, scanCode, modifiers);
+        return super.keyReleased(event);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int delta) {
-        if (list.mouseClicked(InputConstants.Type.MOUSE.getOrCreate(delta)))
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (list.mouseClicked(InputConstants.Type.MOUSE.getOrCreate(event.button())))
             return true;
-        return super.mouseClicked(mouseX, mouseY, delta);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int delta) {
-        if (list.mouseReleased(InputConstants.Type.MOUSE.getOrCreate(delta)))
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (list.mouseReleased(InputConstants.Type.MOUSE.getOrCreate(event.button())))
             return true;
-        return super.mouseReleased(mouseX, mouseY, delta);
+        return super.mouseReleased(event);
     }
 }
