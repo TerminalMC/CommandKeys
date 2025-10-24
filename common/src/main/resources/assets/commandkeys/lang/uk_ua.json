@@ -1,6 +1,6 @@
 {
-  "key.commandkeys.main": "CommandKeys",
-  "key.commandkeys.main.edit": "Редагувати активний профіль",
+  "key.category.commandkeys.main": "CommandKeys",
+  "key.category.commandkeys.main.edit": "Редагувати активний профіль",
   "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "message.commandkeys.blocked.ratelimit": "Перевищено ліміт частоти для клавіші %s. Ліміт встановлено на %s активацій за %s тіків.",
   "message.commandkeys.placeholderFault": "Повідомлення \"%s\" не може бути надіслано, оскільки один або кілька заповнювачів не вдалося застосувати.",

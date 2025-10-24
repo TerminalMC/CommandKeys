@@ -16,6 +16,8 @@
 
 package dev.terminalmc.commandkeys.gui.widget.field;
 
+import net.minecraft.client.input.MouseButtonEvent;
+
 /**
  * A {@link TextField} which renders like a normal editable field, but when clicked, runs a custom
  * {@link Runnable} instead of becoming selected.
@@ -44,16 +46,16 @@ public class FakeTextField extends TextField {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isMouseOver(mouseX, mouseY)) {
-            onClick(mouseX, mouseY);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (isMouseOver(event.x(), event.y())) {
+            onClick(event, doubleClick);
             return true;
         }
         return false;
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
         onClick.run();
     }
 
