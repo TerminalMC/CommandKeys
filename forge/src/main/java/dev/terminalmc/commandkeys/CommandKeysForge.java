@@ -17,31 +17,29 @@
 package dev.terminalmc.commandkeys;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@Mod(
-        value = CommandKeys.MOD_ID,
-        dist = Dist.CLIENT
-)
+@Mod(value = CommandKeys.MOD_ID)
 @EventBusSubscriber(
         modid = CommandKeys.MOD_ID,
         bus = EventBusSubscriber.Bus.MOD,
         value = Dist.CLIENT
 )
-public class CommandKeysNeoForge {
+public class CommandKeysForge {
 
-    public CommandKeysNeoForge() {
+    public CommandKeysForge() {
         // Register config screen
         ModLoadingContext.get().registerExtensionPoint(
-                IConfigScreenFactory.class,
-                () -> (mc, parent) -> CommandKeys.getConfigScreen(parent)
+                ConfigScreenHandler.ConfigScreenFactory.class,
+                () -> new ConfigScreenHandler.ConfigScreenFactory(
+                        (minecraft, parent) -> CommandKeys.getConfigScreen(parent))
         );
 
         // Initialize client
@@ -66,8 +64,10 @@ public class CommandKeysNeoForge {
          * Registers client after-tick event.
          */
         @SubscribeEvent
-        public static void registerAfterClientTick(ClientTickEvent.Post event) {
-            CommandKeys.afterClientTick(Minecraft.getInstance());
+        public static void registerAfterClientTick(TickEvent.ClientTickEvent event) {
+            if (event.phase.equals(TickEvent.Phase.END)) {
+                CommandKeys.afterClientTick(Minecraft.getInstance());
+            }
         }
     }
 }

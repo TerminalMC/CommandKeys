@@ -44,7 +44,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  *
  * <p>When a profile is activated it is automatically moved to the start of the
  * list, so the list maintains most-recently-used order and the current active profile can be
- * obtained using {@link List#getFirst}.</p>
+ * obtained using {@link List#get(int 0)}.</p>
  *
  * <p>The profile list is guaranteed to contain at least one instance at all
  * times, and at least two if {@link Config#spDefault} is not equal to
@@ -206,7 +206,7 @@ public class Config {
      * @return the most recently activated {@link Profile}.
      */
     public Profile activeProfile() {
-        return profiles.getFirst();
+        return profiles.get(0);
     }
 
     /**
@@ -214,13 +214,13 @@ public class Config {
      */
     public void activateProfile(int index) {
         // Deactivate active profile if set to do so
-        profiles.getFirst().getMacros().forEach((macro) -> {
+        profiles.get(0).getMacros().forEach((macro) -> {
             if (!macro.resumeRepeatingStatus)
                 macro.deactivate();
         });
         if (index != 0) {
             // Activate requested profile
-            profiles.addFirst(profiles.remove(index));
+            profiles.add(0, profiles.remove(index));
             // Update default pointers
             if (index == spDefault)
                 spDefault = 0;
