@@ -133,7 +133,7 @@ public class KeybindUtil {
                     boolean rl = macro.trigger(triggerKb, ratelimited);
                     // TYPE, EDIT modes require cancelling char
                     if (!rl && cancel == 0 &&
-                            (macro.getMode().equals(TYPE) || macro.getMode().equals(EDIT)))
+                            (macro.getMode().equals(TYPE)))
                         cancel = 1;
                     ratelimited |= rl;
                 }
