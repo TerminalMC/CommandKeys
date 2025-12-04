@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.16
+
+- Fixed an issue causing the first typed character to not register after activating a type or edit
+  mode macro with a non-character key
+
 ## 2.3.15
 
 - Added South Korean translation (doyoung07)

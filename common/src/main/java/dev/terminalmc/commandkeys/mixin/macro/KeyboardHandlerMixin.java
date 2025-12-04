@@ -33,6 +33,9 @@ public class KeyboardHandlerMixin {
     @Unique
     private static boolean commandKeys$cancelCharTyped;
 
+    @Unique
+    private static long commandKeys$cancellationTime;
+
     /**
      * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be cancelled
      * before being passed to the Minecraft callback.
@@ -50,6 +53,8 @@ public class KeyboardHandlerMixin {
     private void wrapClick(InputConstants.Key key, Operation<Void> original) {
         int cancel = KeybindUtil.handleKey(key);
         commandKeys$cancelCharTyped = (cancel != 0);
+        if (commandKeys$cancelCharTyped)
+            commandKeys$cancellationTime = System.nanoTime();
         if (cancel == 2) {
             KeyMapping.set(key, false);
         } else {
@@ -71,8 +76,11 @@ public class KeyboardHandlerMixin {
     ) {
         if (commandKeys$cancelCharTyped) {
             commandKeys$cancelCharTyped = false;
-        } else {
-            original.call(windowPointer, codePoint, modifiers);
+            // Cancel charTyped only if the most recent cancelling keyPress
+            // was less than 5 milliseconds ago
+            if (System.nanoTime() - commandKeys$cancellationTime < 5_000_000)
+                return;
         }
+        original.call(windowPointer, codePoint, modifiers);
     }
 }
