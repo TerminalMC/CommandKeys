@@ -211,9 +211,11 @@ public class ProfileOptionList extends MacroBindList {
                 int buttonWidth = (width - SPACE_SMALL * 3) / 4;
                 int movingX = x;
 
-                CycleButton<Profile.Control> hudButton = CycleButton.builder(this::getLabel)
+                CycleButton<Profile.@NotNull Control> hudButton = CycleButton.builder(
+                                this::getLabel,
+                                list.profile.getShowHudMessage()
+                        )
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.getShowHudMessage())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.hud.tooltip"
@@ -231,9 +233,11 @@ public class ProfileOptionList extends MacroBindList {
                 elements.add(hudButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
-                CycleButton<Profile.Control> historyButton = CycleButton.builder(this::getLabel)
+                CycleButton<Profile.@NotNull Control> historyButton = CycleButton.builder(
+                                this::getLabel,
+                                list.profile.getAddToHistory()
+                        )
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.getAddToHistory())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.history.tooltip"
@@ -251,9 +255,11 @@ public class ProfileOptionList extends MacroBindList {
                 elements.add(historyButton);
                 movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
-                CycleButton<Profile.Control> resumeButton = CycleButton.builder(this::getLabel)
+                CycleButton<Profile.@NotNull Control> resumeButton = CycleButton.builder(
+                                this::getLabel,
+                                list.profile.getResumeRepeating()
+                        )
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.getResumeRepeating())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.resume.tooltip"
@@ -271,9 +277,11 @@ public class ProfileOptionList extends MacroBindList {
                 elements.add(resumeButton);
                 movingX += buttonWidth + SPACE_SMALL;
 
-                CycleButton<Profile.Control> ratelimitButton = CycleButton.builder(this::getLabel)
+                CycleButton<Profile.@NotNull Control> ratelimitButton = CycleButton.builder(
+                                this::getLabel,
+                                list.profile.getUseRatelimit()
+                        )
                         .withValues(Profile.Control.values())
-                        .withInitialValue(list.profile.getUseRatelimit())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.ratelimit.tooltip"
@@ -412,10 +420,12 @@ public class ProfileOptionList extends MacroBindList {
 
                 if (modeButtonWidth != 0) {
                     // Conflict strategy button
-                    elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
+                    elements.add(CycleButton.builder(
+                                    Macro.ConflictStrategy::title,
+                                    macro.getStrategy()
+                            )
                             .displayOnlyValue()
                             .withValues(Macro.ConflictStrategy.values())
-                            .withInitialValue(macro.getStrategy())
                             .withTooltip((status) -> Tooltip.create(status.tooltip()))
                             .create(
                                     movingX,
@@ -431,10 +441,12 @@ public class ProfileOptionList extends MacroBindList {
                     movingX += modeButtonWidth;
 
                     // Send mode button
-                    elements.add(CycleButton.builder(Macro.SendMode::title)
+                    elements.add(CycleButton.builder(
+                                    Macro.SendMode::title,
+                                    macro.getMode()
+                            )
                             .displayOnlyValue()
                             .withValues(Macro.SendMode.values())
-                            .withInitialValue(macro.getMode())
                             .withTooltip((status) -> Tooltip.create(status.tooltip()))
                             .create(
                                     movingX,
@@ -450,10 +462,12 @@ public class ProfileOptionList extends MacroBindList {
                     movingX += modeButtonWidth;
 
                     // Activation type button
-                    elements.add(CycleButton.builder(Macro.ActivationType::title)
+                    elements.add(CycleButton.builder(
+                                    Macro.ActivationType::title,
+                                    macro.getActivationType()
+                            )
                             .displayOnlyValue()
                             .withValues(Macro.ActivationType.values())
-                            .withInitialValue(macro.getActivationType())
                             .withTooltip((status) -> Tooltip.create(status.tooltip()))
                             .create(
                                     movingX,

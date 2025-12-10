@@ -31,6 +31,7 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -219,13 +220,13 @@ public class MacroOptionList extends MacroBindList {
                 int movingX = x;
 
                 boolean hudActive = profile.getShowHudMessage().equals(DEFER);
-                CycleButton<Boolean> hudButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> hudButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                hudActive
+                                        ? macro.getShowHudMessage()
+                                        : macro.getShowHudMessageStatus()
                         )
-                        .withInitialValue(hudActive
-                                ? macro.getShowHudMessage()
-                                : macro.getShowHudMessageStatus())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.hud.tooltip"
@@ -244,13 +245,13 @@ public class MacroOptionList extends MacroBindList {
                 movingX += buttonWidth + SPACE_SMALL;
 
                 boolean historyActive = profile.getAddToHistory().equals(DEFER);
-                CycleButton<Boolean> historyButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> historyButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                historyActive
+                                        ? macro.getAddToHistory()
+                                        : macro.getAddToHistoryStatus()
                         )
-                        .withInitialValue(historyActive
-                                ? macro.getAddToHistory()
-                                : macro.getAddToHistoryStatus())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.history.tooltip"
@@ -269,13 +270,13 @@ public class MacroOptionList extends MacroBindList {
                 movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
                 boolean resumeActive = profile.getResumeRepeating().equals(DEFER);
-                CycleButton<Boolean> resumeButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> resumeButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                resumeActive
+                                        ? macro.getResumeRepeating()
+                                        : macro.getResumeRepeatingStatus()
                         )
-                        .withInitialValue(resumeActive
-                                ? macro.getResumeRepeating()
-                                : macro.getResumeRepeatingStatus())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.resume.tooltip"
@@ -294,13 +295,13 @@ public class MacroOptionList extends MacroBindList {
                 movingX += buttonWidth + SPACE_SMALL;
 
                 boolean ratelimitActive = profile.getUseRatelimit().equals(DEFER);
-                CycleButton<Boolean> ratelimitButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> ratelimitButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                ratelimitActive
+                                        ? macro.getUseRatelimit()
+                                        : macro.getUseRatelimitStatus()
                         )
-                        .withInitialValue(ratelimitActive
-                                ? macro.getUseRatelimit()
-                                : macro.getUseRatelimitStatus())
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "macro.control.ratelimit.tooltip"
@@ -342,9 +343,11 @@ public class MacroOptionList extends MacroBindList {
                 };
 
                 // Conflict strategy button
-                elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
+                elements.add(CycleButton.builder(
+                                Macro.ConflictStrategy::title,
+                                macro.getStrategy()
+                        )
                         .withValues(Macro.ConflictStrategy.values())
-                        .withInitialValue(macro.getStrategy())
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x,
@@ -359,9 +362,11 @@ public class MacroOptionList extends MacroBindList {
                         ));
 
                 // Send mode button
-                AbstractButton modeButton = CycleButton.builder(Macro.SendMode::title)
+                AbstractButton modeButton = CycleButton.builder(
+                                Macro.SendMode::title,
+                                macro.getMode()
+                        )
                         .withValues(Macro.SendMode.values())
-                        .withInitialValue(macro.getMode())
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x + width - buttonWidth,
@@ -386,9 +391,11 @@ public class MacroOptionList extends MacroBindList {
                         values.add(0);
                     if (macro.cycleIndex > values.getLast())
                         macro.cycleIndex = 0;
-                    elements.add(CycleButton.<Integer>builder((status) -> Component.literal(status.toString()))
+                    elements.add(CycleButton.builder(
+                                    (status) -> Component.literal(status.toString()),
+                                    macro.cycleIndex
+                            )
                             .withValues(values)
-                            .withInitialValue(macro.cycleIndex)
                             .displayOnlyValue()
                             .withTooltip((status) -> Tooltip.create(localized(
                                     "option",
@@ -451,9 +458,11 @@ public class MacroOptionList extends MacroBindList {
                 int buttonWidth = (width - SPACE) / 2;
 
                 // Activation type button
-                elements.add(CycleButton.builder(Macro.ActivationType::title)
+                elements.add(CycleButton.builder(
+                                Macro.ActivationType::title,
+                                macro.getActivationType()
+                        )
                         .withValues(Macro.ActivationType.values())
-                        .withInitialValue(macro.getActivationType())
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x,

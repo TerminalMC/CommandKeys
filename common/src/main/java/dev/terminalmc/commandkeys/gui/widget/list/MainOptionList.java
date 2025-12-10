@@ -33,6 +33,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -495,9 +496,11 @@ public class MainOptionList extends OptionList {
                 int buttonWidth = (width - SPACE) / 2;
 
                 // Conflict strategy button
-                elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
+                elements.add(CycleButton.builder(
+                                Macro.ConflictStrategy::title,
+                                Config.get().defaultConflictStrategy
+                        )
                         .withValues(Macro.ConflictStrategy.values())
-                        .withInitialValue(Config.get().defaultConflictStrategy)
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x,
@@ -509,9 +512,11 @@ public class MainOptionList extends OptionList {
                         ));
 
                 // Send mode button
-                elements.add(CycleButton.builder(Macro.SendMode::title)
+                elements.add(CycleButton.builder(
+                                Macro.SendMode::title,
+                                Config.get().defaultSendMode
+                        )
                         .withValues(Macro.SendMode.values())
-                        .withInitialValue(Config.get().defaultSendMode)
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x + width - buttonWidth,
@@ -531,9 +536,11 @@ public class MainOptionList extends OptionList {
                 int buttonWidth = (width - SPACE) / 2;
 
                 // Activation type button
-                elements.add(CycleButton.builder(Macro.ActivationType::title)
+                elements.add(CycleButton.builder(
+                                Macro.ActivationType::title,
+                                Config.get().defaultActivationType
+                        )
                         .withValues(Macro.ActivationType.values())
-                        .withInitialValue(Config.get().defaultActivationType)
                         .withTooltip((status) -> Tooltip.create(status.tooltip()))
                         .create(
                                 x,
@@ -591,11 +598,11 @@ public class MainOptionList extends OptionList {
                 elements.add(ticksField);
                 movingX = x + width - buttonWidth * 2 - SPACE;
 
-                CycleButton<Boolean> strictButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> strictButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                Config.get().ratelimitStrict
                         )
-                        .withInitialValue(Config.get().ratelimitStrict)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "main.ratelimit.strict.tooltip"
@@ -612,11 +619,11 @@ public class MainOptionList extends OptionList {
                 elements.add(strictButton);
                 movingX = x + width - buttonWidth;
 
-                CycleButton<Boolean> spButton = CycleButton.booleanBuilder(
+                CycleButton<@NotNull Boolean> spButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
-                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED)
+                                CommonComponents.OPTION_OFF.copy().withStyle(ChatFormatting.RED),
+                                Config.get().ratelimitSp
                         )
-                        .withInitialValue(Config.get().ratelimitSp)
                         .withTooltip((status) -> Tooltip.create(localized(
                                 "option",
                                 "main.ratelimit.sp.tooltip"
