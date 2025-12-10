@@ -17,6 +17,7 @@
 package dev.terminalmc.commandkeys.gui.widget.field;
 
 import net.minecraft.client.input.MouseButtonEvent;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A {@link TextField} which renders like a normal editable field, but when clicked, runs a custom
@@ -46,7 +47,7 @@ public class FakeTextField extends TextField {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         if (isMouseOver(event.x(), event.y())) {
             onClick(event, doubleClick);
             return true;
@@ -55,7 +56,7 @@ public class FakeTextField extends TextField {
     }
 
     @Override
-    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+    public void onClick(@NotNull MouseButtonEvent event, boolean doubleClick) {
         onClick.run();
     }
 

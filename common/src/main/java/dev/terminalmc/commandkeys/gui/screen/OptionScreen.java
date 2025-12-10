@@ -99,7 +99,7 @@ public class OptionScreen extends OptionsSubScreen {
     }
 
     @Override
-    public void resize(@NotNull Minecraft mc, int width, int height) {
+    public void resize(int width, int height) {
         this.width = width;
         this.height = height;
         init();
@@ -149,7 +149,7 @@ public class OptionScreen extends OptionsSubScreen {
     @Override
     public void onClose() {
         if (lastScreen instanceof OptionScreen screen) {
-            screen.resize(Minecraft.getInstance(), width, height);
+            screen.resize(width, height);
         }
         super.onClose();
     }
@@ -161,14 +161,14 @@ public class OptionScreen extends OptionsSubScreen {
     // Input handling
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         if (list.keyPressed(InputConstants.getKey(event)))
             return true;
         return super.keyPressed(event);
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event) {
+    public boolean keyReleased(@NotNull KeyEvent event) {
         if (list.keyReleased(InputConstants.getKey(event)))
             return true;
         return super.keyReleased(event);
