@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.17
+
+- Fixed an issue causing toggle actions to not be cancelled when activating macros in veto mode.
+
 ## 2.3.16
 
 - Fixed an issue causing the first typed character to not register after activating a type or edit
