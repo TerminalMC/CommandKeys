@@ -23,7 +23,7 @@ import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,14 +47,15 @@ public abstract class MacroBindList extends DragReorderList {
             Minecraft mc,
             int width,
             int height,
-            int y,
+            int top,
+            int bottom,
             int entryWidth,
             int entryHeight,
             int entrySpace,
             @NotNull Profile profile,
             Map<Class<? extends Entry>, BiFunction<Integer, Integer, Boolean>> clsFunMap
     ) {
-        super(mc, width, height, y, entryWidth, entryHeight, entrySpace, clsFunMap);
+        super(mc, width, height, top, bottom, entryWidth, entryHeight, entrySpace, clsFunMap);
         this.profile = profile;
     }
 

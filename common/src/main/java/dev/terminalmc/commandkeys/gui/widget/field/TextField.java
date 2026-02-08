@@ -17,6 +17,7 @@
 package dev.terminalmc.commandkeys.gui.widget.field;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.mixin.accessor.EditBoxAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -25,6 +26,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -144,7 +146,7 @@ public class TextField extends EditBox {
 
     @Override
     public void setHint(@NotNull Component hint) {
-        super.setHint(hint.copy().withColor(TEXT_COLOR_HINT));
+        super.setHint(hint.copy().withStyle(Style.EMPTY.withColor(TEXT_COLOR_HINT)));
     }
 
     @Override
@@ -242,14 +244,33 @@ public class TextField extends EditBox {
         return true;
     }
 
+    public void moveCursorTo(int delta, boolean select) {
+        setCursorPosition(delta);
+        if (!select) {
+            setHighlightPos(getCursorPosition());
+        }
+
+        onValueChange(((EditBoxAccessor) this).commandkeys$getValue());
+    }
+
+    public void moveCursorToEnd(boolean select) {
+        this.moveCursorTo(((EditBoxAccessor) this).commandkeys$getValue().length(), select);
+    }
+
+    private void onValueChange(String newText) {
+        if (((EditBoxAccessor) this).commandkeys$getResponder() != null) {
+            ((EditBoxAccessor) this).commandkeys$getResponder().accept(newText);
+        }
+    }
+
     // Undo-redo history
 
     private void updateHistory(String str) {
         if (historyIndex == -1 || !history.get(historyIndex).equals(str)) {
             if (historyIndex < history.size() - 1) {
                 // Remove old history before writing new
-                for (int i = history.size() - 1; i > historyIndex; i--) {
-                    history.removeLast();
+                if (history.size() > historyIndex + 1) {
+                    history.subList(historyIndex + 1, history.size()).clear();
                 }
             }
             history.add(str);

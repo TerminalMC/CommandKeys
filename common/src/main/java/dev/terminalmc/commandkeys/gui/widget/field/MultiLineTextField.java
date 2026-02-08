@@ -218,8 +218,8 @@ public class MultiLineTextField extends MultiLineEditBox {
         if (historyIndex == -1 || !history.get(historyIndex).equals(str)) {
             if (historyIndex < history.size() - 1) {
                 // Remove old history before writing new
-                for (int i = history.size() - 1; i > historyIndex; i--) {
-                    history.removeLast();
+                if (history.size() > historyIndex + 1) {
+                    history.subList(historyIndex + 1, history.size()).clear();
                 }
             }
             history.add(str);
