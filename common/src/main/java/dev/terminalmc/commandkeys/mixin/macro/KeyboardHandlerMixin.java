@@ -73,7 +73,7 @@ public class KeyboardHandlerMixin {
 
     /**
      * Allows cancellation of the call to {@link net.minecraft.client.KeyMapping#click}
-     * corresponding to a call cancelled by {@link KeyboardHandlerMixin#wrapClick}.
+     * corresponding to a call cancelled by {@link KeyboardHandlerMixin#wrapSet}.
      */
     @WrapOperation(
             method = "keyPress",
