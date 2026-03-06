@@ -527,7 +527,7 @@ public class MacroOptionList extends MacroBindList {
                 // Message field
                 MultiLineTextField messageField =
                         new MultiLineTextField(x, 0, msgFieldWidth, height * 2);
-                messageField.setCharacterLimit(512);
+                messageField.setCharacterLimit(4096);
                 messageField.setValueListener((val) -> msg.string = val.stripLeading());
                 messageField.setValue(msg.string);
                 elements.add(messageField);
