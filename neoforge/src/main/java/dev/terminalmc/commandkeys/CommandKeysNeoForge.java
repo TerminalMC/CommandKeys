@@ -16,13 +16,16 @@
 
 package dev.terminalmc.commandkeys;
 
+import dev.terminalmc.commandkeys.command.Commands;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
@@ -61,6 +64,17 @@ public class CommandKeysNeoForge {
             value = Dist.CLIENT
     )
     static class ClientEventHandler {
+
+        /**
+         * Registers all client-side commands.
+         */
+        @SubscribeEvent
+        static void registerClientCommands(RegisterClientCommandsEvent event) {
+            new Commands<CommandSourceStack>().register(
+                    event.getDispatcher(),
+                    event.getBuildContext()
+            );
+        }
 
         /**
          * Registers client after-tick event.

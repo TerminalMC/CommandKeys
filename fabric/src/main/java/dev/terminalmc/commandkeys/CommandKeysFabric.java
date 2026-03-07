@@ -16,7 +16,10 @@
 
 package dev.terminalmc.commandkeys;
 
+import dev.terminalmc.commandkeys.command.Commands;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 
@@ -26,6 +29,13 @@ public class CommandKeysFabric implements ClientModInitializer {
     public void onInitializeClient() {
         // Register keybinds
         CommandKeys.KEYBINDS.forEach(KeyBindingHelper::registerKeyBinding);
+
+        // Register client commands
+        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->
+                new Commands<FabricClientCommandSource>().register(
+                        dispatcher,
+                        buildContext
+                )));
 
         // Register client after-tick event
         ClientTickEvents.END_CLIENT_TICK.register(CommandKeys::afterClientTick);

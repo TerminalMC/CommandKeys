@@ -3,6 +3,8 @@
   "key.commandkeys.main.edit": "Редагувати активний профіль",
   "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "message.commandkeys.blocked.ratelimit": "Перевищено ліміт частоти для клавіші %s. Ліміт встановлено на %s активацій за %s тіків.",
+  "message.commandkeys.command.profile.failure": "Failed to switch profile.",
+  "message.commandkeys.command.profile.success": "Switched profile from '%s' to '%s'.",
   "message.commandkeys.placeholderFault": "Повідомлення \"%s\" не може бути надіслано, оскільки один або кілька заповнювачів не вдалося застосувати.",
   "option.commandkeys.macro": "Налаштування макросу",
   "option.commandkeys.macro.activation": "Activation Type",

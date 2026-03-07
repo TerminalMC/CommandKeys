@@ -3,6 +3,8 @@
   "key.commandkeys.main.edit": "활성 프로필 수정",
   "message.commandkeys.blocked.lengthlimit": "메시지 길이가 %d 자로 길어서 전송이 차단되었습니다. 현재 길이 제한은 %d 자 입니다.",
   "message.commandkeys.blocked.ratelimit": "키 %s 의 사용 한도를 초과했습니다. 현재 한도는 %s 이며, %s 틱 동안 활성화 되었습니다..",
+  "message.commandkeys.command.profile.failure": "Failed to switch profile.",
+  "message.commandkeys.command.profile.success": "Switched profile from '%s' to '%s'.",
   "message.commandkeys.placeholderFault": "placeholders 적용 실패로 \"%s\" 를 전송할 수 없습니다.",
   "option.commandkeys.macro": "매크로 옵션",
   "option.commandkeys.macro.activation": "활성화 유형",

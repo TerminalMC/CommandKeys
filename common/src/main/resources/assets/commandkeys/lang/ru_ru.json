@@ -3,6 +3,8 @@
   "key.commandkeys.main.edit": "Изменить активный профиль",
   "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "message.commandkeys.blocked.ratelimit": "Превышен лимит для ключа %s. Лимит установлен на %s активаций за %s тиков.",
+  "message.commandkeys.command.profile.failure": "Failed to switch profile.",
+  "message.commandkeys.command.profile.success": "Switched profile from '%s' to '%s'.",
   "message.commandkeys.placeholderFault": "Сообщение \"%s\" не может быть отправлено, так как не удалось применить один или несколько заполнителей.",
   "option.commandkeys.macro": "Параметры макросов",
   "option.commandkeys.macro.activation": "Тип активации",

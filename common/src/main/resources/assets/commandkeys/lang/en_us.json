@@ -3,6 +3,8 @@
   "key.commandkeys.main.edit": "Edit Active Profile",
   "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "message.commandkeys.blocked.ratelimit": "Ratelimit exceeded by key %s. Ratelimit is set to %s activations in %s ticks.",
+  "message.commandkeys.command.profile.failure": "Failed to switch profile.",
+  "message.commandkeys.command.profile.success": "Switched profile from '%s' to '%s'.",
   "message.commandkeys.placeholderFault": "Message \"%s\" could not be sent because one or more placeholders failed to apply.",
   "option.commandkeys.macro": "Macro Options",
   "option.commandkeys.macro.activation": "Activation Type",

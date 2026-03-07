@@ -3,6 +3,8 @@
   "key.commandkeys.main.edit": "Aktives Profil bearbeiten",
   "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "message.commandkeys.blocked.ratelimit": "Ratenlimit von %s Taste überschritten. Ratenlimit ist auf %s Aktivierungen pro %s Ticks eingestellt.",
+  "message.commandkeys.command.profile.failure": "Failed to switch profile.",
+  "message.commandkeys.command.profile.success": "Switched profile from '%s' to '%s'.",
   "message.commandkeys.placeholderFault": "Die Nachricht \"%s\" konnte nicht gesendet werden, da ein oder mehrere Platzhalter nicht angewendet werden konnten.",
   "modmenu.descriptionTranslation.commandkeys": "Sende vorab geschriebene Chatnachrichten und Befehle per Hotkey.",
   "option.commandkeys.macro": "Makro Optionen",
