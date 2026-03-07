@@ -40,6 +40,8 @@
   "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "Befehle/Nachrichten",
   "option.commandkeys.macro.mode": "Sende Modus",
+  "option.commandkeys.macro.name.hint": "Name",
+  "option.commandkeys.macro.name.tooltip": "List name for this macro.",
   "option.commandkeys.macro.profile": "Zurück zum Profil",
   "option.commandkeys.macro.send.CYCLE": "Durchlauf",
   "option.commandkeys.macro.send.CYCLE.tooltip": "In diesem Modus können mehrere Nachrichten mit einem einzigen Tastaturbefehl gesendet werden, indem sie durch zwei Kommas getrennt werden, z. B. /lobby,,/nick",

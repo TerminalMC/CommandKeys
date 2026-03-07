@@ -314,7 +314,7 @@ public class ProfileOptionList extends MacroBindList {
                 super();
                 Font font = Minecraft.getInstance().font;
                 List<Message> messages = macro.getMessages();
-                boolean editableField = messages.size() == 1;
+                boolean editableField = macro.name.isBlank() && messages.size() == 1;
 
                 int keyButtonWidth = Math.clamp(font.width("> Right Control + W <") + 4, 90, 130);
                 KeybindUtil.KeybindInfo keybindInfo =
@@ -392,7 +392,9 @@ public class ProfileOptionList extends MacroBindList {
                     messageField.setResponder((val) -> macro.setMessage(0, val.stripLeading()));
                 messageField.setValue(editableField
                         ? messages.getFirst().string
-                        : getEditButtonLabel(macro, messageFieldWidth - 10));
+                        : macro.name.isBlank()
+                                ? getEditButtonLabel(macro, messageFieldWidth - 10)
+                                : macro.name);
                 elements.add(messageField);
                 movingX += messageFieldWidth + SPACE_SMALL;
 

@@ -39,6 +39,8 @@
   "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "Commands/Messages",
   "option.commandkeys.macro.mode": "Send Mode",
+  "option.commandkeys.macro.name.hint": "Name",
+  "option.commandkeys.macro.name.tooltip": "List name for this macro.",
   "option.commandkeys.macro.profile": "Back to Profile",
   "option.commandkeys.macro.send.CYCLE": "Cycle",
   "option.commandkeys.macro.send.CYCLE.tooltip": "Messages will be cycled through, one per key-press.\nIn this mode, you can send multiple messages in a single key-press by separating them with two commas e.g. /lobby,,/nick",

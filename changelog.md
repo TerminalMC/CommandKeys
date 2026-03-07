@@ -2,7 +2,8 @@
 
 ## 2.4.0
 
-- Fixed conflict handling for debug keys on 1.21.11
+- Fixed conflict handling for debug keys on 1.21.11.
+- Added an optional list entry name field for macros.
 - Changed default Conflict Strategy from SUBMIT to ASSERT.
 - Increased command/message field length limit from 512 to 4096.
 

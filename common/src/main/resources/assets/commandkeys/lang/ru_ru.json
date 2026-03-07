@@ -39,6 +39,8 @@
   "option.commandkeys.macro.maxRepeats.tooltip": "Maximum number of repetitions (set to 0 for unlimited).",
   "option.commandkeys.macro.messages": "Команды/Сообщения",
   "option.commandkeys.macro.mode": "Режим отправки",
+  "option.commandkeys.macro.name.hint": "Name",
+  "option.commandkeys.macro.name.tooltip": "List name for this macro.",
   "option.commandkeys.macro.profile": "Вернуться к профилю",
   "option.commandkeys.macro.send.CYCLE": "Цикл",
   "option.commandkeys.macro.send.CYCLE.tooltip": "Сообщения будут циклически повторяться, по одному за нажатие клавиши.\nВ этом режиме можно отправлять несколько сообщений за одно нажатие клавиши, разделяя их двумя запятыми, например, /lobby,,/nick",

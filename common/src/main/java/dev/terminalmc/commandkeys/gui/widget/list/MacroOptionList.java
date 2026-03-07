@@ -87,6 +87,14 @@ public class MacroOptionList extends MacroBindList {
 
     @Override
     protected void addEntries() {
+
+        addEntry(new Entry.NameField(
+                dynEntryX,
+                dynEntryWidth,
+                entryHeight,
+                macro
+        ));
+
         addEntry(new Entry.DualKeybind(
                 dynEntryX,
                 dynEntryWidth,
@@ -156,6 +164,34 @@ public class MacroOptionList extends MacroBindList {
     // Custom entries
 
     private abstract static class Entry extends OptionList.Entry {
+
+        private static class NameField extends Entry {
+
+            NameField(
+                    int x,
+                    int width,
+                    int height,
+                    Macro macro
+            ) {
+                super();
+
+                TextField nameField = new TextField(
+                        x,
+                        0,
+                        width,
+                        height
+                );
+                nameField.setMaxLength(256);
+                nameField.setResponder((val) -> macro.name = val.strip());
+                nameField.setValue(macro.name);
+                nameField.setHint(localized("option", "macro.name.hint"));
+                nameField.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "macro.name.tooltip"
+                )));
+                elements.add(nameField);
+            }
+        }
 
         private static class DualKeybind extends Entry {
 

@@ -41,7 +41,7 @@ import static dev.terminalmc.commandkeys.util.Localization.localized;
  */
 public class Macro {
 
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
     public final int version = VERSION;
 
     public static final Random RANDOM = new Random();
@@ -156,6 +156,10 @@ public class Macro {
     public transient int cycleIndex;
     public static final int cycleIndexDefault = 0;
 
+    // Label
+    public String name;
+    public static final String nameDefault = "";
+
     // Keybinds
 
     /**
@@ -190,6 +194,7 @@ public class Macro {
                 spaceTicksDefault,
                 maxRepeatsDefault,
                 cycleIndexDefault,
+                nameDefault,
                 keybindDefault.get(),
                 altKeybindDefault.get(),
                 messagesDefault.get()
@@ -210,6 +215,7 @@ public class Macro {
             int spaceTicks,
             int maxRepeats,
             int cycleIndex,
+            String name,
             Keybind keybind,
             Keybind altKeybind,
             List<Message> messages
@@ -224,6 +230,7 @@ public class Macro {
         this.spaceTicks = spaceTicks;
         this.maxRepeats = maxRepeats;
         this.cycleIndex = cycleIndex;
+        this.name = name;
         this.keybind = keybind;
         this.altKeybind = altKeybind;
         this.messages = messages;
@@ -247,6 +254,7 @@ public class Macro {
         this.spaceTicks = macro.spaceTicks;
         this.maxRepeats = macro.maxRepeats;
         this.cycleIndex = macro.cycleIndex;
+        this.name = macro.name;
         this.keybind = new Keybind(macro.keybind);
         this.altKeybind = new Keybind(macro.altKeybind);
         this.messages = macro.messages.stream()
@@ -663,6 +671,10 @@ public class Macro {
 
             int maxRepeats = JsonUtil.getOrDefault(obj, "maxRepeats", maxRepeatsDefault, silent);
 
+            String name = version >= 7 // Since v2.4.0
+                    ? JsonUtil.getOrDefault(obj, "name", nameDefault, silent)
+                    : nameDefault;
+
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(
                     ctx,
@@ -705,6 +717,7 @@ public class Macro {
                     spaceTicks,
                     maxRepeats,
                     0,
+                    name,
                     keybind,
                     altKeybind,
                     messages

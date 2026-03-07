@@ -39,6 +39,8 @@
   "option.commandkeys.macro.maxRepeats.tooltip": "최대 반복 횟수입니다 (무제한으로는 0으로 설정).",
   "option.commandkeys.macro.messages": "커맨드/메시지",
   "option.commandkeys.macro.mode": "전송 방식",
+  "option.commandkeys.macro.name.hint": "Name",
+  "option.commandkeys.macro.name.tooltip": "List name for this macro.",
   "option.commandkeys.macro.profile": "프로필로 돌아가기",
   "option.commandkeys.macro.send.CYCLE": "순환",
   "option.commandkeys.macro.send.CYCLE.tooltip": "키를 누를 떄마다 메시지를 하나씩 순환해 전송합니다.\n두 개의 쉼표로 구분하면 한 번의 키 입력으로 여러개의 메시지를 보낼 수 있습니다. 예: /lobby,,/nick",
