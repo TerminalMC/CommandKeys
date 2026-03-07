@@ -17,6 +17,7 @@
 package dev.terminalmc.commandkeys.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.config.Keybind;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Profile;
@@ -73,14 +74,26 @@ public class KeybindUtil {
      * @return the number of operations to cancel. 0 -> None. 1 -> KeyboardHandler#charTyped. 2 ->
      * KeyboardHandler#charTyped and KeyMapping#click.
      */
-    public static int handleKey(InputConstants.Key key) {
+    public static int handleKey(InputConstants.Key key, boolean press) {
         int cancel = 0;
 
         if (Minecraft.getInstance().screen == null && profile().keybindMap.containsKey(key)) {
             // Get all keybinds matching the pressed key
-            Collection<Keybind> keybinds = profile().keybindMap.get(key);
+            Collection<Keybind> keybinds = profile().keybindMap.get(key)
+                    .stream()
+                    .filter((k) -> k.activateOnPress == press)
+                    .toList();
             // The single keybind that we decide best matches the key
             Keybind triggerKb = null;
+
+            Collection<Keybind> tempAll = profile().keybindMap.get(key);
+            CommandKeys.LOG.warn(
+                    "found {} keybinds matching key {}, of which {} match press={}",
+                    tempAll.size(),
+                    key.getName(),
+                    keybinds.size(),
+                    press
+            );
 
             // Search for a limited keybind for which the limit key is down
             Collection<Macro> macros = null;

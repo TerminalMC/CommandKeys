@@ -685,7 +685,8 @@ public class Macro {
                     silent
             ) : new Keybind(
                     JsonUtil.getOrDefault(obj, "keyName", InputConstants.UNKNOWN, true),
-                    JsonUtil.getOrDefault(obj, "limitKeyName", InputConstants.UNKNOWN, true)
+                    JsonUtil.getOrDefault(obj, "limitKeyName", InputConstants.UNKNOWN, true),
+                    Keybind.activateOnPressDefault
             ).validate();
 
             Keybind altKeybind = JsonUtil.getOrDefault(

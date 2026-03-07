@@ -42,10 +42,28 @@ public class KeyboardHandlerMixin {
     private static long commandKeys$cancelCharTypedTime;
 
     /**
-     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be cancelled
+     * Passes keyboard key release to {@link KeybindUtil#handleKey}.
+     *
+     * @see MouseHandlerMixin#wrapSet
+     */
+    @WrapOperation(
+            method = "keyPress",
+            at = @At(
+                    value = "INVOKE:FIRST",
+                    target = "Lnet/minecraft/client/KeyMapping;set(Lcom/mojang/blaze3d/platform/InputConstants$Key;Z)V"
+            )
+    )
+    @SuppressWarnings("JavadocReference")
+    private void wrapRelease(InputConstants.Key key, boolean held, Operation<Void> original) {
+        KeybindUtil.handleKey(key, false);
+        original.call(key, held);
+    }
+
+    /**
+     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be canceled
      * before being passed to the Minecraft callback.
      *
-     * @see MouseHandlerMixin#wrapClick
+     * @see MouseHandlerMixin#wrapSet
      */
     @WrapOperation(
             method = "keyPress",
@@ -55,8 +73,8 @@ public class KeyboardHandlerMixin {
             )
     )
     @SuppressWarnings("JavadocReference")
-    private void wrapSet(InputConstants.Key key, boolean held, Operation<Void> original) {
-        int cancel = KeybindUtil.handleKey(key);
+    private void wrapPress(InputConstants.Key key, boolean held, Operation<Void> original) {
+        int cancel = KeybindUtil.handleKey(key, true);
 
         commandKeys$cancelKeyPressed = (cancel == 2);
         if (commandKeys$cancelKeyPressed)
@@ -73,7 +91,7 @@ public class KeyboardHandlerMixin {
 
     /**
      * Allows cancellation of the call to {@link net.minecraft.client.KeyMapping#click}
-     * corresponding to a call cancelled by {@link KeyboardHandlerMixin#wrapSet}.
+     * corresponding to a call canceled by {@link KeyboardHandlerMixin#wrapPress}.
      */
     @WrapOperation(
             method = "keyPress",
@@ -95,7 +113,7 @@ public class KeyboardHandlerMixin {
 
     /**
      * Allows cancellation of the call to {@link KeyboardHandler#charTyped} corresponding to a call
-     * cancelled by {@link KeyboardHandlerMixin#wrapClick}.
+     * canceled by {@link KeyboardHandlerMixin#wrapPress}.
      */
     @WrapMethod(method = "charTyped")
     @SuppressWarnings("JavadocReference")

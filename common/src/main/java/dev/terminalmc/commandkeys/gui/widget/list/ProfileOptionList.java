@@ -324,7 +324,8 @@ public class ProfileOptionList extends MacroBindList {
                     keyButtonWidth = Math.clamp(nominalWidth, 90, 130);
 
                 int messageFieldWidth =
-                        width - keyButtonWidth - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
+                        width - keyButtonWidth - (list.smallWidgetWidth * 2 + list.tinyWidgetWidth
+                                + SPACE_SMALL * 2);
                 int modeButtonWidth = 0;
                 if (messageFieldWidth > 280) {
                     modeButtonWidth = 40;
@@ -359,6 +360,25 @@ public class ProfileOptionList extends MacroBindList {
                         .size(keyButtonWidth, height)
                         .build());
                 movingX += keyButtonWidth;
+
+                elements.add(CycleButton.booleanBuilder(
+                                Component.literal("\u2193"),
+                                Component.literal("\u2191")
+                        )
+                        .withInitialValue(macro.getKeybind().activateOnPress)
+                        .displayOnlyValue()
+                        .withTooltip((status) -> Tooltip.create(status
+                                ? localized("option", "macro.keybind.activate.press.tooltip")
+                                : localized("option", "macro.keybind.activate.release.tooltip")))
+                        .create(
+                                movingX,
+                                0,
+                                list.tinyWidgetWidth,
+                                height,
+                                Component.empty(),
+                                (button, value) -> macro.getKeybind().activateOnPress = value
+                        ));
+                movingX += list.tinyWidgetWidth;
 
                 // Send button
                 Button sendButton = new ImageButton(

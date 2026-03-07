@@ -35,7 +35,7 @@ import java.util.Objects;
  */
 public class Keybind {
 
-    public static final int VERSION = 0;
+    public static final int VERSION = 1;
     public final int version = VERSION;
 
     private String keyName;
@@ -44,27 +44,32 @@ public class Keybind {
     private String limitKeyName;
     private transient InputConstants.Key limitKey;
 
+    public boolean activateOnPress;
+    public static final boolean activateOnPressDefault = true;
+
     /**
      * Creates a default instance.
      */
     public Keybind() {
-        this(InputConstants.UNKNOWN, InputConstants.UNKNOWN);
+        this(InputConstants.UNKNOWN, InputConstants.UNKNOWN, activateOnPressDefault);
     }
 
     /**
      * Not validated. Only for use by default constructor or self-validating deserializer.
      */
-    Keybind(InputConstants.Key key, InputConstants.Key limitKey) {
+    Keybind(InputConstants.Key key, InputConstants.Key limitKey, boolean activateOnPress) {
         this.key = key;
         this.keyName = key.getName();
         this.limitKey = limitKey;
         this.limitKeyName = limitKey.getName();
+        this.activateOnPress = activateOnPress;
     }
 
     /**
      * Copy constructor.
      */
     Keybind(Keybind keybind) {
+        this.activateOnPress = keybind.activateOnPress;
         this.key = keybind.key;
         this.keyName = keybind.keyName;
         this.limitKey = keybind.limitKey;
@@ -117,12 +122,14 @@ public class Keybind {
             return true;
         if (!(other instanceof Keybind keybind))
             return false;
-        return key.equals(keybind.key) && limitKey.equals(keybind.limitKey);
+        return key.equals(keybind.key)
+                && limitKey.equals(keybind.limitKey)
+                && activateOnPress == keybind.activateOnPress;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, limitKey);
+        return Objects.hash(key, limitKey, activateOnPress);
     }
 
     // Validation
@@ -157,7 +164,11 @@ public class Keybind {
             InputConstants.Key limitKey =
                     JsonUtil.getOrDefault(obj, "limitKeyName", InputConstants.UNKNOWN, silent);
 
-            return new Keybind(key, limitKey).validate();
+            boolean activateOnPress = version >= 1 // Since v2.4.0
+                    ? JsonUtil.getOrDefault(obj, "activateOnPress", activateOnPressDefault, silent)
+                    : activateOnPressDefault;
+
+            return new Keybind(key, limitKey, activateOnPress).validate();
         }
     }
 }
