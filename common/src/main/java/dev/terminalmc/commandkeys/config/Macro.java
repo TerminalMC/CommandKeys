@@ -691,7 +691,7 @@ public class Macro {
 
             int maxRepeats = JsonUtil.getOrDefault(obj, "maxRepeats", maxRepeatsDefault, silent);
 
-            String name = version >= 7 // Since v2.4.0
+            String name = version >= 7 // Since v2.4.0-beta.1
                     ? JsonUtil.getOrDefault(obj, "name", nameDefault, silent)
                     : nameDefault;
 
