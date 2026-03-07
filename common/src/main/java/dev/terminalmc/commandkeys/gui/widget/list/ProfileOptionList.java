@@ -387,7 +387,7 @@ public class ProfileOptionList extends MacroBindList {
                                 height,
                                 () -> list.openMacroOptions(macro)
                         );
-                messageField.setMaxLength(512);
+                messageField.setMaxLength(4096);
                 if (editableField)
                     messageField.setResponder((val) -> macro.setMessage(0, val.stripLeading()));
                 messageField.setValue(editableField

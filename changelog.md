@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0
+
+- Increased command/message field length limit from 512 to 4096.
+
 ## 2.3.17
 
 - Fixed an issue causing toggle actions to not be cancelled when activating macros in veto mode.
