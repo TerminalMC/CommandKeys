@@ -67,7 +67,7 @@ public class Macro {
     // Local controls
 
     ConflictStrategy conflictStrategy;
-    public static final ConflictStrategy conflictStrategyDefault = ConflictStrategy.SUBMIT;
+    public static final ConflictStrategy conflictStrategyDefault = ConflictStrategy.ASSERT;
 
     public enum ConflictStrategy {
         SUBMIT(ChatFormatting.GREEN),

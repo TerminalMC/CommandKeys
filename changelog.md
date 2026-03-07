@@ -2,6 +2,7 @@
 
 ## 2.4.0
 
+- Changed default Conflict Strategy from SUBMIT to ASSERT.
 - Increased command/message field length limit from 512 to 4096.
 
 ## 2.3.17
