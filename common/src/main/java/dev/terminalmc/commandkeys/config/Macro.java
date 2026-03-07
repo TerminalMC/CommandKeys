@@ -157,9 +157,17 @@ public class Macro {
     public transient int cycleIndex;
     public static final int cycleIndexDefault = 0;
 
-    // Label
+    /**
+     * Label
+     */
     public String name;
     public static final String nameDefault = "";
+
+    /**
+     * MC activator key index
+     */
+    public int mcActivatorKey;
+    public static final int mcActivatorKeyDefault = 0;
 
     // Keybinds
 
@@ -196,6 +204,7 @@ public class Macro {
                 maxRepeatsDefault,
                 cycleIndexDefault,
                 nameDefault,
+                mcActivatorKeyDefault,
                 keybindDefault.get(),
                 altKeybindDefault.get(),
                 messagesDefault.get()
@@ -217,6 +226,7 @@ public class Macro {
             int maxRepeats,
             int cycleIndex,
             String name,
+            int mcActivatorKey,
             Keybind keybind,
             Keybind altKeybind,
             List<Message> messages
@@ -232,6 +242,7 @@ public class Macro {
         this.maxRepeats = maxRepeats;
         this.cycleIndex = cycleIndex;
         this.name = name;
+        this.mcActivatorKey = mcActivatorKey;
         this.keybind = keybind;
         this.altKeybind = altKeybind;
         this.messages = messages;
@@ -256,6 +267,7 @@ public class Macro {
         this.maxRepeats = macro.maxRepeats;
         this.cycleIndex = macro.cycleIndex;
         this.name = macro.name;
+        this.mcActivatorKey = macro.mcActivatorKey;
         this.keybind = new Keybind(macro.keybind);
         this.altKeybind = new Keybind(macro.altKeybind);
         this.messages = macro.messages.stream()
@@ -691,9 +703,10 @@ public class Macro {
 
             int maxRepeats = JsonUtil.getOrDefault(obj, "maxRepeats", maxRepeatsDefault, silent);
 
-            String name = version >= 7 // Since v2.4.0-beta.1
-                    ? JsonUtil.getOrDefault(obj, "name", nameDefault, silent)
-                    : nameDefault;
+            String name = JsonUtil.getOrDefault(obj, "name", nameDefault, silent);
+
+            int mcActivatorKey =
+                    JsonUtil.getOrDefault(obj, "mcActivatorKey", mcActivatorKeyDefault, silent);
 
             Keybind keybind = version >= 4 // Since 2.3.0-beta.1
                     ? JsonUtil.getOrDefault(
@@ -738,6 +751,7 @@ public class Macro {
                     maxRepeats,
                     0,
                     name,
+                    mcActivatorKey,
                     keybind,
                     altKeybind,
                     messages

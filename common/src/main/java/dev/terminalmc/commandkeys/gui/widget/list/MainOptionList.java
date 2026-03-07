@@ -36,6 +36,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
 
@@ -157,11 +158,12 @@ public class MainOptionList extends OptionList {
                 dynEntryX,
                 dynEntryWidth,
                 entryHeight,
-                localized("option", "main.lengthlimit", "\u2139"),
-                Tooltip.create(localized("option", "main.lengthlimit.tooltip")),
-                500
+                localized("option", "main.other"),
+                null,
+                -1
         ));
         addEntry(new Entry.LengthLimit(dynEntryX, dynEntryWidth, entryHeight));
+        addEntry(new Entry.MacroMcKeyCount(dynEntryX, dynEntryWidth, entryHeight));
     }
 
     // Sub-screen opening
@@ -639,8 +641,25 @@ public class MainOptionList extends OptionList {
             LengthLimit(int x, int width, int height) {
                 super();
 
+                int labelWidth = 140;
+                Button label = Button.builder(
+                        localized("option", "main.lengthlimit"), (button) -> {
+                        }
+                ).pos(x, 0).size(labelWidth, height).build();
+                label.active = false;
+                label.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "main.lengthlimit.tooltip"
+                ).append("\n")
+                        .append(localized(
+                                "option",
+                                "main.lengthlimit.tooltip.warning"
+                        ).withStyle(ChatFormatting.RED))));
+                elements.add(label);
+
                 // Max length field
-                TextField lengthField = new TextField(x, 0, width, height);
+                TextField lengthField =
+                        new TextField(x + labelWidth, 0, width - labelWidth, height);
                 lengthField.posIntValidator().strict();
                 lengthField.setMaxLength(6);
                 lengthField.setResponder((val) -> {
@@ -655,15 +674,60 @@ public class MainOptionList extends OptionList {
                     }
                 });
                 lengthField.setValue(String.valueOf(Config.get().getLengthLimitLength()));
-                lengthField.setTooltip(Tooltip.create(localized(
+                lengthField.setHint(localized("option", "main.lengthlimit.hint"));
+                elements.add(lengthField);
+            }
+        }
+
+        private static class MacroMcKeyCount extends Entry {
+
+            MacroMcKeyCount(int x, int width, int height) {
+                super();
+
+                int labelWidth = 140;
+                Button label = Button.builder(
+                        localized("option", "main.macroMcKeyCount"), (button) -> {
+                        }
+                ).pos(x, 0).size(labelWidth, height).build();
+                label.active = false;
+                label.setTooltip(Tooltip.create(localized(
                         "option",
-                        "main.lengthlimit.length.tooltip"
+                        "main.macroMcKeyCount.tooltip"
                 ).append("\n")
                         .append(localized(
                                 "option",
-                                "main.lengthlimit.length.tooltip.warning"
+                                "main.macroMcKeyCount.tooltip.warning"
                         ).withStyle(ChatFormatting.RED))));
-                elements.add(lengthField);
+                elements.add(label);
+
+                // Key count field
+                TextField countField = new TextField(x + labelWidth, 0, width - labelWidth, height)
+                        .posIntValidator()
+                        .withValidator((val) -> {
+                            int count = Integer.parseInt(val.strip());
+                            if (count >= 0 && count <= 16)
+                                return Optional.empty();
+                            else
+                                return Optional.of(localized(
+                                        "option",
+                                        "main.macroMcKeyCount.range"
+                                ).withStyle(ChatFormatting.RED));
+                        });
+                countField.setMaxLength(2);
+                countField.setResponder((val) -> {
+                    try {
+                        int space = Integer.parseInt(val.strip());
+                        if (space < 0 || space > 16)
+                            throw new NumberFormatException();
+                        Config.get().setMacroMcKeyCount(space);
+                        countField.setTextColor(16777215);
+                    } catch (NumberFormatException ignored) {
+                        countField.setTextColor(16711680);
+                    }
+                });
+                countField.setValue(String.valueOf(Config.get().getMacroMcKeyCount()));
+                countField.setHint(localized("option", "main.macroMcKeyCount.hint"));
+                elements.add(countField);
             }
         }
     }

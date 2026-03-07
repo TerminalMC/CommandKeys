@@ -16,6 +16,7 @@
 
 package dev.terminalmc.commandkeys.gui.widget.list;
 
+import dev.terminalmc.commandkeys.config.Config;
 import dev.terminalmc.commandkeys.config.Macro;
 import dev.terminalmc.commandkeys.config.Message;
 import dev.terminalmc.commandkeys.config.Profile;
@@ -33,10 +34,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static dev.terminalmc.commandkeys.config.Macro.ConflictStrategy.AVOID;
 import static dev.terminalmc.commandkeys.config.Macro.SendMode.*;
@@ -119,6 +117,9 @@ public class MacroOptionList extends MacroBindList {
         addEntry(new Entry.MacroMode1(dynEntryX, dynEntryWidth, entryHeight, this, profile, macro));
         addEntry(new Entry.MacroMode2(dynEntryX, dynEntryWidth, entryHeight, profile, macro));
 
+        if (macro.getMode().equals(REPEAT) && Config.get().getMacroMcKeyCount() > 0)
+            addEntry(new Entry.MacroMode3(dynEntryX, dynEntryWidth, entryHeight, profile, macro));
+
         addEntry(new OptionList.Entry.Text(
                 dynEntryX,
                 dynEntryWidth,
@@ -175,20 +176,26 @@ public class MacroOptionList extends MacroBindList {
             ) {
                 super();
 
+                int labelWidth = 70;
+                int fieldWidth = width - labelWidth;
+
+                Button label = Button.builder(
+                        localized("option", "macro.name"), (button) -> {
+                        }
+                ).pos(x, 0).size(labelWidth, height).build();
+                label.active = false;
+                elements.add(label);
+
                 TextField nameField = new TextField(
-                        x,
+                        x + labelWidth,
                         0,
-                        width,
+                        fieldWidth,
                         height
                 );
                 nameField.setMaxLength(256);
                 nameField.setResponder((val) -> macro.name = val.strip());
                 nameField.setValue(macro.name);
                 nameField.setHint(localized("option", "macro.name.hint"));
-                nameField.setTooltip(Tooltip.create(localized(
-                        "option",
-                        "macro.name.tooltip"
-                )));
                 elements.add(nameField);
             }
         }
@@ -482,7 +489,7 @@ public class MacroOptionList extends MacroBindList {
         private static class MacroMode2 extends Entry {
 
             MacroMode2(int x, int width, int height, Profile profile, Macro macro) {
-                int buttonWidth = (width - SPACE) / 2;
+                int halfWidth = (width - SPACE) / 2;
 
                 // Activation type button
                 elements.add(CycleButton.builder(Macro.ActivationType::title)
@@ -492,29 +499,171 @@ public class MacroOptionList extends MacroBindList {
                         .create(
                                 x,
                                 0,
-                                buttonWidth,
+                                halfWidth,
                                 height,
                                 localized("option", "macro.activation"),
                                 (button, status) -> profile.setActivationType(macro, status)
                         ));
 
                 if (macro.getMode().equals(REPEAT)) {
-                    TextField delayField = new TextField(
-                            x + width - buttonWidth,
-                            0,
-                            buttonWidth,
-                            height
-                    ).posIntValidator().strict();
-                    delayField.setMaxLength(8);
-                    delayField.setResponder((val) ->
-                            macro.maxRepeats = Integer.parseInt(val.strip()));
-                    delayField.setValue(String.valueOf(macro.maxRepeats));
-                    delayField.setTooltip(Tooltip.create(localized(
+                    int labelWidth = 70;
+                    int fieldWidth = halfWidth - labelWidth;
+
+                    Button label = Button.builder(
+                            localized("option", "macro.maxRepeats"), (button) -> {
+                            }
+                    ).pos(x + width - halfWidth, 0).size(labelWidth, height).build();
+                    label.active = false;
+                    label.setTooltip(Tooltip.create(localized(
                             "option",
                             "macro.maxRepeats.tooltip"
                     )));
-                    elements.add(delayField);
+                    elements.add(label);
+
+                    TextField repeatsField = new TextField(
+                            x + width - fieldWidth,
+                            0,
+                            fieldWidth,
+                            height
+                    ).posIntValidator().strict();
+                    repeatsField.setMaxLength(8);
+                    repeatsField.setResponder((val) ->
+                            macro.maxRepeats = Integer.parseInt(val.strip()));
+                    repeatsField.setValue(String.valueOf(macro.maxRepeats));
+                    repeatsField.setTooltip(Tooltip.create(localized(
+                            "option",
+                            "macro.maxRepeats.tooltip"
+                    )));
+                    elements.add(repeatsField);
+                } else if (Config.get().getMacroMcKeyCount() > 0) {
+                    int labelWidth = 70;
+                    int fieldWidth = halfWidth - labelWidth;
+
+                    Button label = Button.builder(
+                            localized("option", "macro.mcActivatorKey"), (button) -> {
+                            }
+                    ).pos(x + width - halfWidth, 0).size(labelWidth, height).build();
+                    label.active = false;
+                    label.setTooltip(Tooltip.create(localized(
+                            "option",
+                            "macro.mcActivatorKey.tooltip"
+                    )));
+                    elements.add(label);
+
+                    TextField indexField = new TextField(
+                            x + width - fieldWidth,
+                            0,
+                            fieldWidth,
+                            height
+                    )
+                            .withValidator((val) -> {
+                                if (val.isBlank())
+                                    return Optional.empty();
+                                try {
+                                    int index = Integer.parseInt(val.strip());
+                                    if (index < 1 || index > Config.get().getMacroMcKeyCount())
+                                        throw new NumberFormatException();
+
+                                    for (Macro m : profile.getMacros()) {
+                                        if (m != macro && m.mcActivatorKey == index)
+                                            return Optional.of(localized(
+                                                    "option",
+                                                    "macro.mcActivatorKey.tooltip.overlap",
+                                                    profile.getMacros().indexOf(m)
+                                            ).withStyle(ChatFormatting.GOLD));
+                                    }
+
+                                    return Optional.empty();
+                                } catch (NumberFormatException ignored) {
+                                    return Optional.of(localized(
+                                            "option",
+                                            "macro.mcActivatorKey.tooltip.error"
+                                    ).withStyle(ChatFormatting.RED));
+                                }
+                            })
+                            .lenient();
+                    indexField.setMaxLength(2);
+                    indexField.setResponder((val) -> {
+                        if (val.isBlank())
+                            macro.mcActivatorKey = 0;
+                        else {
+                            try {
+                                macro.mcActivatorKey = Integer.parseInt(val.strip());
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                    });
+                    indexField.setValue(
+                            macro.mcActivatorKey == 0 ? "" : String.valueOf(macro.mcActivatorKey));
+                    elements.add(indexField);
                 }
+            }
+        }
+
+        private static class MacroMode3 extends Entry {
+
+            MacroMode3(int x, int width, int height, Profile profile, Macro macro) {
+                int halfWidth = (width - SPACE) / 2;
+                int labelWidth = 70;
+                int fieldWidth = halfWidth - labelWidth;
+
+                Button label = Button.builder(
+                        localized("option", "macro.mcActivatorKey"), (button) -> {
+                        }
+                ).pos(x, 0).size(labelWidth, height).build();
+                label.active = false;
+                label.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "macro.mcActivatorKey.tooltip"
+                )));
+                elements.add(label);
+
+                TextField indexField = new TextField(
+                        x + labelWidth,
+                        0,
+                        fieldWidth,
+                        height
+                )
+                        .withValidator((val) -> {
+                            if (val.isBlank())
+                                return Optional.empty();
+                            try {
+                                int index = Integer.parseInt(val.strip());
+                                if (index < 1 || index > Config.get().getMacroMcKeyCount())
+                                    throw new NumberFormatException();
+
+                                for (Macro m : profile.getMacros()) {
+                                    if (m != macro && m.mcActivatorKey == index)
+                                        return Optional.of(localized(
+                                                "option",
+                                                "macro.mcActivatorKey.tooltip.overlap",
+                                                profile.getMacros().indexOf(m)
+                                        ).withStyle(ChatFormatting.GOLD));
+                                }
+
+                                return Optional.empty();
+                            } catch (NumberFormatException ignored) {
+                                return Optional.of(localized(
+                                        "option",
+                                        "macro.mcActivatorKey.tooltip.error"
+                                ).withStyle(ChatFormatting.RED));
+                            }
+                        })
+                        .lenient();
+                indexField.setMaxLength(2);
+                indexField.setResponder((val) -> {
+                    if (val.isBlank())
+                        macro.mcActivatorKey = 0;
+                    else {
+                        try {
+                            macro.mcActivatorKey = Integer.parseInt(val.strip());
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                });
+                indexField.setValue(
+                        macro.mcActivatorKey == 0 ? "" : String.valueOf(macro.mcActivatorKey));
+                elements.add(indexField);
             }
         }
 

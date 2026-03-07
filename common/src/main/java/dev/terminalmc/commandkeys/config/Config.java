@@ -52,7 +52,7 @@ import static dev.terminalmc.commandkeys.config.Profile.LINK_PROFILE_MAP;
  */
 public class Config {
 
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
     public final int version = VERSION;
     private static final Path CONFIG_DIR = PlatformServices.getInstance().getConfigDir();
     public static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
@@ -95,6 +95,10 @@ public class Config {
     private int lengthLimitLength;
     public static final int lengthLimitLengthDefault = SharedConstants.MAX_CHAT_LENGTH;
 
+    // Macro MC key options
+    private int macroMcKeyCount;
+    public static final int macroMcKeyCountDefault = 0;
+
     /**
      * Creates a profile list with a single profile, set as both singleplayer and multiplayer
      * default.
@@ -111,7 +115,8 @@ public class Config {
                 ratelimitTicksDefault,
                 ratelimitStrictDefault,
                 ratelimitSpDefault,
-                lengthLimitLengthDefault
+                lengthLimitLengthDefault,
+                macroMcKeyCountDefault
         );
     }
 
@@ -129,7 +134,8 @@ public class Config {
             int ratelimitTicks,
             boolean ratelimitStrict,
             boolean ratelimitSp,
-            int lengthLimitLength
+            int lengthLimitLength,
+            int macroMcKeyCount
     ) {
         this.profiles = profiles;
         this.spDefault = spDefault;
@@ -142,6 +148,7 @@ public class Config {
         this.ratelimitStrict = ratelimitStrict;
         this.ratelimitSp = ratelimitSp;
         this.lengthLimitLength = lengthLimitLength;
+        this.macroMcKeyCount = macroMcKeyCount;
     }
 
     // Default profile pointer management
@@ -198,6 +205,18 @@ public class Config {
         if (length < 1)
             throw new IllegalArgumentException();
         this.lengthLimitLength = length;
+    }
+
+    // Macro MC key management
+
+    public int getMacroMcKeyCount() {
+        return macroMcKeyCount;
+    }
+
+    public void setMacroMcKeyCount(int length) {
+        if (length < 0)
+            throw new IllegalArgumentException();
+        this.macroMcKeyCount = length;
     }
 
     // Profile activation handling
@@ -516,6 +535,13 @@ public class Config {
                     silent
             );
 
+            int macroMcKeyCount = JsonUtil.getOrDefault(
+                    obj,
+                    "macroMcKeyCount",
+                    macroMcKeyCountDefault,
+                    silent
+            );
+
             return new Config(
                     profiles,
                     spDefault,
@@ -527,7 +553,8 @@ public class Config {
                     ratelimitTicks,
                     ratelimitStrict,
                     ratelimitSp,
-                    lengthLimitLength
+                    lengthLimitLength,
+                    macroMcKeyCount
             ).validate();
         }
     }

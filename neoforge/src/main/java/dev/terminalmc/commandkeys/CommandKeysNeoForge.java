@@ -56,7 +56,7 @@ public class CommandKeysNeoForge {
      */
     @SubscribeEvent
     static void registerKeyMappingsEvent(RegisterKeyMappingsEvent event) {
-        CommandKeys.KEYBINDS.forEach(event::register);
+        CommandKeys.getKeybinds().forEach(event::register);
     }
 
     @EventBusSubscriber(

@@ -27,8 +27,11 @@ public class CommandKeysFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Initialize client
+        CommandKeys.init();
+
         // Register keybinds
-        CommandKeys.KEYBINDS.forEach(KeyBindingHelper::registerKeyBinding);
+        CommandKeys.getKeybinds().forEach(KeyBindingHelper::registerKeyBinding);
 
         // Register client commands
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->
@@ -39,8 +42,5 @@ public class CommandKeysFabric implements ClientModInitializer {
 
         // Register client after-tick event
         ClientTickEvents.END_CLIENT_TICK.register(CommandKeys::afterClientTick);
-
-        // Initialize client
-        CommandKeys.init();
     }
 }

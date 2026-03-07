@@ -2,6 +2,7 @@
 
 ## 2.4.0-beta.1
 
+- Added support for activating macros using MC keybinds.
 - Added a button to copy macros in the profile editor.
 - Added a new activation mode for key Release.
 - Added a command to switch profiles.

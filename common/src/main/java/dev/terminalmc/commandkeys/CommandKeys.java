@@ -40,6 +40,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static dev.terminalmc.commandkeys.util.Localization.localized;
@@ -61,7 +62,7 @@ public class CommandKeys {
             InputConstants.KEY_K,
             translationKey("key", "main")
     );
-    public static final List<KeyMapping> KEYBINDS = List.of(CONFIG_KEY);
+    public static final List<KeyMapping> KEYBINDS = new ArrayList<>();
 
     public static boolean hasResetConfig = false;
     public static String lastConnection = "";
@@ -80,6 +81,20 @@ public class CommandKeys {
 
     public static void init() {
         Config.getAndSave();
+    }
+
+    public static Collection<KeyMapping> getKeybinds() {
+        KEYBINDS.add(CONFIG_KEY);
+        int macroKeyCount = Config.get().getMacroMcKeyCount();
+        for (int i = 1; i <= macroKeyCount; i++) {
+            KEYBINDS.add(new KeyMapping(
+                    translationKey("key", "main.macro." + i),
+                    InputConstants.Type.KEYSYM,
+                    InputConstants.UNKNOWN.getValue(),
+                    translationKey("key", "main")
+            ));
+        }
+        return KEYBINDS;
     }
 
     public static void afterClientTick(Minecraft mc) {
@@ -112,6 +127,16 @@ public class CommandKeys {
                                     .withStyle(ChatFormatting.GOLD)
                     )
             ));
+        }
+
+        for (int i = 1; i < KEYBINDS.size(); i++) {
+            while (KEYBINDS.get(i).consumeClick()) {
+                for (Macro m : profile().getMacros()) {
+                    if (m.mcActivatorKey == i) {
+                        m.trigger(m.getKeybind(), false);
+                    }
+                }
+            }
         }
     }
 
