@@ -37,7 +37,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class CommandKeys {
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
     public static final KeyMapping.Category CATEGORY =
-            KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "main"));
+            KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
             translationKey("key", "main.edit"),
             InputConstants.Type.KEYSYM,

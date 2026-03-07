@@ -20,7 +20,6 @@ import dev.terminalmc.commandkeys.mixin.accessor.MultiLineEditBoxAccessor;
 import dev.terminalmc.commandkeys.mixin.accessor.MultilineTextFieldAccessor;
 import dev.terminalmc.commandkeys.mixin.accessor.StringViewAccessor;
 import dev.terminalmc.commandkeys.mixin.gui.MultiLineEditBoxMixin;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineEditBox;
@@ -30,6 +29,7 @@ import net.minecraft.client.gui.components.Whence;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -183,7 +183,7 @@ public class MultiLineTextField extends MultiLineEditBox {
     // Chained clicks
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) {
             // Double-click to select all
             long time = Util.getMillis();
@@ -243,7 +243,7 @@ public class MultiLineTextField extends MultiLineEditBox {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
+    public boolean keyPressed(@NotNull KeyEvent event) {
         if (!super.keyPressed(event)) {
             if (TextField.isUndo(event)) {
                 undo();

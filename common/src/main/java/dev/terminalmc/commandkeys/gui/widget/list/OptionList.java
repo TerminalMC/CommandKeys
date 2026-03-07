@@ -28,7 +28,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +50,7 @@ import java.util.List;
  * level.</p>
  */
 @SuppressWarnings("unused")
-public abstract class OptionList extends ContainerObjectSelectionList<OptionList.Entry> {
+public abstract class OptionList extends ContainerObjectSelectionList<OptionList.@NotNull Entry> {
 
     protected OptionScreen screen;
 
@@ -183,52 +183,52 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
     /**
      * Base implementation of {@link Entry}, with common entries.
      */
-    public abstract static class Entry extends ContainerObjectSelectionList.Entry<Entry> {
+    public abstract static class Entry extends ContainerObjectSelectionList.Entry<@NotNull Entry> {
 
         public static final int SPACE = OptionScreen.ELEMENT_SPACING;
         public static final int SPACE_SMALL = OptionScreen.ELEMENT_SPACING_NARROW;
         public static final int SPACE_TINY = OptionScreen.ELEMENT_SPACING_FINE;
 
         public static final WidgetSprites COPY_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/copy_button"),
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/copy_button_disabled"
                 ),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/copy_button_highlighted"
                 )
         );
         public static final WidgetSprites OPTION_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button"),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/options_button"),
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/options_button_disabled"
                 ),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/options_button_highlighted"
                 )
         );
         public static final WidgetSprites LINK_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/link_button"),
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/link_button_disabled"
                 ),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/link_button_highlighted"
                 )
         );
         public static final WidgetSprites SEND_SPRITES = new WidgetSprites(
-                ResourceLocation.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button"),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(CommandKeys.MOD_ID, "widget/send_button"),
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/send_button_disabled"
                 ),
-                ResourceLocation.fromNamespaceAndPath(
+                Identifier.fromNamespaceAndPath(
                         CommandKeys.MOD_ID,
                         "widget/send_button_highlighted"
                 )
@@ -363,12 +363,16 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
 
             @Override
-            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            public boolean mouseClicked(@NotNull MouseButtonEvent event, boolean doubleClick) {
                 return entry.mouseClicked(event, doubleClick);
             }
 
             @Override
-            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+            public boolean mouseDragged(
+                    @NotNull MouseButtonEvent event,
+                    double deltaX,
+                    double deltaY
+            ) {
                 return entry.mouseDragged(event, deltaX, deltaY);
             }
 

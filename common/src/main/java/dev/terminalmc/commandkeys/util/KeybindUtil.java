@@ -23,6 +23,7 @@ import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.mixin.accessor.KeyMappingAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.KeyMapping.Category;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -144,8 +145,10 @@ public class KeybindUtil {
 
     public static @Nullable KeyMapping getConflict(InputConstants.Key key) {
         for (KeyMapping keyMapping : Minecraft.getInstance().options.keyMappings) {
-            if (((KeyMappingAccessor) keyMapping).commandkeys$getKey().equals(key)) {
-                return keyMapping;
+            if (!keyMapping.getCategory().equals(Category.DEBUG)) {
+                if (((KeyMappingAccessor) keyMapping).commandkeys$getKey().equals(key)) {
+                    return keyMapping;
+                }
             }
         }
         return null;

@@ -33,7 +33,9 @@ public class MultiLineEditBoxMixin {
             method = "renderContents",
             at = @At(
                     value = "FIELD",
-                    target = "Lnet/minecraft/client/gui/components/MultiLineEditBox;textColor:I"
+                    target = "Lnet/minecraft/client/gui/components/MultiLineEditBox;textColor:I",
+                    // GETFIELD
+                    opcode = 180
             )
     )
     private int modifyColor(int original) {
