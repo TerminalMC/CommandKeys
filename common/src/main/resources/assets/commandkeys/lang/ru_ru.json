@@ -105,6 +105,7 @@
   "option.commandkeys.profile.key.edit": "Редактировать",
   "option.commandkeys.profile.keys": "Макросы %s",
   "option.commandkeys.profile.keys.tooltip": "Активировать макрос, нажав его привязку в игре.\nМакросы с одной привязанной клавишей также могут быть активированы на этом экране, если ничего не выбрано.",
+  "option.commandkeys.profile.macro.copy.tooltip": "Copy macro",
   "option.commandkeys.profile.switch": "Сменить профиль",
   "option.commandkeys.profile.trigger.tooltip": "Активировать этот макрос",
   "toast.commandkeys.reset.message": "Резервная копия сохранена в %s",

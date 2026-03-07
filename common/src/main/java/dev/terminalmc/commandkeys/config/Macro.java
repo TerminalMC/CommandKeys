@@ -240,7 +240,7 @@ public class Macro {
     /**
      * Copy constructor.
      */
-    Macro(Macro macro) {
+    public Macro(Macro macro) {
         this.addToHistory = macro.addToHistory;
         this.addToHistoryStatus = macro.addToHistoryStatus;
         this.showHudMessage = macro.showHudMessage;

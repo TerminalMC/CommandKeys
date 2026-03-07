@@ -105,6 +105,7 @@
   "option.commandkeys.profile.key.edit": "编辑",
   "option.commandkeys.profile.keys": "宏“%s”",
   "option.commandkeys.profile.keys.tooltip": "在游戏中按下按键绑定即可激活宏。\n如果未选择任何内容，也可以在此屏幕上激活具有单个绑定按键的宏。",
+  "option.commandkeys.profile.macro.copy.tooltip": "Copy macro",
   "option.commandkeys.profile.switch": "切换配置文件",
   "option.commandkeys.profile.trigger.tooltip": "Activate this Macro",
   "toast.commandkeys.reset.message": "Backup saved to %s",

@@ -95,7 +95,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
      * changed.</p>
      */
     protected void updateElementBounds() {
-        this.dynWideEntryWidth = Math.max(entryWidth, (int) (width / 100F * 70F));
+        this.dynWideEntryWidth = Math.max(entryWidth, (int) (width / 100F * 75F));
         this.dynEntryWidth = Math.max(entryWidth, (int) (width / 100F * 50F));
         this.entryX = width / 2 - (entryWidth / 2);
         this.dynWideEntryX = width / 2 - (dynWideEntryWidth / 2);

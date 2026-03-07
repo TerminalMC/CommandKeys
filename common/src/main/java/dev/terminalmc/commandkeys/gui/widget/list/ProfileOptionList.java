@@ -324,10 +324,10 @@ public class ProfileOptionList extends MacroBindList {
                     keyButtonWidth = Math.clamp(nominalWidth, 90, 130);
 
                 int messageFieldWidth =
-                        width - keyButtonWidth - (list.smallWidgetWidth * 2 + SPACE_SMALL * 2);
+                        width - keyButtonWidth - (list.smallWidgetWidth * 3 + SPACE_SMALL * 3);
                 int modeButtonWidth = 0;
                 if (messageFieldWidth > 280) {
-                    modeButtonWidth = 40;
+                    modeButtonWidth = 44;
                     messageFieldWidth -= modeButtonWidth * 3 + SPACE_SMALL;
                 }
                 int movingX = x;
@@ -467,6 +467,26 @@ public class ProfileOptionList extends MacroBindList {
                                     }
                             ));
                 }
+
+                // Copy button
+                ImageButton copyButton = new ImageButton(
+                        x + width - list.smallWidgetWidth,
+                        0,
+                        list.smallWidgetWidth,
+                        height,
+                        COPY_SPRITES,
+                        (button) -> {
+                            profile.addMacro(new Macro(macro));
+                            list.init();
+                        },
+                        Component.empty()
+                );
+                copyButton.setTooltip(Tooltip.create(localized(
+                        "option",
+                        "profile.macro.copy.tooltip"
+                )));
+                copyButton.setTooltipDelay(Duration.ofMillis(500));
+                elements.add(copyButton);
 
                 // Delete button
                 elements.add(Button.builder(

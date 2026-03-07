@@ -106,6 +106,7 @@
   "option.commandkeys.profile.key.edit": "Bearbeiten",
   "option.commandkeys.profile.keys": "Makros %s",
   "option.commandkeys.profile.keys.tooltip": "Aktiviert ein Makro durch Drücken der entsprechenden Taste im Spiel.\nMakros mit einer einzigen gebundenen Taste können auch auf diesem Bildschirm aktiviert werden, wenn nichts ausgewählt ist.",
+  "option.commandkeys.profile.macro.copy.tooltip": "Copy macro",
   "option.commandkeys.profile.switch": "Profil wechseln",
   "option.commandkeys.profile.trigger.tooltip": "Diesen Makro auslösen",
   "toast.commandkeys.reset.message": "Backup gespeichert unter %s",

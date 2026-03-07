@@ -105,6 +105,7 @@
   "option.commandkeys.profile.key.edit": "편집",
   "option.commandkeys.profile.keys": "매크로 %s",
   "option.commandkeys.profile.keys.tooltip": "게임 내에서 해당 키의 매크로를 누르거나, 이 화면에서(선택 항목이 없을 떄) 눌러 매크로를 활성화합니다.",
+  "option.commandkeys.profile.macro.copy.tooltip": "Copy macro",
   "option.commandkeys.profile.switch": "프로필 전환",
   "option.commandkeys.profile.trigger.tooltip": "이 키의 매크로를 누른 동작을 시뮬레이션합니다.",
   "toast.commandkeys.reset.message": "%s 의 백업이 저장되었습니다.",

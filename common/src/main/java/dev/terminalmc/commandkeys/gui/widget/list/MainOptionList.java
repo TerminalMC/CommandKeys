@@ -231,7 +231,7 @@ public class MainOptionList extends OptionList {
                 boolean mpDefault = index == Config.get().getMpDefault();
 
                 int smallWidgetWidth = list.smallWidgetWidth;
-                int mainButtonWidth = width - smallWidgetWidth * 5 - SPACE * 5;
+                int mainButtonWidth = width - smallWidgetWidth * 5 - SPACE_SMALL * 5;
                 int mainButtonX = x;
 
                 if (inGame) {
@@ -272,8 +272,8 @@ public class MainOptionList extends OptionList {
                         activateButton.setTooltipDelay(Duration.ofMillis(500));
                         elements.add(activateButton);
                     }
-                    mainButtonWidth -= (smallWidgetWidth + SPACE);
-                    mainButtonX += (smallWidgetWidth + SPACE);
+                    mainButtonWidth -= (smallWidgetWidth + SPACE_SMALL);
+                    mainButtonX += (smallWidgetWidth + SPACE_SMALL);
                 }
 
                 MutableComponent name = Component.literal(profile.getDisplayName());
@@ -300,7 +300,7 @@ public class MainOptionList extends OptionList {
                         .build());
 
                 // Switch to right-justified
-                int movingX = x + width - smallWidgetWidth * 5 - SPACE * 4;
+                int movingX = x + width - smallWidgetWidth * 5 - SPACE_SMALL * 4;
 
                 // Edit details button
                 ImageButton configureButton = new ImageButton(
@@ -321,7 +321,7 @@ public class MainOptionList extends OptionList {
                 )));
                 configureButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(configureButton);
-                movingX += smallWidgetWidth + SPACE;
+                movingX += smallWidgetWidth + SPACE_SMALL;
 
                 // Singleplayer default button
                 Button setAsSpDefaultButton = Button.builder(
@@ -347,7 +347,7 @@ public class MainOptionList extends OptionList {
                 setAsSpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsSpDefaultButton.active = !spDefault;
                 elements.add(setAsSpDefaultButton);
-                movingX += smallWidgetWidth + SPACE;
+                movingX += smallWidgetWidth + SPACE_SMALL;
 
                 // Multiplayer default button
                 Button setAsMpDefaultButton = Button.builder(
@@ -373,7 +373,7 @@ public class MainOptionList extends OptionList {
                 setAsMpDefaultButton.setTooltipDelay(Duration.ofMillis(500));
                 setAsMpDefaultButton.active = !mpDefault;
                 elements.add(setAsMpDefaultButton);
-                movingX += smallWidgetWidth + SPACE;
+                movingX += smallWidgetWidth + SPACE_SMALL;
 
                 // Copy button
                 ImageButton copyButton = new ImageButton(
@@ -388,7 +388,7 @@ public class MainOptionList extends OptionList {
                 )));
                 copyButton.setTooltipDelay(Duration.ofMillis(500));
                 elements.add(copyButton);
-                movingX += smallWidgetWidth + SPACE;
+                movingX += smallWidgetWidth + SPACE_SMALL;
 
                 // Delete button
                 Button deleteButton = Button.builder(
@@ -423,7 +423,7 @@ public class MainOptionList extends OptionList {
             ProfileName(int x, int width, int height, Profile profile) {
                 super();
                 int labelWidth = 50;
-                int nameBoxWidth = width - labelWidth - SPACE;
+                int nameBoxWidth = width - labelWidth - SPACE_SMALL;
 
                 Button label = Button.builder(
                         localized("option", "main.profile.name"), (button -> {
@@ -452,7 +452,7 @@ public class MainOptionList extends OptionList {
             ) {
                 super();
                 int labelWidth = 50;
-                int linkFieldWidth = width - labelWidth - list.smallWidgetWidth - SPACE;
+                int linkFieldWidth = width - labelWidth - list.smallWidgetWidth - SPACE_SMALL;
 
                 Button label = Button.builder(
                         localized("option", "main.profiles.link"), (button -> {
@@ -492,7 +492,7 @@ public class MainOptionList extends OptionList {
 
             DefaultOptions1(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACE) / 2;
+                int buttonWidth = (width - SPACE_SMALL) / 2;
 
                 // Conflict strategy button
                 elements.add(CycleButton.builder(Macro.ConflictStrategy::title)
@@ -528,7 +528,7 @@ public class MainOptionList extends OptionList {
 
             DefaultOptions2(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACE) / 2;
+                int buttonWidth = (width - SPACE_SMALL) / 2;
 
                 // Activation type button
                 elements.add(CycleButton.builder(Macro.ActivationType::title)
@@ -550,8 +550,8 @@ public class MainOptionList extends OptionList {
 
             Ratelimit(int x, int width, int height) {
                 super();
-                int buttonWidth = (width - SPACE * 2) / 3;
-                int fieldWidth = (buttonWidth - SPACE) / 2;
+                int buttonWidth = (width - SPACE_SMALL * 2) / 3;
+                int fieldWidth = (buttonWidth - SPACE_SMALL) / 2;
                 int movingX = x;
 
                 // Message count field
@@ -566,7 +566,7 @@ public class MainOptionList extends OptionList {
                         "main.ratelimit.count.tooltip"
                 )));
                 elements.add(countField);
-                movingX += fieldWidth + SPACE;
+                movingX += fieldWidth + SPACE_SMALL;
 
                 // Time window field
                 TextField ticksField = new TextField(movingX, 0, fieldWidth, height);
@@ -589,7 +589,7 @@ public class MainOptionList extends OptionList {
                         "main.ratelimit.ticks.tooltip"
                 )));
                 elements.add(ticksField);
-                movingX = x + width - buttonWidth * 2 - SPACE;
+                movingX = x + width - buttonWidth * 2 - SPACE_SMALL;
 
                 CycleButton<Boolean> strictButton = CycleButton.booleanBuilder(
                                 CommonComponents.OPTION_ON.copy().withStyle(ChatFormatting.GREEN),
