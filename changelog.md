@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0-beta.2
+
+- Fixed ordering of macro activator MC keybinds.
+
 ## 2.4.0-beta.1
 
 - Added support for activating macros using MC keybinds.
