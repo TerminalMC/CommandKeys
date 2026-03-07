@@ -16,21 +16,26 @@
 
 package dev.terminalmc.commandkeys.platform;
 
-import dev.terminalmc.commandkeys.platform.services.IPlatformServices;
+import dev.terminalmc.commandkeys.platform.services.PlatformServices;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
-public class FabricServices implements IPlatformServices {
+public class FabricServices implements PlatformServices {
 
     @Override
-    public String getPlatformName() {
-        return "Fabric";
+    public boolean isDevEnv() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     @Override
     public boolean isModLoaded(String modId) {
         return FabricLoader.getInstance().isModLoaded(modId);
+    }
+
+    @Override
+    public String getPlatformName() {
+        return "Fabric";
     }
 
     @Override
@@ -41,10 +46,5 @@ public class FabricServices implements IPlatformServices {
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
-    }
-
-    @Override
-    public boolean isDevEnv() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

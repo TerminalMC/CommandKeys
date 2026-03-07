@@ -16,23 +16,28 @@
 
 package dev.terminalmc.commandkeys.platform;
 
-import dev.terminalmc.commandkeys.platform.services.IPlatformServices;
+import dev.terminalmc.commandkeys.platform.services.PlatformServices;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.loading.LoadingModList;
 
 import java.nio.file.Path;
 
-public class NeoForgeServices implements IPlatformServices {
+public class NeoForgeServices implements PlatformServices {
 
     @Override
-    public String getPlatformName() {
-        return "NeoForge";
+    public boolean isDevEnv() {
+        return !FMLLoader.isProduction();
     }
 
     @Override
     public boolean isModLoaded(String modId) {
         return LoadingModList.get().getModFileById(modId) != null;
+    }
+
+    @Override
+    public String getPlatformName() {
+        return "NeoForge";
     }
 
     @Override
@@ -43,10 +48,5 @@ public class NeoForgeServices implements IPlatformServices {
     @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
-    }
-
-    @Override
-    public boolean isDevEnv() {
-        return !FMLLoader.isProduction();
     }
 }

@@ -18,7 +18,7 @@ package dev.terminalmc.commandkeys.config;
 
 import com.google.gson.*;
 import dev.terminalmc.commandkeys.CommandKeys;
-import dev.terminalmc.commandkeys.platform.Services;
+import dev.terminalmc.commandkeys.platform.services.PlatformServices;
 import dev.terminalmc.commandkeys.util.JsonUtil;
 import net.minecraft.SharedConstants;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ public class Config {
 
     public static final int VERSION = 6;
     public final int version = VERSION;
-    private static final Path CONFIG_DIR = Services.PLATFORM.getConfigDir();
+    private static final Path CONFIG_DIR = PlatformServices.getInstance().getConfigDir();
     public static final String FILE_NAME = CommandKeys.MOD_ID + ".json";
     public static final String UNREADABLE_FILE_NAME = CommandKeys.MOD_ID + ".unreadable.json";
     public static final String OLD_FILE_NAME = CommandKeys.MOD_ID + ".old.json";
