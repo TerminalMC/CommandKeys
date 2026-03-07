@@ -10,6 +10,8 @@
   "option.commandkeys.macro.activation": "Activation Type",
   "option.commandkeys.macro.activation.HOLD": "Hold",
   "option.commandkeys.macro.activation.HOLD.tooltip": "Macro will be activated once and remain active while its keybind is held.",
+  "option.commandkeys.macro.activation.RELEASE": "Release",
+  "option.commandkeys.macro.activation.RELEASE.tooltip": "Macro will be activated when the keybind is released after being pressed.",
   "option.commandkeys.macro.activation.VANILLA": "Vanilla",
   "option.commandkeys.macro.activation.VANILLA.tooltip": "Macro will be activated once, then be repeatedly activated and deactivated while its keybind is held (excluding mouse keybinds).",
   "option.commandkeys.macro.bind.alt.tooltip": "Use this keybind to cycle the messages in reverse order.",

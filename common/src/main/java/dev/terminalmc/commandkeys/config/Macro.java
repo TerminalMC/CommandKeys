@@ -121,7 +121,8 @@ public class Macro {
 
     public enum ActivationType {
         HOLD(ChatFormatting.GREEN),
-        VANILLA(ChatFormatting.GOLD);
+        VANILLA(ChatFormatting.GOLD),
+        RELEASE(ChatFormatting.AQUA);
 
         private final ChatFormatting style;
 
@@ -387,6 +388,8 @@ public class Macro {
      * triggered again otherwise.</p>
      */
     private transient boolean active = false;
+    private transient boolean waiting = false;
+    private transient Keybind activationKeybind = null;
     private transient int activeTicks = 0;
     private transient int repetitions = 0;
 
@@ -398,6 +401,11 @@ public class Macro {
             // Deactivate if key has been released
             if (activationType == ActivationType.HOLD && !keybind.isKeyDown()) {
                 deactivate();
+            } else if (activationType == ActivationType.RELEASE && waiting) {
+                if (!keybind.isKeyDown()) {
+                    waiting = false;
+                    doAction(activationKeybind);
+                }
             }
             // Tick ongoing actions
             else {
@@ -421,7 +429,9 @@ public class Macro {
      */
     public boolean trigger(@Nullable Keybind keybind, boolean ratelimited) {
         if (active) {
-            singleActionComplete();
+            if (activationType != ActivationType.RELEASE || !waiting) {
+                singleActionComplete();
+            }
         } else {
             // Only check ratelimiter if we've actually got something to do
             if (keybind != null && useRatelimitStatus && !canTrigger(
@@ -453,6 +463,16 @@ public class Macro {
         active = true;
         activeTicks = -1; // trigger is processed prior to tick
         repetitions = 1;
+
+        if (activationType == ActivationType.RELEASE) {
+            waiting = true;
+            activationKeybind = keybind;
+        } else {
+            doAction(keybind);
+        }
+    }
+
+    private void doAction(@Nullable Keybind keybind) {
         switch (sendMode) {
             case SEND -> {
                 scheduleAll(spaceTicks != 0);

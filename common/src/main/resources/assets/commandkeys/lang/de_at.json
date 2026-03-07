@@ -11,6 +11,8 @@
   "option.commandkeys.macro.activation": "Aktivierungstyp",
   "option.commandkeys.macro.activation.HOLD": "Halten",
   "option.commandkeys.macro.activation.HOLD.tooltip": "Das Makro wird einmal aktiviert und bleibt aktiv, solange die zugewiesene Taste gedrückt wird.",
+  "option.commandkeys.macro.activation.RELEASE": "Release",
+  "option.commandkeys.macro.activation.RELEASE.tooltip": "Macro will be activated when the keybind is released after being pressed.",
   "option.commandkeys.macro.activation.VANILLA": "Vanilla",
   "option.commandkeys.macro.activation.VANILLA.tooltip": "Das Makro wird einmal aktiviert und dann wiederholt aktiviert und deaktiviert, solange die zugewiesene Taste gedrückt wird (ausgenommen Maustasten).",
   "option.commandkeys.macro.bind.alt.tooltip": "Verwende diese Tastenbelegung, um die Nachrichten in umgekehrter Reihenfolge zu durchlaufen.",

@@ -29,10 +29,10 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MouseHandlerMixin {
 
     /**
-     * Passes mouse button click to {@link KeybindUtil#handleKey} and allows it to be cancelled
+     * Passes mouse button click to {@link KeybindUtil#handleKey} and allows it to be canceled
      * before being passed to the Minecraft callback.
      *
-     * @see KeyboardHandlerMixin#wrapClick
+     * @see KeyboardHandlerMixin#wrapSet
      */
     @WrapOperation(
             method = "onPress",

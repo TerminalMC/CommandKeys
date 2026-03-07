@@ -10,6 +10,8 @@
   "option.commandkeys.macro.activation": "활성화 유형",
   "option.commandkeys.macro.activation.HOLD": "유지",
   "option.commandkeys.macro.activation.HOLD.tooltip": "키를 누르는 동안 매크로가 활성화되어 지속됩니다.",
+  "option.commandkeys.macro.activation.RELEASE": "Release",
+  "option.commandkeys.macro.activation.RELEASE.tooltip": "Macro will be activated when the keybind is released after being pressed.",
   "option.commandkeys.macro.activation.VANILLA": "기본",
   "option.commandkeys.macro.activation.VANILLA.tooltip": "키를 누르고 있는 동안 매크로가 반복적으로 활성, 비활성 됩니다 (마우스 키 제외).",
   "option.commandkeys.macro.bind.alt.tooltip": "Alt 키 발동.\n메시지 역순환에 사용됩니다.",

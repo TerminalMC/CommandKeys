@@ -10,6 +10,8 @@
   "option.commandkeys.macro.activation": "Тип активации",
   "option.commandkeys.macro.activation.HOLD": "Удержание",
   "option.commandkeys.macro.activation.HOLD.tooltip": "Макрос будет активирован один раз и останется активным, пока удерживается назначенная клавиша.",
+  "option.commandkeys.macro.activation.RELEASE": "Release",
+  "option.commandkeys.macro.activation.RELEASE.tooltip": "Macro will be activated when the keybind is released after being pressed.",
   "option.commandkeys.macro.activation.VANILLA": "Ванильный",
   "option.commandkeys.macro.activation.VANILLA.tooltip": "Макрос будет активирован один раз, а затем будет повторно активироваться и деактивироваться, пока удерживается назначенная клавиша (не касается клавиш мыши).",
   "option.commandkeys.macro.bind.alt.tooltip": "Используйте это сочетание клавиш для переключения сообщений в обратном порядке.",

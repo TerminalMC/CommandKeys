@@ -42,7 +42,7 @@ public class KeyboardHandlerMixin {
     private static long commandKeys$cancelCharTypedTime;
 
     /**
-     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be cancelled
+     * Passes keyboard key press to {@link KeybindUtil#handleKey} and allows it to be canceled
      * before being passed to the Minecraft callback.
      *
      * @see MouseHandlerMixin#wrapClick
@@ -73,7 +73,7 @@ public class KeyboardHandlerMixin {
 
     /**
      * Allows cancellation of the call to {@link net.minecraft.client.KeyMapping#click}
-     * corresponding to a call cancelled by {@link KeyboardHandlerMixin#wrapSet}.
+     * corresponding to a call canceled by {@link KeyboardHandlerMixin#wrapSet}.
      */
     @WrapOperation(
             method = "keyPress",
@@ -95,7 +95,7 @@ public class KeyboardHandlerMixin {
 
     /**
      * Allows cancellation of the call to {@link KeyboardHandler#charTyped} corresponding to a call
-     * cancelled by {@link KeyboardHandlerMixin#wrapClick}.
+     * canceled by {@link KeyboardHandlerMixin#wrapSet}.
      */
     @WrapMethod(method = "charTyped")
     @SuppressWarnings("JavadocReference")
