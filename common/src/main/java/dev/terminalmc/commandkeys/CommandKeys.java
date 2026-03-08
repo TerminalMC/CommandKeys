@@ -88,7 +88,7 @@ public class CommandKeys {
         int macroKeyCount = Config.get().getMacroMcKeyCount();
         for (int i = 1; i <= macroKeyCount; i++) {
             KEYBINDS.add(new KeyMapping(
-                    translationKey("key", "main.macro." + i),
+                    translationKey("key", String.format("main.macro.%02d", i)),
                     InputConstants.Type.KEYSYM,
                     InputConstants.UNKNOWN.getValue(),
                     translationKey("key", "main")
