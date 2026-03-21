@@ -1,8 +1,22 @@
 # Changelog
 
-## 2.4.0-beta.2
+## 2.4.0
+
+Changes over latest beta
 
 - Fixed ordering of macro activator MC keybinds.
+- Updated Russian translation (rfin0)
+
+Changes over latest release
+
+- Added support for activating macros using MC keybinds.
+- Added a button to copy macros in the profile editor.
+- Added a new activation mode for key Release.
+- Added a command to switch profiles.
+- Added an optional list entry name field for macros.
+- Changed default Conflict Strategy from Submit to Assert.
+- Increased command/message field length limit from 512 to 4096.
+- Fixed conflict handling for debug keys on 1.21.11
 
 ## 2.4.0-beta.1
 
