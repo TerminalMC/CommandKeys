@@ -35,7 +35,7 @@ public class MouseHandlerMixin {
      * @see KeyboardHandlerMixin#wrapSet
      */
     @WrapOperation(
-            method = "onPress",
+            method = "onButton",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/KeyMapping;click(Lcom/mojang/blaze3d/platform/InputConstants$Key;)V"

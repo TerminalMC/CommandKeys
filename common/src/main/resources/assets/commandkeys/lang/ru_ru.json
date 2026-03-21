@@ -1,6 +1,7 @@
 {
-  "key.commandkeys.main": "CommandKeys",
-  "key.commandkeys.main.edit": "Изменить активный профиль",
+  "key.category.commandkeys.main": "CommandKeys",
+  "key.category.commandkeys.main.edit": "Изменить активный профиль",
+  "message.commandkeys.blocked.lengthlimit": "Prevented sending message with length %d. Length limit is set to %d.",
   "key.commandkeys.main.macro.1": "Активатор макроса 1",
   "key.commandkeys.main.macro.10": "Активатор макроса 10",
   "key.commandkeys.main.macro.11": "Активатор макроса 11",

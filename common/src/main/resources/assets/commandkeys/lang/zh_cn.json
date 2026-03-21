@@ -1,6 +1,6 @@
 {
-  "key.commandkeys.main": "命令按键（CommandKeys）",
-  "key.commandkeys.main.edit": "编辑活动配置文件",
+  "key.category.commandkeys.main": "命令按键（CommandKeys）",
+  "key.category.commandkeys.main.edit": "编辑活动配置文件",
   "key.commandkeys.main.macro.01": "Macro Activator 01",
   "key.commandkeys.main.macro.02": "Macro Activator 02",
   "key.commandkeys.main.macro.03": "Macro Activator 03",

@@ -37,6 +37,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -56,11 +57,13 @@ public class CommandKeys {
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))
             .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY))
             .withStyle(ChatFormatting.GRAY);
+    public static final KeyMapping.Category CATEGORY =
+            KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "main"));
     public static final KeyMapping CONFIG_KEY = new KeyMapping(
             translationKey("key", "main.edit"),
             InputConstants.Type.KEYSYM,
             InputConstants.KEY_K,
-            translationKey("key", "main")
+            CATEGORY
     );
     public static final List<KeyMapping> KEYBINDS = new ArrayList<>();
 
@@ -91,7 +94,7 @@ public class CommandKeys {
                     translationKey("key", String.format("main.macro.%02d", i)),
                     InputConstants.Type.KEYSYM,
                     InputConstants.UNKNOWN.getValue(),
-                    translationKey("key", "main")
+                    CATEGORY
             ));
         }
         return KEYBINDS;
@@ -244,7 +247,7 @@ public class CommandKeys {
     ) {
         Minecraft mc = Minecraft.getInstance();
         if (type) {
-            ChatScreen screen = new ChatScreen(message);
+            ChatScreen screen = new ChatScreen(message, false);
             mc.setScreen(screen);
             int index = message.indexOf("%edit%");
             if (index != -1) {

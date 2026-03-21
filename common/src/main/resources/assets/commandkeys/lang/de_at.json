@@ -1,6 +1,6 @@
 {
-  "key.commandkeys.main": "CommandKeys",
-  "key.commandkeys.main.edit": "Aktives Profil bearbeiten",
+  "key.category.commandkeys.main": "CommandKeys",
+  "key.category.commandkeys.main.edit": "Aktives Profil bearbeiten",
   "key.commandkeys.main.macro.01": "Macro Activator 01",
   "key.commandkeys.main.macro.02": "Macro Activator 02",
   "key.commandkeys.main.macro.03": "Macro Activator 03",

@@ -26,6 +26,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -41,8 +42,8 @@ import java.util.List;
  *
  * <p>Contains list of {@link Entry} objects, which are drawn onto the screen
  * top-down in the order that they are stored, with each entry being allocated a standard amount of
- * space specified by {@link OptionList#itemHeight}. The actual height of list entries, specified by
- * {@link OptionList#entryHeight}, can be less but should not be more.</p>
+ * space specified by {@link OptionList#defaultEntryHeight}. The actual height of list entries,
+ * specified by {@link OptionList#entryHeight}, can be less but should not be more.</p>
  *
  * <p><b>Note:</b> If you want multiple widgets to appear side-by-side, you must
  * add them all to a single {@link Entry}'s list of widgets, which are all rendered at the same list
@@ -250,20 +251,15 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void render(
+        public void renderContent(
                 @NotNull GuiGraphics graphics,
-                int index,
-                int y,
-                int x,
-                int entryWidth,
-                int entryHeight,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
                 float tickDelta
         ) {
             elements.forEach((button) -> {
-                button.setY(y);
+                button.setY(getContentY());
                 button.render(graphics, mouseX, mouseY, tickDelta);
             });
         }
@@ -283,11 +279,12 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
                 super();
 
                 AbstractStringWidget widget;
-                if (Minecraft.getInstance().font.width(message.getString()) <= width) {
+                int widgetWidth = Minecraft.getInstance().font.width(message.getString());
+                if (widgetWidth <= width) {
                     widget = new StringWidget(
-                            x,
+                            x + (width / 2) - (widgetWidth / 2),
                             0,
-                            width,
+                            widgetWidth,
                             height,
                             message,
                             Minecraft.getInstance().font
@@ -366,19 +363,13 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
             }
 
             @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                return entry.mouseClicked(mouseX, mouseY, button);
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                return entry.mouseClicked(event, doubleClick);
             }
 
             @Override
-            public boolean mouseDragged(
-                    double mouseX,
-                    double mouseY,
-                    int button,
-                    double deltaX,
-                    double deltaY
-            ) {
-                return entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+                return entry.mouseDragged(event, deltaX, deltaY);
             }
 
             public void setFocused(GuiEventListener listener) {

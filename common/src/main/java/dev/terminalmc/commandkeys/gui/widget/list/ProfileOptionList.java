@@ -84,7 +84,7 @@ public class ProfileOptionList extends MacroBindList {
                 (button) -> {
                     profile.addMacro(new Macro());
                     init();
-                    ensureVisible(addMacroEntry);
+                    scrollToEntry(addMacroEntry);
                 }
         );
     }
@@ -110,11 +110,12 @@ public class ProfileOptionList extends MacroBindList {
     }
 
     protected void refreshMacroSubList() {
-        children().removeIf((entry) -> entry instanceof Entry.MacroOptions);
+        List<OptionList.Entry> entries = new ArrayList<>(children());
+        entries.removeIf((entry) -> entry instanceof Entry.MacroOptions);
         // Get list start index
-        int start = children().indexOf(addMacroEntry);
+        int start = entries.indexOf(addMacroEntry);
         if (start == -1) {
-            start = children().size();
+            start = entries.size();
         } else {
             start--;
         }
@@ -127,7 +128,7 @@ public class ProfileOptionList extends MacroBindList {
             List<Message> messages = macro.getMessages();
             if (messages.isEmpty())
                 macro.addMessage(new Message());
-            children().add(
+            entries.add(
                     start,
                     new Entry.MacroOptions(
                             dynWideEntryX,
@@ -139,6 +140,7 @@ public class ProfileOptionList extends MacroBindList {
                     )
             );
         }
+        replaceEntries(entries);
         refreshScrollAmount();
     }
 

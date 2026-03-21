@@ -78,7 +78,7 @@ public class MacroOptionList extends MacroBindList {
                 entryX, entryWidth, entryHeight, Component.literal("+"), null, -1, (button) -> {
             macro.addMessage(new Message());
             init();
-            ensureVisible(addMessageEntry);
+            scrollToEntry(addMessageEntry);
         }
         );
     }
@@ -135,11 +135,12 @@ public class MacroOptionList extends MacroBindList {
     }
 
     protected void refreshMessageSubList() {
-        children().removeIf((entry) -> entry instanceof Entry.MessageOptions);
+        List<OptionList.Entry> entries = new ArrayList<>(children());
+        entries.removeIf((entry) -> entry instanceof Entry.MessageOptions);
         // Get list start index
-        int start = children().indexOf(addMessageEntry);
+        int start = entries.indexOf(addMessageEntry);
         if (start == -1) {
-            start = children().size();
+            start = entries.size();
         } else {
             start--;
         }
@@ -156,9 +157,10 @@ public class MacroOptionList extends MacroBindList {
                     message,
                     i
             );
-            children().add(start, new OptionList.Entry.Space(msgEntry));
-            children().add(start, msgEntry);
+            entries.add(start, new OptionList.Entry.Space(msgEntry));
+            entries.add(start, msgEntry);
         }
+        replaceEntries(entries);
         refreshScrollAmount();
     }
 
