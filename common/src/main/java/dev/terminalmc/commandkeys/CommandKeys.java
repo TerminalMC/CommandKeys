@@ -118,7 +118,7 @@ public class CommandKeys {
         if (hasResetConfig && mc.screen instanceof TitleScreen) {
             hasResetConfig = false;
             mc.getToasts().addToast(new SystemToast(
-                    new SystemToast.SystemToastId(15000L),
+                    SystemToast.SystemToastIds.UNSECURE_SERVER_WARNING,
                     localized("toast", "reset.title"),
                     localized(
                             "toast",
@@ -250,8 +250,9 @@ public class CommandKeys {
             if (index != -1) {
                 EditBox input = ((ChatScreenAccessor) screen).commandkeys$getInput();
                 if (input != null) {
-                    input.moveCursorTo(index + "%edit%".length(), false);
-                    input.moveCursorTo(index, true);
+                    input.setCursorPosition(index + "%edit%".length());
+                    input.setHighlightPos(index + "%edit%".length());
+                    input.setCursorPosition(index);
                 }
             }
         } else if (message.length() > Config.get().getLengthLimitLength()) {

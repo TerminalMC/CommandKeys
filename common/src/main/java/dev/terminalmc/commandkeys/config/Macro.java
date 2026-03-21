@@ -494,14 +494,14 @@ public class Macro {
             case EDIT -> {
                 // Edit the first message
                 if (!messages.isEmpty()) {
-                    CommandKeys.edit(messages.getFirst().string);
+                    CommandKeys.edit(messages.get(0).string);
                 }
                 singleActionComplete();
             }
             case TYPE -> {
                 // Type the first message
                 if (!messages.isEmpty()) {
-                    CommandKeys.type(messages.getFirst().string);
+                    CommandKeys.type(messages.get(0).string);
                 }
                 singleActionComplete();
             }

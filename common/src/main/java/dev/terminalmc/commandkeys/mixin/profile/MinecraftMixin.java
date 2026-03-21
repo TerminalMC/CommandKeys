@@ -38,7 +38,8 @@ public class MinecraftMixin {
             at = @At("HEAD")
     )
     private void startIntegratedServer(
-            LevelStorageSource.LevelStorageAccess levelStorage,
+            String levelId,
+            LevelStorageSource.LevelStorageAccess storageAccess,
             PackRepository packRepo,
             WorldStem worldStem,
             boolean newWorld,

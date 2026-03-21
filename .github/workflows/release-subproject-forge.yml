@@ -1,5 +1,5 @@
-# A NeoForge-only version of the normal release workflow.
-name: Release-Subproject-NeoForge
+# A Forge-only version of the normal release workflow.
+name: Release-Subproject-Forge
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
       - name: Build
-        run: ./gradlew build neoforge:publishGithub neoforge:publishCurseforge neoforge:publishModrinth --stacktrace
+        run: ./gradlew build forge:publishGithub forge:publishCurseforge forge:publishModrinth --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
