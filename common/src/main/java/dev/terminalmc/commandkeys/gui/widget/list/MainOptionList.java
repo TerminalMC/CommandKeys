@@ -580,9 +580,9 @@ public class MainOptionList extends OptionList {
                         if (space < 1)
                             throw new NumberFormatException();
                         Config.get().setRatelimitTicks(space);
-                        ticksField.setTextColor(16777215);
+                        ticksField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
                     } catch (NumberFormatException ignored) {
-                        ticksField.setTextColor(16711680);
+                        ticksField.setTextColor(TextField.TEXT_COLOR_ERROR);
                     }
                 });
                 ticksField.setValue(String.valueOf(Config.get().getRatelimitTicks()));
@@ -668,9 +668,9 @@ public class MainOptionList extends OptionList {
                         if (space < 1)
                             throw new NumberFormatException();
                         Config.get().setLengthLimitLength(space);
-                        lengthField.setTextColor(16777215);
+                        lengthField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
                     } catch (NumberFormatException ignored) {
-                        lengthField.setTextColor(16711680);
+                        lengthField.setTextColor(TextField.TEXT_COLOR_ERROR);
                     }
                 });
                 lengthField.setValue(String.valueOf(Config.get().getLengthLimitLength()));
@@ -720,9 +720,9 @@ public class MainOptionList extends OptionList {
                         if (space < 0 || space > 16)
                             throw new NumberFormatException();
                         Config.get().setMacroMcKeyCount(space);
-                        countField.setTextColor(16777215);
+                        countField.setTextColor(TextField.TEXT_COLOR_DEFAULT);
                     } catch (NumberFormatException ignored) {
-                        countField.setTextColor(16711680);
+                        countField.setTextColor(TextField.TEXT_COLOR_HINT);
                     }
                 });
                 countField.setValue(String.valueOf(Config.get().getMacroMcKeyCount()));
