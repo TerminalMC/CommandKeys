@@ -21,7 +21,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 
 public class CommandKeysFabric implements ClientModInitializer {
 
@@ -31,7 +31,7 @@ public class CommandKeysFabric implements ClientModInitializer {
         CommandKeys.init();
 
         // Register keybinds
-        CommandKeys.getKeybinds().forEach(KeyBindingHelper::registerKeyBinding);
+        CommandKeys.getKeybinds().forEach(KeyMappingHelper::registerKeyMapping);
 
         // Register client commands
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, buildContext) ->

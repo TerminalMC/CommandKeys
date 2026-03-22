@@ -169,7 +169,8 @@ public class CommandKeys {
         if ((!inSingleplayer() || Config.get().ratelimitSp) && rateLimiter.size() >= Config.get()
                 .getRatelimitCount()) {
             if (sendMessage && ratelimitedKey != key) {
-                Minecraft.getInstance().gui.getChat().addMessage(PREFIX.copy().append(localized(
+                Minecraft.getInstance().gui.getChat()
+                        .addClientSystemMessage(PREFIX.copy().append(localized(
                         "message",
                         "blocked.ratelimit",
                         key.getDisplayName().copy().withStyle(ChatFormatting.GRAY),
@@ -235,7 +236,7 @@ public class CommandKeys {
                     "placeholderFault",
                     Component.literal(message).withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
-            mc.gui.getChat().addMessage(msg);
+            mc.gui.getChat().addClientSystemMessage(msg);
         }
     }
 
@@ -267,7 +268,7 @@ public class CommandKeys {
                     Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
                             .withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
-            mc.gui.getChat().addMessage(msg);
+            mc.gui.getChat().addClientSystemMessage(msg);
         } else {
             // new ChatScreen("").handleChatInput(message, addToHistory)
             // could be slightly better for compat but costs performance.

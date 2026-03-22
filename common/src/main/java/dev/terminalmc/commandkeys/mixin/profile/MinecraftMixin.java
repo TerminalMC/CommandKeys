@@ -21,14 +21,17 @@ import dev.terminalmc.commandkeys.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
+
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
 
     /**
      * Automatic profile switching for singleplayer.
@@ -37,14 +40,16 @@ public class MinecraftMixin {
             method = "doWorldLoad",
             at = @At("HEAD")
     )
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void startIntegratedServer(
-            LevelStorageSource.LevelStorageAccess levelStorage,
-            PackRepository packRepo,
+            LevelStorageSource.LevelStorageAccess levelSourceAccess,
+            PackRepository packRepository,
             WorldStem worldStem,
+            Optional<GameRules> gameRules,
             boolean newWorld,
             CallbackInfo ci
     ) {
-        String world = worldStem.worldData().getLevelName();
+        String world = worldStem.worldDataAndGenSettings().data().getLevelName();
         Config.get().activateSpProfile(world);
         CommandKeys.lastConnection = world;
     }

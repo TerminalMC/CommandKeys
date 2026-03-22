@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ConnectScreen.class)
-public class ConnectScreenMixin {
+public abstract class ConnectScreenMixin {
 
     /**
      * Automatic profile switching for multiplayer.

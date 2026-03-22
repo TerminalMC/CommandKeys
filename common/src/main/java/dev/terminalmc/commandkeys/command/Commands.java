@@ -80,7 +80,7 @@ public class Commands<S> extends CommandDispatcher<S> {
                                         ).withStyle(ChatFormatting.RED));
                                     }
 
-                                    mc.gui.getChat().addMessage(msg);
+                                    mc.gui.getChat().addClientSystemMessage(msg);
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )

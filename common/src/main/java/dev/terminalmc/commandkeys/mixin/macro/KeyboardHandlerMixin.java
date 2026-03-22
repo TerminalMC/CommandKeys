@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(KeyboardHandler.class)
-public class KeyboardHandlerMixin {
+public abstract class KeyboardHandlerMixin {
 
     @Unique
     private static boolean commandKeys$cancelKeyPressed;

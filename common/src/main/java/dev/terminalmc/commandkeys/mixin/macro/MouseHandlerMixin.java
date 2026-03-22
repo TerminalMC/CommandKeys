@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(MouseHandler.class)
-public class MouseHandlerMixin {
+public abstract class MouseHandlerMixin {
 
     /**
      * Passes mouse button click to {@link KeybindUtil#handleKey} and allows it to be canceled

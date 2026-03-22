@@ -19,10 +19,11 @@ package dev.terminalmc.commandkeys.gui.widget.list;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.CommandKeys;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -194,10 +195,15 @@ public abstract class DragReorderList extends OptionList {
     }
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderWidget(graphics, mouseX, mouseY, delta);
+    public void extractWidgetRenderState(
+            @NotNull GuiGraphicsExtractor graphics,
+            int mouseX,
+            int mouseY,
+            float delta
+    ) {
+        super.extractWidgetRenderState(graphics, mouseX, mouseY, delta);
         if (dragSourceSlot != -1) {
-            super.renderItem(
+            super.extractItem(
                     graphics,
                     mouseX,
                     mouseY,
@@ -205,7 +211,7 @@ public abstract class DragReorderList extends OptionList {
                     getEntry(dragSourceSlot)
             );
             if (hasTrailer) {
-                super.renderItem(
+                super.extractItem(
                         graphics,
                         mouseX,
                         mouseY,
@@ -217,7 +223,7 @@ public abstract class DragReorderList extends OptionList {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent event) {
         if (dragSourceSlot != -1 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             dropDragged(event.y());
             return true;

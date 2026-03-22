@@ -42,49 +42,43 @@
     "${mod_id}.fabric.mixins.json"
   ],
 
-  "accessWidener": "${mod_id}.accesswidener",
+  "accessWidener": "${mod_id}.classtweaker",
 
   "depends": {
-    ${
-  fabric_depends
-}
-"java": [$java_versions_fabric_list],
-"minecraft": [$minecraft_versions_fabric_list],
-"fabricloader": [$fabric_loader_versions_list],
-"fabric-api": [$fabric_api_versions_list]
-},
+    ${fabric_depends}
+    "java": [$java_versions_fabric_list],
+    "minecraft": [$minecraft_versions_fabric_list],
+    "fabricloader": [$fabric_loader_versions_list],
+    "fabric-api": [$fabric_api_versions_list]
+  },
 
-"recommends": {
-${fabric_recommends}
-},
+  "recommends": {
+    ${fabric_recommends}
+  },
 
-"suggests": {
-${
-fabric_suggests
-}
-},
+  "suggests": {
+    ${fabric_suggests}
+  },
 
-"conflicts": {
-${fabric_conflicts}
-},
+  "conflicts": {
+    ${fabric_conflicts}
+  },
 
-"breaks": {
-${
-fabric_breaks
-}
-},
+  "breaks": {
+    ${fabric_breaks}
+  },
 
-"custom": {
-"modmenu": {
-"links": {
-"Contact": "${contact_url}"
-}
-},
-"formatSpec": {
-"links": {
-"formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec",
-"formatExample": "https://github.com/FabricMC/fabric-example-mod/blob/HEAD/src/main/resources/fabric.mod.json"
-}
-}
-}
+  "custom": {
+    "modmenu": {
+      "links": {
+        "Contact": "${contact_url}"
+      }
+    },
+    "formatSpec": {
+      "links": {
+        "formatSpec": "https://fabricmc.net/wiki/documentation:fabric_mod_json_spec",
+        "formatExample": "https://github.com/FabricMC/fabric-example-mod/blob/HEAD/src/main/resources/fabric.mod.json"
+      }
+    }
+  }
 }

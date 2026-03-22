@@ -21,7 +21,7 @@ import dev.terminalmc.commandkeys.CommandKeys;
 import dev.terminalmc.commandkeys.gui.screen.OptionScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -251,8 +251,8 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         }
 
         @Override
-        public void renderContent(
-                @NotNull GuiGraphics graphics,
+        public void extractContent(
+                @NotNull GuiGraphicsExtractor graphics,
                 int mouseX,
                 int mouseY,
                 boolean hovered,
@@ -260,7 +260,7 @@ public abstract class OptionList extends ContainerObjectSelectionList<OptionList
         ) {
             elements.forEach((button) -> {
                 button.setY(getContentY());
-                button.render(graphics, mouseX, mouseY, tickDelta);
+                button.extractRenderState(graphics, mouseX, mouseY, tickDelta);
             });
         }
 

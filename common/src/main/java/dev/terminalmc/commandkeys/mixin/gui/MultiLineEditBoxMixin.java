@@ -27,10 +27,10 @@ import org.spongepowered.asm.mixin.injection.At;
  * as ARGB 0xFFE0E0E0.
  */
 @Mixin(MultiLineEditBox.class)
-public class MultiLineEditBoxMixin {
+public abstract class MultiLineEditBoxMixin {
 
     @ModifyExpressionValue(
-            method = "renderContents",
+            method = "extractContents",
             at = @At(
                     value = "FIELD",
                     target = "Lnet/minecraft/client/gui/components/MultiLineEditBox;textColor:I",
