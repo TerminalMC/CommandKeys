@@ -2,6 +2,7 @@
   "key.category.commandkeys.main": "CommandKeys",
   "modmenu.nameTranslation.commandkeys": "CommandKeys",
   "modmenu.descriptionTranslation.commandkeys": "Отправка заранее подготовленных сообщений и команд с помощью горячих клавиш.",
+  "fml.menu.mods.info.description.commandkeys": "Отправка заранее подготовленных сообщений и команд с помощью горячих клавиш.",
   "key.category.commandkeys.main.edit": "Изменить активный профиль",
   "key.commandkeys.main.macro.1": "Активатор макроса 1",
   "key.commandkeys.main.macro.2": "Активатор макроса 2",
