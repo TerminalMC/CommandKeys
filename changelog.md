@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1
+
+- Updated Russian translation (rfin0)
+
 ## 3.0.0
 
 - Updated to mc26.1
