@@ -170,7 +170,7 @@ public class MainOptionList extends OptionList {
     // Sub-screen opening
 
     public void openProfileOptions(Profile profile) {
-        mc.setScreen(new OptionScreen(
+        mc.gui.setScreen(new OptionScreen(
                 screen,
                 localized("option", "profile", profile.getDisplayName()),
                 new ProfileOptionList(

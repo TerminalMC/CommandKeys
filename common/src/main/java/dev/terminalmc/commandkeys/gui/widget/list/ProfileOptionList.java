@@ -147,7 +147,7 @@ public class ProfileOptionList extends MacroBindList {
     // Sub-screen opening
 
     public void openMainOptions() {
-        mc.setScreen(new OptionScreen(
+        mc.gui.setScreen(new OptionScreen(
                 screen,
                 localized("option", "main"),
                 new MainOptionList(
@@ -164,7 +164,7 @@ public class ProfileOptionList extends MacroBindList {
     }
 
     public void openMacroOptions(Macro macro) {
-        mc.setScreen(new OptionScreen(
+        mc.gui.setScreen(new OptionScreen(
                 screen,
                 localized("option", "macro"),
                 new MacroOptionList(
@@ -374,7 +374,7 @@ public class ProfileOptionList extends MacroBindList {
                 Button sendButton = new ImageButton(
                         movingX, 0, list.smallWidgetWidth, height, SEND_SPRITES, (button) -> {
                     list.screen.onClose();
-                    Minecraft.getInstance().setScreen(null);
+                    Minecraft.getInstance().gui.setScreen(null);
                     macro.trigger(null, false);
                 }
                 );

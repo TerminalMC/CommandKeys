@@ -145,7 +145,7 @@ public class PlaceholderUtil {
             Pattern regex = Pattern.compile(pattern[0]);
 
             int i = 0;
-            for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).commandkeys$getAllMessages()) {
+            for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.hud.getChat()).commandkeys$getAllMessages()) {
                 if (++i > 50)
                     break;
 
@@ -194,15 +194,15 @@ public class PlaceholderUtil {
     // Message history
 
     private static String getLastMessage() {
-        String lastMsg = Minecraft.getInstance().gui.getChat().getRecentChat().peekLast();
+        String lastMsg = Minecraft.getInstance().gui.hud.getChat().getRecentChat().peekLast();
         if (lastMsg == null)
             return fault();
         return lastMsg;
     }
 
     private static String getLastCommand() {
-        if (Minecraft.getInstance()
-                .commandHistory()
+        if (((ChatComponentAccessor) Minecraft.getInstance().gui.hud.getChat())
+                .commandkeys$getCommandHistory()
                 .history() instanceof ArrayListDeque<String> deque) {
             String lastCmd = deque.peekLast();
             if (lastCmd != null)
@@ -225,7 +225,7 @@ public class PlaceholderUtil {
         if (pmSenderName != null)
             return pmSenderName;
         int i = 0;
-        for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.getChat()).commandkeys$getAllMessages()) {
+        for (GuiMessage guiMsg : ((ChatComponentAccessor) Minecraft.getInstance().gui.hud.getChat()).commandkeys$getAllMessages()) {
             if (++i > 50)
                 break;
             Component msg = guiMsg.content();
@@ -258,7 +258,7 @@ public class PlaceholderUtil {
             HitResult result = mc.player.pick(
                     Math.max(
                             384,
-                            (mc.levelRenderer.getLastViewDistance() + 1D) * 16
+                            (mc.levelRenderer.viewArea().getViewDistance() + 1D) * 16
                     ), 0.0F, false
             );
             if (result.getType().equals(HitResult.Type.BLOCK)) {
@@ -278,7 +278,7 @@ public class PlaceholderUtil {
         if (updatePlayerBlockPos() == null || updateLookAngle() == null)
             return fault();
         int offset = Integer.parseInt(args[1]);
-        Vec3 playerPos = playerBlockPos.getBottomCenter();
+        Vec3 playerPos = Vec3.atBottomCenterOf(playerBlockPos.multiply(1));
         if (offset != 0)
             playerPos = offsetCardinalDirection(playerPos, lookAngle, args[0], offset);
         return String.format(
@@ -311,7 +311,7 @@ public class PlaceholderUtil {
         if (updateLookBlockPos() == null || updateLookAngle() == null)
             return fault();
         int offset = Integer.parseInt(args[1]);
-        Vec3 playerPos = lookBlockPos.getBottomCenter();
+        Vec3 playerPos = Vec3.atBottomCenterOf(lookBlockPos.multiply(1));
         if (offset != 0)
             playerPos = offsetCardinalDirection(playerPos, lookAngle, args[0], offset);
         return String.format(

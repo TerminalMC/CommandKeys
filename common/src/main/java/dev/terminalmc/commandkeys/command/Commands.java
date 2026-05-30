@@ -41,7 +41,7 @@ public class Commands<S> extends CommandDispatcher<S> {
         Minecraft mc = Minecraft.getInstance();
         dispatcher.register((LiteralArgumentBuilder<S>) literal(CommandKeys.MOD_ID)
                 .executes((ctx) -> {
-                    mc.schedule(() -> mc.setScreen(CommandKeys.getConfigScreen(null)));
+                    mc.schedule(() -> mc.gui.setScreen(CommandKeys.getConfigScreen(null)));
                     return Command.SINGLE_SUCCESS;
                 })
                 .then(literal("profile")
@@ -84,7 +84,7 @@ public class Commands<S> extends CommandDispatcher<S> {
                                         ).withStyle(ChatFormatting.RED));
                                     }
 
-                                    mc.gui.getChat().addClientSystemMessage(msg);
+                                    mc.gui.hud.getChat().addClientSystemMessage(msg);
                                     return Command.SINGLE_SUCCESS;
                                 })
                         )

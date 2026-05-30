@@ -103,7 +103,7 @@ public class CommandKeys {
     public static void afterClientTick(Minecraft mc) {
         // Open config screen via keybind
         while (CONFIG_KEY.consumeClick()) {
-            mc.setScreen(new MainOptionScreen(mc.screen, true));
+            mc.gui.setScreen(new MainOptionScreen(mc.gui.screen(), true));
         }
 
         // Tick ratelimiter
@@ -118,9 +118,9 @@ public class CommandKeys {
         }
 
         // Config reset warning toast
-        if (hasResetConfig && mc.screen instanceof TitleScreen) {
+        if (hasResetConfig && mc.gui.screen() instanceof TitleScreen) {
             hasResetConfig = false;
-            mc.getToastManager().addToast(new SystemToast(
+            mc.gui.toastManager().addToast(new SystemToast(
                     new SystemToast.SystemToastId(15000L),
                     localized("toast", "reset.title"),
                     localized(
@@ -169,7 +169,7 @@ public class CommandKeys {
         if ((!inSingleplayer() || Config.get().ratelimitSp) && rateLimiter.size() >= Config.get()
                 .getRatelimitCount()) {
             if (sendMessage && ratelimitedKey != key) {
-                Minecraft.getInstance().gui.getChat()
+                Minecraft.getInstance().gui.hud.getChat()
                         .addClientSystemMessage(PREFIX.copy().append(localized(
                         "message",
                         "blocked.ratelimit",
@@ -220,7 +220,7 @@ public class CommandKeys {
         if (faults == 0) {
             if (edit) {
                 String finalMessage = message;
-                mc.setScreen(new EditScreen((str) -> send(
+                mc.gui.setScreen(new EditScreen((str) -> send(
                         type,
                         finalMessage.replaceAll("%edit%", str),
                         addToHistory,
@@ -236,7 +236,7 @@ public class CommandKeys {
                     "placeholderFault",
                     Component.literal(message).withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
-            mc.gui.getChat().addClientSystemMessage(msg);
+            mc.gui.hud.getChat().addClientSystemMessage(msg);
         }
     }
 
@@ -249,7 +249,7 @@ public class CommandKeys {
         Minecraft mc = Minecraft.getInstance();
         if (type) {
             ChatScreen screen = new ChatScreen(message, false);
-            mc.setScreen(screen);
+            mc.gui.setScreen(screen);
             int index = message.indexOf("%edit%");
             if (index != -1) {
                 EditBox input = ((ChatScreenAccessor) screen).commandkeys$getInput();
@@ -268,7 +268,7 @@ public class CommandKeys {
                     Component.literal(String.valueOf(Config.get().getLengthLimitLength()))
                             .withStyle(ChatFormatting.GRAY)
             ).withStyle(ChatFormatting.RED));
-            mc.gui.getChat().addClientSystemMessage(msg);
+            mc.gui.hud.getChat().addClientSystemMessage(msg);
         } else {
             // new ChatScreen("").handleChatInput(message, addToHistory)
             // could be slightly better for compat but costs performance.
@@ -278,9 +278,9 @@ public class CommandKeys {
                 mc.player.connection.sendChat(message);
             }
             if (addToHistory)
-                mc.gui.getChat().addRecentChat(message);
+                mc.gui.hud.getChat().addRecentChat(message);
             if (showHudMsg)
-                mc.gui.setOverlayMessage(
+                mc.gui.hud.setOverlayMessage(
                         Component.literal(message)
                                 .withStyle(ChatFormatting.GRAY), false
                 );

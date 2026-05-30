@@ -77,14 +77,14 @@ public class MainOptionScreen extends OptionScreen {
 
         addRenderableWidget(Button.builder(
                 CommonComponents.GUI_CANCEL,
-                (button) -> Minecraft.getInstance().setScreen(new ConfirmScreen(
+                (button) -> Minecraft.getInstance().gui.setScreen(new ConfirmScreen(
                         (confirm) -> {
                             if (confirm) {
                                 Config.reload();
-                                Minecraft.getInstance().setScreen(this);
+                                Minecraft.getInstance().gui.setScreen(this);
                                 onClose();
                             } else {
-                                Minecraft.getInstance().setScreen(this);
+                                Minecraft.getInstance().gui.setScreen(this);
                             }
                         },
                         localized("option", "main.exitWithoutSaving"),
