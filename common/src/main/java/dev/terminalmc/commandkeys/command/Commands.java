@@ -40,6 +40,10 @@ public class Commands<S> extends CommandDispatcher<S> {
     public void register(CommandDispatcher<S> dispatcher, CommandBuildContext buildContext) {
         Minecraft mc = Minecraft.getInstance();
         dispatcher.register((LiteralArgumentBuilder<S>) literal(CommandKeys.MOD_ID)
+                .executes((ctx) -> {
+                    mc.schedule(() -> mc.setScreen(CommandKeys.getConfigScreen(null)));
+                    return Command.SINGLE_SUCCESS;
+                })
                 .then(literal("profile")
                         .then(argument("name", StringArgumentType.greedyString())
                                 .suggests(((ctx, builder) -> SharedSuggestionProvider.suggest(

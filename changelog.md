@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.2
+
+- Added a command to open the config screen
+
 ## 3.2.1
 
 - Updated Russian translation (rfin0)
