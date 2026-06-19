@@ -22,9 +22,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
+@SuppressWarnings("unused")
 public class Services {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("CommandKeys (Service)");
+
+    private Services() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
 
     public static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz, clazz.getClassLoader())

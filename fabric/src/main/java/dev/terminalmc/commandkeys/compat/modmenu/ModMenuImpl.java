@@ -20,6 +20,7 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import dev.terminalmc.commandkeys.CommandKeys;
 
+@SuppressWarnings("unused")
 public class ModMenuImpl implements ModMenuApi {
 
     @Override

@@ -35,9 +35,13 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 @SuppressWarnings("unchecked")
-public class Commands<S> extends CommandDispatcher<S> {
+public class Commands {
 
-    public void register(CommandDispatcher<S> dispatcher, CommandBuildContext buildContext) {
+    private Commands() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
+
+    public static <S> void register(CommandDispatcher<S> dispatcher, CommandBuildContext buildCtx) {
         Minecraft mc = Minecraft.getInstance();
         dispatcher.register((LiteralArgumentBuilder<S>) literal(CommandKeys.MOD_ID)
                 .executes((ctx) -> {

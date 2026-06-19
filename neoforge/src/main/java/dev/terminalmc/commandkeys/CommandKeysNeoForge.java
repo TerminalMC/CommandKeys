@@ -18,7 +18,6 @@ package dev.terminalmc.commandkeys;
 
 import dev.terminalmc.commandkeys.command.Commands;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -69,10 +68,7 @@ public class CommandKeysNeoForge {
          */
         @SubscribeEvent
         static void registerClientCommands(RegisterClientCommandsEvent event) {
-            new Commands<CommandSourceStack>().register(
-                    event.getDispatcher(),
-                    event.getBuildContext()
-            );
+            Commands.register(event.getDispatcher(), event.getBuildContext());
         }
 
         /**

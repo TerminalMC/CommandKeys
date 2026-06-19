@@ -24,7 +24,7 @@ import dev.terminalmc.commandkeys.config.Profile;
 import dev.terminalmc.commandkeys.gui.screen.EditScreen;
 import dev.terminalmc.commandkeys.gui.screen.MainOptionScreen;
 import dev.terminalmc.commandkeys.mixin.accessor.ChatScreenAccessor;
-import dev.terminalmc.commandkeys.util.ModLogger;
+import dev.terminalmc.commandkeys.util.Logging;
 import dev.terminalmc.commandkeys.util.PlaceholderUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -38,6 +38,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class CommandKeys {
 
     public static final String MOD_ID = "commandkeys";
     public static final String MOD_NAME = "CommandKeys";
-    public static final ModLogger LOG = new ModLogger(MOD_NAME);
+    public static final Logger LOG = Logging.getLogger(MOD_ID);
     public static final Component PREFIX = Component.empty()
             .append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
             .append(Component.literal(MOD_NAME).withStyle(ChatFormatting.DARK_AQUA))

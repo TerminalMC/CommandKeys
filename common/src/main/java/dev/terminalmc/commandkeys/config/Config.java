@@ -103,7 +103,7 @@ public class Config {
      * Creates a profile list with a single profile, set as both singleplayer and multiplayer
      * default.
      */
-    public Config() {
+    private Config() {
         this(
                 profilesDefault.get(),
                 defaultIndexDefault,
