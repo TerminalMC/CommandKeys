@@ -77,7 +77,7 @@ public class KeybindUtil {
     public static int handleKey(InputConstants.Key key) {
         int cancel = 0;
 
-        if (Minecraft.getInstance().screen == null && profile().keybindMap.containsKey(key)) {
+        if (Minecraft.getInstance().gui.screen() == null && profile().keybindMap.containsKey(key)) {
             // Get all keybinds matching the pressed key
             Collection<Keybind> keybinds = profile().keybindMap.get(key);
             // The single keybind that we decide best matches the key

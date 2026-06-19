@@ -137,7 +137,7 @@ public abstract class MacroBindList extends DragReorderList {
             Collection<Macro> macros = profile.macroMap.get(sendKeybind);
             if (!macros.isEmpty()) {
                 screen.onClose();
-                minecraft.setScreen(null);
+                minecraft.gui.setScreen(null);
                 macros.forEach((macro) -> macro.trigger(sendKeybind, false));
                 return true;
             }
@@ -157,6 +157,6 @@ public abstract class MacroBindList extends DragReorderList {
     }
 
     public void openMinecraftControlsScreen() {
-        minecraft.setScreen(new KeyBindsScreen(screen, minecraft.options));
+        minecraft.gui.setScreen(new KeyBindsScreen(screen, minecraft.options));
     }
 }
