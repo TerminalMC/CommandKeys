@@ -10,7 +10,6 @@
   "mixins": [
   ],
   "client": [
-    "TitleScreenMixin"
   ],
   "server": [
   ],

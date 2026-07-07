@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.102.4
+
+- Fixed an invalid mixin configuration on NeoForge
+
 ## 3.102.3
 
 - Reset `mc` version counter to 1 at mc1.0.0
