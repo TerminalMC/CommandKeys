@@ -126,15 +126,33 @@ public class PlaceholderUtil {
     private record Placeholder(Pattern pattern, int groups, Function<String[], String> operator) {
 
         public String process(String message) {
-            Matcher matcher = pattern.matcher(message);
+            String newMessage;
+            Matcher matcher;
+
             while (true) {
+                matcher = pattern.matcher(message);
                 if (!matcher.find())
-                    return message;
+                    break;
+
                 String[] args = new String[groups];
                 for (int i = 0; i < args.length; i++)
                     args[i] = matcher.group(i + 1);
-                message = matcher.replaceFirst(operator.apply(args));
+
+                newMessage = matcher.replaceFirst(operator.apply(args));
+
+                // shouldn't happen, but play it safe
+                if (newMessage.equals(message)) {
+                    CommandKeys.LOG.warn(
+                        "Detected infinite loop while completing placeholder {} on message {}",
+                        pattern,
+                        message
+                    );
+                    break;
+                }
+
+                message = newMessage;
             }
+            return message;
         }
     }
 
@@ -292,19 +310,19 @@ public class PlaceholderUtil {
     private static String getPlayerBlockX(String[] offset) {
         if (updatePlayerBlockPos() == null)
             return fault();
-        return String.valueOf(Mth.floor(playerBlockPos.getX()) + Integer.parseInt(offset[0]));
+        return String.valueOf(playerBlockPos.getX() + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockY(String[] offset) {
         if (updatePlayerBlockPos() == null)
             return fault();
-        return String.valueOf(Mth.floor(playerBlockPos.getY()) + Integer.parseInt(offset[0]));
+        return String.valueOf(playerBlockPos.getY() + Integer.parseInt(offset[0]));
     }
 
     private static String getPlayerBlockZ(String[] offset) {
         if (updatePlayerBlockPos() == null)
             return fault();
-        return String.valueOf(Mth.floor(playerBlockPos.getZ()) + Integer.parseInt(offset[0]));
+        return String.valueOf(playerBlockPos.getZ() + Integer.parseInt(offset[0]));
     }
 
     private static String getLookBlockPos(String[] args) {
