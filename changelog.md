@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.104.0-beta.1
+
+- Updated to mc26.3-rc-2
+
 ## 3.103.1
 
 - Fixed an invalid mixin configuration on NeoForge

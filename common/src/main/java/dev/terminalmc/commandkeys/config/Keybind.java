@@ -19,10 +19,11 @@ package dev.terminalmc.commandkeys.config;
 import com.google.gson.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.terminalmc.commandkeys.util.JsonUtil;
-import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLKeyboard;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -101,13 +102,18 @@ public class Keybind {
         if (key.equals(InputConstants.UNKNOWN))
             return false;
         if (key.getType().equals(InputConstants.Type.MOUSE)) {
-            return GLFW.glfwGetMouseButton(
-                    Minecraft.getInstance().getWindow().handle(),
-                    key.getValue()
-            ) == 1;
+            int state = SDLMouse.SDL_GetMouseState(null, null);
+            return switch (key.getValue()) {
+                case SDLMouse.SDL_BUTTON_LEFT -> (state & SDLMouse.SDL_BUTTON_LMASK) != 0;
+                case SDLMouse.SDL_BUTTON_MIDDLE -> (state & SDLMouse.SDL_BUTTON_MMASK) != 0;
+                case SDLMouse.SDL_BUTTON_RIGHT -> (state & SDLMouse.SDL_BUTTON_RMASK) != 0;
+                case SDLMouse.SDL_BUTTON_X1 -> (state & SDLMouse.SDL_BUTTON_X1MASK) != 0;
+                case SDLMouse.SDL_BUTTON_X2 -> (state & SDLMouse.SDL_BUTTON_X2MASK) != 0;
+                default -> false;
+            };
         } else {
-            return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().handle(), key.getValue())
-                    == 1;
+            ByteBuffer keyboardState = SDLKeyboard.SDL_GetKeyboardState();
+            return keyboardState != null && keyboardState.get(key.getValue()) != 0;
         }
     }
 
