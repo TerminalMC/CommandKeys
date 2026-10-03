@@ -12,7 +12,6 @@
     "accessor.KeyMappingAccessor",
     "accessor.MultiLineEditBoxAccessor",
     "accessor.MultilineTextFieldAccessor",
-    "accessor.StringViewAccessor",
     "gui.MultiLineEditBoxMixin",
     "macro.KeyboardHandlerMixin",
     "macro.MouseHandlerMixin",

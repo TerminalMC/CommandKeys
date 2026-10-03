@@ -18,7 +18,6 @@ package dev.terminalmc.commandkeys.gui.widget.field;
 
 import dev.terminalmc.commandkeys.mixin.accessor.MultiLineEditBoxAccessor;
 import dev.terminalmc.commandkeys.mixin.accessor.MultilineTextFieldAccessor;
-import dev.terminalmc.commandkeys.mixin.accessor.StringViewAccessor;
 import dev.terminalmc.commandkeys.mixin.gui.MultiLineEditBoxMixin;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -181,13 +180,13 @@ public class MultiLineTextField extends MultiLineEditBox {
                         // double-click: select word
                         field.seekCursor(
                                 Whence.ABSOLUTE,
-                                ((StringViewAccessor) (Object) field.getNextWord()).commandkeys$getBeginIndex()
+                                field.getNextWord().beginIndex()
                         );
                         int pos = fieldAcc.commandkeys$getCursor();
                         //noinspection DataFlowIssue
                         field.seekCursor(
                                 Whence.ABSOLUTE,
-                                ((StringViewAccessor) (Object) field.getPreviousWord()).commandkeys$getBeginIndex()
+                                field.getPreviousWord().beginIndex()
                         );
                         fieldAcc.commandkeys$setSelectCursor(pos);
                     }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1
+
+- Fixed a crash on NeoForge when double-clicking a text field.
+
 ## 2.4.0
 
 Changes over latest beta
