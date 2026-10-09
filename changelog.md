@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.104.1
+
+- Added a filter for invalid characters before sending text
+
 ## 3.104.0
 
 - Updated to mc26.3
