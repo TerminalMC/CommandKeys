@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.103.2
+
+- Added a filter for invalid characters before sending text
+
 ## 3.103.1
 
 - Fixed an invalid mixin configuration on NeoForge
