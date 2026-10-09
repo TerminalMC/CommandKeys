@@ -38,6 +38,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.StringUtil;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -247,6 +248,7 @@ public class CommandKeys {
             boolean addToHistory,
             boolean showHudMsg
     ) {
+        message = StringUtil.filterText(message);
         Minecraft mc = Minecraft.getInstance();
         if (type) {
             ChatScreen screen = new ChatScreen(message, false);
