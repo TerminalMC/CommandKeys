@@ -563,7 +563,7 @@ public class Macro {
                     showHudMessage
             ));
         } else {
-            CommandKeys.send(message, showHudMessage, addToHistory);
+            CommandKeys.send(message, addToHistory, showHudMessage);
         }
     }
 
@@ -588,19 +588,19 @@ public class Macro {
 
         private int delay;
         final String message;
-        final boolean showHudMessage;
         final boolean addToHistory;
+        final boolean showHudMessage;
 
         public ScheduledMessage(
                 int delay,
                 String message,
-                boolean showHudMessage,
-                boolean addToHistory
+                boolean addToHistory,
+                boolean showHudMessage
         ) {
             this.delay = delay;
             this.message = message;
-            this.showHudMessage = showHudMessage;
             this.addToHistory = addToHistory;
+            this.showHudMessage = showHudMessage;
         }
 
         /**
@@ -609,7 +609,7 @@ public class Macro {
          */
         private boolean tick() {
             if (--delay <= 0) {
-                CommandKeys.send(message, showHudMessage, addToHistory);
+                CommandKeys.send(message, addToHistory, showHudMessage);
                 return true;
             }
             return false;

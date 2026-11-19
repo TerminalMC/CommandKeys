@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1
+
+- Fixed the addToHistory and showHudMessage options being swapped for messages sent without a delay
+
 ## 2.4.0
 
 Changes over latest beta
